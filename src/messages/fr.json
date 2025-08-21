@@ -7,6 +7,25 @@
     "signIn": "Se Connecter",
     "reserveNow": "Réserver Maintenant"
   },
+  "search": {
+    "title": "Trouvez Votre Véhicule Parfait",
+    "subtitle": "Recherchez dans notre flotte premium de véhicules",
+    "pickupLocation": "Lieu de Prise",
+    "dropoffLocation": "Lieu de Retour",
+    "pickupDate": "Date de Prise",
+    "pickupTime": "Heure de Prise",
+    "returnDate": "Date de Retour",
+    "returnTime": "Heure de Retour",
+    "differentDropoff": "Retourner dans un bureau différent",
+    "driverAge": "Âge du conducteur",
+    "searchButton": "Rechercher Voitures Disponibles",
+    "placeholders": {
+      "pickupLocation": "Aéroport, ville, hôtel...",
+      "dropoffLocation": "Aéroport, ville, hôtel...",
+      "selectDate": "Sélectionner une date",
+      "selectTime": "Sélectionner l'heure"
+    }
+  },
   "hero": {
     "subtitle": "Trouvez Votre",
     "title": "Véhicule Parfait",

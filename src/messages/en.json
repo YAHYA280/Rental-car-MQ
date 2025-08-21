@@ -7,6 +7,25 @@
     "signIn": "Sign In",
     "reserveNow": "Reserve Now"
   },
+  "search": {
+    "title": "Find Your Perfect Ride",
+    "subtitle": "Search from our premium fleet of vehicles",
+    "pickupLocation": "Pickup Location",
+    "dropoffLocation": "Drop-off Location",
+    "pickupDate": "Pickup Date",
+    "pickupTime": "Pickup Time",
+    "returnDate": "Return Date",
+    "returnTime": "Return Time",
+    "differentDropoff": "Return to a different office",
+    "driverAge": "Driver's age",
+    "searchButton": "Search Available Cars",
+    "placeholders": {
+      "pickupLocation": "Airport, city, hotel...",
+      "dropoffLocation": "Airport, city, hotel...",
+      "selectDate": "Select date",
+      "selectTime": "Select time"
+    }
+  },
   "hero": {
     "subtitle": "Find Your",
     "title": "Perfect Ride",
