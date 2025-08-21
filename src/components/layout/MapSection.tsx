@@ -21,8 +21,8 @@ const MapSection = () => {
             Find Us in Tangier
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Visit our location at RUE 8 ENNASR LOT 635 TANGER. We're here to
-            help you with all your car rental needs.
+            Visit our location at RUE 8 ENNASR LOT 635 TANGER. We&apos;re here
+            to help you with all your car rental needs.
           </p>
         </AnimatedContainer>
 
@@ -45,7 +45,7 @@ const MapSection = () => {
               {/* Overlay with coordinates */}
               <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg">
                 <p className="text-sm font-semibold text-gray-900">
-                  📍 35°45'04.5"N 5°49'50.2"W
+                  📍 35°45&apos;04.5&quot;N 5°49&apos;50.2&quot;W
                 </p>
                 <p className="text-xs text-gray-600">
                   MELHOR QUE NADA - Tangier

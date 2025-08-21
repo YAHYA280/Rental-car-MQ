@@ -7,6 +7,17 @@ import { Button } from "@/components/ui/button";
 import AnimatedContainer from "@/components/ui/animated-container";
 import CarSearchComponent from "@/components/search/CarSearchComponent";
 
+interface SearchFormData {
+  pickupLocation: string;
+  dropoffLocation: string;
+  pickupDate: string;
+  pickupTime: string;
+  returnDate: string;
+  returnTime: string;
+  differentDropoff: boolean;
+  driverAge: string;
+}
+
 const HeroSection = () => {
   const t = useTranslations("hero");
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -31,7 +42,7 @@ const HeroSection = () => {
     return () => clearInterval(interval);
   }, [backgroundImages.length]);
 
-  const handleSearch = (searchData: any) => {
+  const handleSearch = (searchData: SearchFormData) => {
     console.log("Search submitted:", searchData);
     // Handle search logic here
   };

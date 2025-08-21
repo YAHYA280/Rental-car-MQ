@@ -6,7 +6,6 @@ import { useTranslations, useLocale } from "next-intl";
 import {
   MapPin,
   Phone,
-  Mail,
   Facebook,
   Instagram,
   Twitter,
@@ -30,8 +29,6 @@ const Footer = () => {
     { label: t("links.airportTransfer"), href: `/${locale}/airport` },
     { label: t("links.weddingBuses"), href: `/${locale}/wedding` },
   ];
-
-  const blogPosts = []; // Removed blog posts array
 
   return (
     <footer className="bg-black text-white">
