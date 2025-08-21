@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useState, useTransition } from "react";
-import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -13,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Menu, X, Phone, MapPin, Clock, Globe } from "lucide-react";
+import { Link, useRouter } from "@/i18n/routing";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -22,28 +22,19 @@ const Navbar = () => {
   const router = useRouter();
   const pathname = usePathname();
 
-  const handleLanguageChange = (newLocale: string) => {
-    if (newLocale === locale) return; // Don't change if same locale
+  const handleLanguageChange = (newLocale: "en" | "fr") => {
+    if (newLocale === locale) return;
 
     startTransition(() => {
-      // Get the current path without locale prefix
-      const segments = pathname.split("/");
-      // Remove the current locale from the path
-      const pathWithoutLocale = segments.slice(2).join("/") || "";
-      // Create new path with new locale
-      const newPath = `/${newLocale}${
-        pathWithoutLocale ? "/" + pathWithoutLocale : ""
-      }`;
-
-      router.push(newPath);
+      router.replace(pathname, { locale: newLocale });
     });
   };
 
   const menuItems = [
-    { label: t("home"), href: `/${locale}` },
-    { label: t("vehicles"), href: `/${locale}/vehicles` },
-    { label: t("about"), href: `/${locale}/about` },
-    { label: t("contact"), href: `/${locale}/contact` },
+    { label: t("home"), href: "/" },
+    { label: t("vehicles"), href: "/vehicles" },
+    { label: t("about"), href: "/about" },
+    { label: t("contact"), href: "/contact" },
   ];
 
   return (
@@ -96,7 +87,7 @@ const Navbar = () => {
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
-            <Link href={`/${locale}`} className="flex items-center space-x-2">
+            <Link href="/" className="flex items-center space-x-2">
               <div className="bg-red-600 p-2 rounded">
                 <span className="text-white font-bold text-lg sm:text-xl">
                   CB
@@ -185,7 +176,7 @@ const Navbar = () => {
                   <Globe className="h-4 w-4 text-white" />
                   <Select
                     value={locale}
-                    onValueChange={(newLocale) => {
+                    onValueChange={(newLocale: "en" | "fr") => {
                       handleLanguageChange(newLocale);
                       setIsMenuOpen(false);
                     }}

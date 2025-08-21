@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,17 @@ import AnimatedContainer from "@/components/ui/animated-container";
 
 const HeroSection = () => {
   const t = useTranslations("hero");
+
+  // Generate particles with stable positions to avoid hydration mismatch
+  const particles = useMemo(() => {
+    return Array.from({ length: 20 }, (_, i) => ({
+      id: i,
+      left: `${(i * 4.7 + 15) % 100}%`, // Deterministic positioning
+      top: `${(i * 3.2 + 10) % 100}%`,
+      delay: i * 0.1,
+      duration: 2 + (i % 3), // Vary duration between 2-4 seconds
+    }));
+  }, []);
 
   return (
     <section className="relative min-h-screen bg-black text-white overflow-hidden">
@@ -22,24 +33,24 @@ const HeroSection = () => {
           }}
         />
 
-        {/* Animated particles */}
+        {/* Animated particles with stable positions */}
         <div className="absolute inset-0">
-          {[...Array(20)].map((_, i) => (
+          {particles.map((particle) => (
             <motion.div
-              key={i}
+              key={particle.id}
               className="absolute w-1 h-1 bg-yellow-400 rounded-full"
               style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
+                left: particle.left,
+                top: particle.top,
               }}
               animate={{
                 opacity: [0.3, 1, 0.3],
                 scale: [1, 1.5, 1],
               }}
               transition={{
-                duration: 2 + Math.random() * 2,
+                duration: particle.duration,
                 repeat: Infinity,
-                delay: Math.random() * 2,
+                delay: particle.delay,
               }}
             />
           ))}

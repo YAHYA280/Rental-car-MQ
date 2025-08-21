@@ -1,4 +1,3 @@
-// src/i18n/routing.js
 import { createNavigation } from "next-intl/navigation";
 import { defineRouting } from "next-intl/routing";
 
