@@ -4,6 +4,8 @@ export default createMiddleware({
   locales: ["en", "fr"],
   defaultLocale: "en",
   localePrefix: "always",
+  // Add locale detection strategy
+  localeDetection: true,
 });
 
 export const config = {

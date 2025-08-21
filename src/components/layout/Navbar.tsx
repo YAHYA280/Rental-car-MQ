@@ -23,10 +23,15 @@ const Navbar = () => {
   const pathname = usePathname();
 
   const handleLanguageChange = (newLocale: string) => {
+    if (newLocale === locale) return; // Don't change if same locale
+
     startTransition(() => {
-      // Replace the locale in the current pathname
-      const newPathname = pathname.replace(`/${locale}`, `/${newLocale}`);
-      router.replace(newPathname);
+      // Get the current path without locale prefix
+      const pathWithoutLocale = pathname.replace(`/${locale}`, "") || "";
+      // Create new path with new locale
+      const newPath = `/${newLocale}${pathWithoutLocale}`;
+      router.push(newPath);
+      router.refresh(); // Force a refresh to reload with new locale
     });
   };
 
@@ -70,7 +75,7 @@ const Navbar = () => {
                 disabled={isPending}
               >
                 <SelectTrigger className="w-16 h-6 text-xs border-none bg-transparent text-white hover:bg-white/10">
-                  <SelectValue />
+                  <SelectValue>{locale.toUpperCase()}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="en">EN</SelectItem>
@@ -126,7 +131,7 @@ const Navbar = () => {
                   disabled={isPending}
                 >
                   <SelectTrigger className="w-20 h-8 text-sm border border-white/20 bg-transparent text-white hover:bg-white/10">
-                    <SelectValue />
+                    <SelectValue>{locale.toUpperCase()}</SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="en">EN</SelectItem>
@@ -183,7 +188,7 @@ const Navbar = () => {
                     disabled={isPending}
                   >
                     <SelectTrigger className="w-24 h-8 text-sm border border-white/20 bg-transparent text-white">
-                      <SelectValue />
+                      <SelectValue>{locale.toUpperCase()}</SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="en">EN</SelectItem>
