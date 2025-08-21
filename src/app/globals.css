@@ -41,6 +41,11 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* Custom colors for the car rental theme */
+  --color-elhor-red: oklch(0.577 0.245 27.325);
+  --color-elhor-dark-red: oklch(0.477 0.245 27.325);
+  --color-elhor-deep-red: oklch(0.377 0.245 27.325);
 }
 
 :root {
@@ -76,6 +81,11 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* Custom colors */
+  --elhor-red: oklch(0.577 0.245 27.325);
+  --elhor-dark-red: oklch(0.477 0.245 27.325);
+  --elhor-deep-red: oklch(0.377 0.245 27.325);
 }
 
 .dark {
@@ -110,6 +120,11 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+
+  /* Custom colors for dark mode */
+  --elhor-red: oklch(0.627 0.245 27.325);
+  --elhor-dark-red: oklch(0.527 0.245 27.325);
+  --elhor-deep-red: oklch(0.427 0.245 27.325);
 }
 
 @layer base {

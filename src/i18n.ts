@@ -1,14 +1,12 @@
 import { getRequestConfig } from "next-intl/server";
-import { headers } from "next/headers";
 
 export default getRequestConfig(async ({ requestLocale }) => {
-  // This can either be defined statically at the top-level or based on the user
+  // This typically corresponds to the `[locale]` segment
   let locale = await requestLocale;
 
-  // Fallback to default locale if not found
-  if (!locale) {
-    const headersList = await headers();
-    locale = headersList.get("x-next-intl-locale") || "en";
+  // Ensure that the incoming locale is valid
+  if (!locale || !["en", "fr"].includes(locale)) {
+    locale = "en";
   }
 
   return {

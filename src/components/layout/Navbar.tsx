@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useTransition } from "react";
 import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter, usePathname } from "next/navigation";
@@ -16,19 +16,18 @@ import { Menu, X, Phone, MapPin, Clock, Globe } from "lucide-react";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const t = useTranslations("nav");
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
 
   const handleLanguageChange = (newLocale: string) => {
-    // Remove the current locale from the pathname
-    const segments = pathname.split("/").filter(Boolean);
-    const pathWithoutLocale = segments.slice(1).join("/");
-    const newPath = `/${newLocale}${
-      pathWithoutLocale ? `/${pathWithoutLocale}` : ""
-    }`;
-    router.push(newPath);
+    startTransition(() => {
+      // Replace the locale in the current pathname
+      const newPathname = pathname.replace(`/${locale}`, `/${newLocale}`);
+      router.replace(newPathname);
+    });
   };
 
   const menuItems = [
@@ -41,7 +40,7 @@ const Navbar = () => {
   return (
     <>
       {/* Top Info Bar */}
-      <div className="bg-elhor-deep-red text-white py-2 px-4">
+      <div className="bg-red-800 text-white py-2 px-4">
         <div className="container mx-auto flex flex-wrap justify-between items-center text-sm">
           <div className="flex items-center space-x-4 lg:space-x-6">
             <div className="flex items-center space-x-2">
@@ -65,7 +64,11 @@ const Navbar = () => {
             {/* Language Switcher */}
             <div className="flex items-center space-x-2">
               <Globe className="h-4 w-4" />
-              <Select value={locale} onValueChange={handleLanguageChange}>
+              <Select
+                value={locale}
+                onValueChange={handleLanguageChange}
+                disabled={isPending}
+              >
                 <SelectTrigger className="w-16 h-6 text-xs border-none bg-transparent text-white hover:bg-white/10">
                   <SelectValue />
                 </SelectTrigger>
@@ -85,7 +88,7 @@ const Navbar = () => {
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <Link href={`/${locale}`} className="flex items-center space-x-2">
-              <div className="bg-elhor-red p-2 rounded">
+              <div className="bg-red-600 p-2 rounded">
                 <span className="text-white font-bold text-lg sm:text-xl">
                   CB
                 </span>
@@ -94,7 +97,7 @@ const Navbar = () => {
                 <span className="text-lg sm:text-xl font-bold text-white">
                   Car
                 </span>
-                <span className="text-elhor-red ml-1 text-lg sm:text-xl">
+                <span className="text-red-500 ml-1 text-lg sm:text-xl">
                   Bookers
                 </span>
               </div>
@@ -104,9 +107,9 @@ const Navbar = () => {
             <div className="hidden md:flex items-center space-x-8">
               {menuItems.map((item) => (
                 <Link
-                  key={item.label}
+                  key={item.href}
                   href={item.href}
-                  className="text-white hover:text-elhor-red transition-colors duration-200 font-medium"
+                  className="text-white hover:text-red-500 transition-colors duration-200 font-medium"
                 >
                   {item.label}
                 </Link>
@@ -117,7 +120,11 @@ const Navbar = () => {
             <div className="hidden md:flex items-center space-x-4">
               <div className="flex items-center space-x-2">
                 <Globe className="h-4 w-4 text-white" />
-                <Select value={locale} onValueChange={handleLanguageChange}>
+                <Select
+                  value={locale}
+                  onValueChange={handleLanguageChange}
+                  disabled={isPending}
+                >
                   <SelectTrigger className="w-20 h-8 text-sm border border-white/20 bg-transparent text-white hover:bg-white/10">
                     <SelectValue />
                   </SelectTrigger>
@@ -127,7 +134,7 @@ const Navbar = () => {
                   </SelectContent>
                 </Select>
               </div>
-              <Button className="bg-elhor-red hover:bg-elhor-dark-red text-white font-semibold px-6">
+              <Button className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6">
                 {t("signIn")}
               </Button>
             </div>
@@ -138,7 +145,7 @@ const Navbar = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="text-white hover:text-elhor-red p-2"
+                className="text-white hover:text-red-500 p-2"
               >
                 {isMenuOpen ? (
                   <X className="h-6 w-6" />
@@ -155,9 +162,9 @@ const Navbar = () => {
               <div className="flex flex-col space-y-4">
                 {menuItems.map((item) => (
                   <Link
-                    key={item.label}
+                    key={item.href}
                     href={item.href}
-                    className="text-white hover:text-elhor-red transition-colors duration-200 font-medium py-2"
+                    className="text-white hover:text-red-500 transition-colors duration-200 font-medium py-2"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {item.label}
@@ -167,7 +174,14 @@ const Navbar = () => {
                 {/* Mobile Language Switcher */}
                 <div className="flex items-center space-x-2 py-2">
                   <Globe className="h-4 w-4 text-white" />
-                  <Select value={locale} onValueChange={handleLanguageChange}>
+                  <Select
+                    value={locale}
+                    onValueChange={(newLocale) => {
+                      handleLanguageChange(newLocale);
+                      setIsMenuOpen(false);
+                    }}
+                    disabled={isPending}
+                  >
                     <SelectTrigger className="w-24 h-8 text-sm border border-white/20 bg-transparent text-white">
                       <SelectValue />
                     </SelectTrigger>
@@ -178,7 +192,7 @@ const Navbar = () => {
                   </Select>
                 </div>
 
-                <Button className="bg-elhor-red hover:bg-elhor-dark-red text-white w-fit font-semibold mt-4">
+                <Button className="bg-red-600 hover:bg-red-700 text-white w-fit font-semibold mt-4">
                   {t("signIn")}
                 </Button>
               </div>
