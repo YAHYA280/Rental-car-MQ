@@ -1,0 +1,31 @@
+{
+  "title": "Pourquoi Choisir Notre Service",
+  "subtitle": "Découvrez le meilleur service de location de voitures avec nos fonctionnalités et avantages premium",
+  "features": {
+    "wideSelection": {
+      "title": "Large Sélection",
+      "description": "Choisissez parmi notre vaste flotte de véhicules pour toute occasion"
+    },
+    "safeSecure": {
+      "title": "Sûr et Sécurisé",
+      "description": "Tous les véhicules sont régulièrement entretenus et entièrement assurés"
+    },
+    "support": {
+      "title": "Support 24/7",
+      "description": "Service client 24h/24 pour votre tranquillité d'esprit"
+    },
+    "topRated": {
+      "title": "Service Très Bien Noté",
+      "description": "Constamment noté 5 étoiles par nos clients satisfaits"
+    },
+    "bestPrice": {
+      "title": "Garantie Meilleur Prix",
+      "description": "Tarifs compétitifs sans frais cachés"
+    },
+    "premiumQuality": {
+      "title": "Qualité Premium",
+      "description": "Luxe et confort garantis à chaque location"
+    }
+  },
+  "cta": "Parcourir Nos Véhicules"
+}

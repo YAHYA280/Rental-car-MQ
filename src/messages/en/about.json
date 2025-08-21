@@ -1,0 +1,31 @@
+{
+  "title": "Why Choose Our Service",
+  "subtitle": "Experience the best car rental service with our premium features and benefits",
+  "features": {
+    "wideSelection": {
+      "title": "Wide Selection",
+      "description": "Choose from our extensive fleet of vehicles for any occasion"
+    },
+    "safeSecure": {
+      "title": "Safe & Secure",
+      "description": "All vehicles are regularly maintained and fully insured"
+    },
+    "support": {
+      "title": "24/7 Support",
+      "description": "Round-the-clock customer service for peace of mind"
+    },
+    "topRated": {
+      "title": "Top Rated Service",
+      "description": "Consistently rated 5 stars by our satisfied customers"
+    },
+    "bestPrice": {
+      "title": "Best Price Guarantee",
+      "description": "Competitive rates with no hidden fees or charges"
+    },
+    "premiumQuality": {
+      "title": "Premium Quality",
+      "description": "Luxury and comfort guaranteed with every rental"
+    }
+  },
+  "cta": "Browse Our Vehicles"
+}

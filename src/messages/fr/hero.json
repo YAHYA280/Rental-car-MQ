@@ -1,0 +1,14 @@
+{
+  "subtitle": "Votre Voyage Commence",
+  "title": "Avec La Voiture Parfaite",
+  "description": "Découvrez notre sélection premium de véhicules. Du luxe à l'économique, trouvez votre véhicule parfait pour toute occasion.",
+  "cta": "Parcourir les Voitures Disponibles",
+  "stats": {
+    "availableCars": "1000+",
+    "availableCarsLabel": "Voitures Disponibles",
+    "happyCustomers": "10,000+",
+    "happyCustomersLabel": "Clients Satisfaits",
+    "clientRating": "4.8/5",
+    "clientRatingLabel": "Note Client"
+  }
+}

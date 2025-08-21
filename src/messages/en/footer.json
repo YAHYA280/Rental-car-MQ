@@ -1,0 +1,26 @@
+{
+  "company": "CarBookers",
+  "description": "Your trusted partner for convenient and reliable bus ticket bookings across the country.",
+  "quickLinks": "Quick Links",
+  "services": "Our Services",
+  "contactInfo": "Contact Info",
+  "address": "1234 Bus Street, City, State 12345",
+  "phone": "1-800-BUS-HELP",
+  "email": "info@busbooker.com",
+  "links": {
+    "home": "Home",
+    "routes": "Routes",
+    "faq": "FAQ",
+    "contact": "Contact",
+    "luxuryBuses": "Luxury Buses",
+    "airportTransfer": "Airport Transfer",
+    "weddingBuses": "Wedding Buses",
+    "businessTravel": "Business Travel"
+  },
+  "copyright": "© 2025 BusBooker. All rights reserved.",
+  "policies": {
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "cookies": "Cookie Policy"
+  }
+}

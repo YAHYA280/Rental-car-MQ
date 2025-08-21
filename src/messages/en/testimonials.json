@@ -1,0 +1,21 @@
+{
+  "title": "What Our Customers Say",
+  "subtitle": "Read about experiences from our satisfied customers",
+  "customers": {
+    "sarah": {
+      "name": "Sarah Johnson",
+      "role": "Business Executive",
+      "text": "The service was exceptional! The car was in perfect condition and the rental process was smooth and hassle-free."
+    },
+    "michael": {
+      "name": "Michael Chen",
+      "role": "Travel Blogger",
+      "text": "Best car rental experience I've had. The vehicle selection is amazing and the staff is incredibly helpful."
+    },
+    "emma": {
+      "name": "Emma Davis",
+      "role": "Photographer",
+      "text": "Fantastic service and beautiful cars. Made my vacation even more special with their premium vehicle selection."
+    }
+  }
+}

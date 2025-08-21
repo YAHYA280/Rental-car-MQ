@@ -1,0 +1,12 @@
+{
+  "title": "Véhicules Populaires",
+  "subtitle": "Découvrez nos véhicules les plus recherchés",
+  "viewAll": "Voir Tous les Véhicules",
+  "day": "/jour",
+  "viewDetails": "Voir Détails",
+  "features": {
+    "electric": "Électrique",
+    "luxury": "Luxe",
+    "suv": "SUV"
+  }
+}

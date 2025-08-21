@@ -27,11 +27,15 @@ const Navbar = () => {
 
     startTransition(() => {
       // Get the current path without locale prefix
-      const pathWithoutLocale = pathname.replace(`/${locale}`, "") || "";
+      const segments = pathname.split("/");
+      // Remove the current locale from the path
+      const pathWithoutLocale = segments.slice(2).join("/") || "";
       // Create new path with new locale
-      const newPath = `/${newLocale}${pathWithoutLocale}`;
+      const newPath = `/${newLocale}${
+        pathWithoutLocale ? "/" + pathWithoutLocale : ""
+      }`;
+
       router.push(newPath);
-      router.refresh(); // Force a refresh to reload with new locale
     });
   };
 

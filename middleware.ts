@@ -1,11 +1,14 @@
 import createMiddleware from "next-intl/middleware";
 
 export default createMiddleware({
+  // A list of all locales that are supported
   locales: ["en", "fr"],
+
+  // Used when no locale matches
   defaultLocale: "en",
+
+  // Always use locale prefix
   localePrefix: "always",
-  // Add locale detection strategy
-  localeDetection: true,
 });
 
 export const config = {
@@ -14,7 +17,5 @@ export const config = {
   // - _next (Next.js internals)
   // - _vercel (Vercel internals)
   // - Static files (images, icons, etc.)
-  matcher: [
-    "/((?!api|_next/static|_next/image|_vercel|favicon.ico|.*\\..*).*)",
-  ],
+  matcher: ["/((?!api|_next|_vercel|favicon.ico|.*\\..*).*)"],
 };
