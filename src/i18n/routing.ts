@@ -1,8 +1,12 @@
 // src/i18n/routing.ts
 import { defineRouting } from "next-intl/routing";
 
+// Define locales as const assertion for better type inference
+export const locales = ["en", "fr"] as const;
+export type Locale = (typeof locales)[number];
+
 export const routing = defineRouting({
-  locales: ["en", "fr"],
+  locales,
   defaultLocale: "en",
   localePrefix: "as-needed",
   pathnames: {
@@ -23,4 +27,8 @@ export const routing = defineRouting({
 });
 
 export type Pathnames = keyof typeof routing.pathnames;
-export type Locale = (typeof routing.locales)[number];
+
+// Type guard function for locale validation
+export function isValidLocale(locale: string): locale is Locale {
+  return locales.includes(locale as Locale);
+}

@@ -2,19 +2,12 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
+import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
-import { routing } from "@/i18n/routing";
+import { routing, isValidLocale } from "@/i18n/routing";
 import "../globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
-
-// Type for valid locales
-type ValidLocale = (typeof routing.locales)[number];
-
-// Type guard function to check if a string is a valid locale
-function isValidLocale(locale: string): locale is ValidLocale {
-  return routing.locales.includes(locale as ValidLocale);
-}
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -27,7 +20,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
 
-  console.log(locale);
+  // Enable static rendering for metadata
+  setRequestLocale(locale);
 
   return {
     title: "CarBookers - Premium Car Rental Service",
@@ -45,10 +39,13 @@ export default async function LocaleLayout({
 }) {
   const { locale } = await params;
 
-  // Validate that the incoming `locale` parameter is valid using type guard
+  // Validate that the incoming `locale` parameter is valid
   if (!isValidLocale(locale)) {
     notFound();
   }
+
+  // Enable static rendering - THIS IS THE KEY FIX
+  setRequestLocale(locale);
 
   let messages;
   try {

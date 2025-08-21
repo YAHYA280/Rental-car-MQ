@@ -1,3 +1,4 @@
+import { setRequestLocale } from "next-intl/server";
 import Navbar from "@/components/layout/Navbar";
 import HeroSection from "@/components/layout/HeroSection";
 import AboutSection from "@/components/layout/AboutSection";
@@ -12,7 +13,9 @@ type Props = {
 
 export default async function HomePage({ params }: Props) {
   const { locale } = await params;
-  console.log(locale);
+
+  // Enable static rendering - THIS IS CRUCIAL
+  setRequestLocale(locale);
 
   return (
     <div className="min-h-screen m-0 p-0">
