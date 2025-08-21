@@ -1,4 +1,3 @@
-// src/app/[locale]/page.tsx
 import Navbar from "@/components/layout/Navbar";
 import HeroSection from "@/components/layout/HeroSection";
 import AboutSection from "@/components/layout/AboutSection";
@@ -8,10 +7,12 @@ import CTASection from "@/components/layout/CTASection";
 import Footer from "@/components/layout/Footer";
 
 type Props = {
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 };
 
-export default function HomePage({ params: { locale } }: Props) {
+export default async function HomePage({ params }: Props) {
+  const { locale } = await params;
+
   return (
     <main className="min-h-screen">
       <Navbar />
