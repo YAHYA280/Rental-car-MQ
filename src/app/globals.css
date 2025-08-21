@@ -42,10 +42,23 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
-  /* Custom colors for the car rental theme */
-  --color-elhor-red: oklch(0.577 0.245 27.325);
-  --color-elhor-dark-red: oklch(0.477 0.245 27.325);
-  --color-elhor-deep-red: oklch(0.377 0.245 27.325);
+  /* Unified CarBookers Red Color System */
+  --color-carbookers-red-50: oklch(0.97 0.05 27.325);
+  --color-carbookers-red-100: oklch(0.92 0.1 27.325);
+  --color-carbookers-red-200: oklch(0.85 0.15 27.325);
+  --color-carbookers-red-300: oklch(0.75 0.2 27.325);
+  --color-carbookers-red-400: oklch(0.67 0.22 27.325);
+  --color-carbookers-red-500: oklch(0.58 0.24 27.325); /* Primary brand red */
+  --color-carbookers-red-600: oklch(0.51 0.24 27.325);
+  --color-carbookers-red-700: oklch(0.43 0.24 27.325);
+  --color-carbookers-red-800: oklch(0.35 0.24 27.325);
+  --color-carbookers-red-900: oklch(0.27 0.24 27.325);
+  --color-carbookers-red-950: oklch(0.18 0.24 27.325);
+
+  /* Legacy colors for backward compatibility */
+  --color-elhor-red: var(--color-carbookers-red-500);
+  --color-elhor-dark-red: var(--color-carbookers-red-700);
+  --color-elhor-deep-red: var(--color-carbookers-red-800);
 }
 
 :root {
@@ -82,10 +95,23 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
 
-  /* Custom colors */
-  --elhor-red: oklch(0.577 0.245 27.325);
-  --elhor-dark-red: oklch(0.477 0.245 27.325);
-  --elhor-deep-red: oklch(0.377 0.245 27.325);
+  /* CarBookers Brand Colors */
+  --carbookers-red-50: oklch(0.97 0.05 27.325);
+  --carbookers-red-100: oklch(0.92 0.1 27.325);
+  --carbookers-red-200: oklch(0.85 0.15 27.325);
+  --carbookers-red-300: oklch(0.75 0.2 27.325);
+  --carbookers-red-400: oklch(0.67 0.22 27.325);
+  --carbookers-red-500: oklch(0.58 0.24 27.325);
+  --carbookers-red-600: oklch(0.51 0.24 27.325);
+  --carbookers-red-700: oklch(0.43 0.24 27.325);
+  --carbookers-red-800: oklch(0.35 0.24 27.325);
+  --carbookers-red-900: oklch(0.27 0.24 27.325);
+  --carbookers-red-950: oklch(0.18 0.24 27.325);
+
+  /* Legacy colors */
+  --elhor-red: var(--carbookers-red-500);
+  --elhor-dark-red: var(--carbookers-red-700);
+  --elhor-deep-red: var(--carbookers-red-800);
 }
 
 .dark {
@@ -121,10 +147,23 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
 
-  /* Custom colors for dark mode */
-  --elhor-red: oklch(0.627 0.245 27.325);
-  --elhor-dark-red: oklch(0.527 0.245 27.325);
-  --elhor-deep-red: oklch(0.427 0.245 27.325);
+  /* Dark mode CarBookers colors */
+  --carbookers-red-50: oklch(0.18 0.24 27.325);
+  --carbookers-red-100: oklch(0.27 0.24 27.325);
+  --carbookers-red-200: oklch(0.35 0.24 27.325);
+  --carbookers-red-300: oklch(0.43 0.24 27.325);
+  --carbookers-red-400: oklch(0.51 0.24 27.325);
+  --carbookers-red-500: oklch(0.62 0.24 27.325);
+  --carbookers-red-600: oklch(0.67 0.22 27.325);
+  --carbookers-red-700: oklch(0.75 0.2 27.325);
+  --carbookers-red-800: oklch(0.85 0.15 27.325);
+  --carbookers-red-900: oklch(0.92 0.1 27.325);
+  --carbookers-red-950: oklch(0.97 0.05 27.325);
+
+  /* Legacy colors for dark mode */
+  --elhor-red: var(--carbookers-red-500);
+  --elhor-dark-red: var(--carbookers-red-400);
+  --elhor-deep-red: var(--carbookers-red-300);
 }
 
 @layer base {
@@ -133,5 +172,110 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Utility classes for CarBookers red colors */
+@layer utilities {
+  .bg-carbookers-red-50 {
+    background-color: var(--carbookers-red-50);
+  }
+  .bg-carbookers-red-100 {
+    background-color: var(--carbookers-red-100);
+  }
+  .bg-carbookers-red-200 {
+    background-color: var(--carbookers-red-200);
+  }
+  .bg-carbookers-red-300 {
+    background-color: var(--carbookers-red-300);
+  }
+  .bg-carbookers-red-400 {
+    background-color: var(--carbookers-red-400);
+  }
+  .bg-carbookers-red-500 {
+    background-color: var(--carbookers-red-500);
+  }
+  .bg-carbookers-red-600 {
+    background-color: var(--carbookers-red-600);
+  }
+  .bg-carbookers-red-700 {
+    background-color: var(--carbookers-red-700);
+  }
+  .bg-carbookers-red-800 {
+    background-color: var(--carbookers-red-800);
+  }
+  .bg-carbookers-red-900 {
+    background-color: var(--carbookers-red-900);
+  }
+  .bg-carbookers-red-950 {
+    background-color: var(--carbookers-red-950);
+  }
+
+  .text-carbookers-red-50 {
+    color: var(--carbookers-red-50);
+  }
+  .text-carbookers-red-100 {
+    color: var(--carbookers-red-100);
+  }
+  .text-carbookers-red-200 {
+    color: var(--carbookers-red-200);
+  }
+  .text-carbookers-red-300 {
+    color: var(--carbookers-red-300);
+  }
+  .text-carbookers-red-400 {
+    color: var(--carbookers-red-400);
+  }
+  .text-carbookers-red-500 {
+    color: var(--carbookers-red-500);
+  }
+  .text-carbookers-red-600 {
+    color: var(--carbookers-red-600);
+  }
+  .text-carbookers-red-700 {
+    color: var(--carbookers-red-700);
+  }
+  .text-carbookers-red-800 {
+    color: var(--carbookers-red-800);
+  }
+  .text-carbookers-red-900 {
+    color: var(--carbookers-red-900);
+  }
+  .text-carbookers-red-950 {
+    color: var(--carbookers-red-950);
+  }
+
+  .border-carbookers-red-50 {
+    border-color: var(--carbookers-red-50);
+  }
+  .border-carbookers-red-100 {
+    border-color: var(--carbookers-red-100);
+  }
+  .border-carbookers-red-200 {
+    border-color: var(--carbookers-red-200);
+  }
+  .border-carbookers-red-300 {
+    border-color: var(--carbookers-red-300);
+  }
+  .border-carbookers-red-400 {
+    border-color: var(--carbookers-red-400);
+  }
+  .border-carbookers-red-500 {
+    border-color: var(--carbookers-red-500);
+  }
+  .border-carbookers-red-600 {
+    border-color: var(--carbookers-red-600);
+  }
+  .border-carbookers-red-700 {
+    border-color: var(--carbookers-red-700);
+  }
+  .border-carbookers-red-800 {
+    border-color: var(--carbookers-red-800);
+  }
+  .border-carbookers-red-900 {
+    border-color: var(--carbookers-red-900);
+  }
+  .border-carbookers-red-950 {
+    border-color: var(--carbookers-red-950);
   }
 }
