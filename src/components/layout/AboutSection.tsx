@@ -4,11 +4,21 @@ import React from "react";
 import { useTranslations } from "next-intl";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Car, Shield, Clock, Star, DollarSign, Award } from "lucide-react";
+import {
+  Car,
+  Shield,
+  Clock,
+  Star,
+  DollarSign,
+  Award,
+  Users,
+} from "lucide-react";
+import { motion } from "framer-motion";
 import AnimatedContainer from "@/components/ui/animated-container";
 
 const AboutSection = () => {
   const t = useTranslations("about");
+  const tHero = useTranslations("hero");
 
   const features = [
     {
@@ -55,9 +65,70 @@ const AboutSection = () => {
     },
   ];
 
+  const stats = [
+    {
+      icon: Car,
+      number: tHero("stats.availableCars"),
+      label: tHero("stats.availableCarsLabel"),
+      color: "from-blue-500 to-blue-600",
+      bgColor: "bg-blue-500/10",
+      borderColor: "border-blue-200",
+    },
+    {
+      icon: Users,
+      number: tHero("stats.happyCustomers"),
+      label: tHero("stats.happyCustomersLabel"),
+      color: "from-green-500 to-green-600",
+      bgColor: "bg-green-500/10",
+      borderColor: "border-green-200",
+    },
+    {
+      icon: Star,
+      number: tHero("stats.clientRating"),
+      label: tHero("stats.clientRatingLabel"),
+      color: "from-yellow-500 to-orange-500",
+      bgColor: "bg-yellow-500/10",
+      borderColor: "border-yellow-200",
+    },
+  ];
+
   return (
     <section className="py-20 bg-gray-50">
       <div className="container mx-auto px-4">
+        {/* Stats Section */}
+        <AnimatedContainer direction="down" className="mb-20">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {stats.map((stat, index) => (
+              <AnimatedContainer
+                key={index}
+                delay={index * 0.2}
+                className="h-full"
+              >
+                <motion.div
+                  className={`text-center ${stat.bgColor} backdrop-blur-sm rounded-2xl p-8 border-2 ${stat.borderColor} group hover:scale-105 transition-all duration-300`}
+                  whileHover={{
+                    y: -5,
+                    boxShadow:
+                      "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)",
+                  }}
+                >
+                  <div
+                    className={`inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r ${stat.color} rounded-full mb-6 group-hover:scale-110 transition-transform duration-300`}
+                  >
+                    <stat.icon className="h-8 w-8 text-white" />
+                  </div>
+                  <div className="text-4xl font-bold text-gray-900 mb-2">
+                    {stat.number}
+                  </div>
+                  <div className="text-gray-700 font-medium text-lg">
+                    {stat.label}
+                  </div>
+                </motion.div>
+              </AnimatedContainer>
+            ))}
+          </div>
+        </AnimatedContainer>
+
         {/* Header */}
         <AnimatedContainer direction="down" className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
