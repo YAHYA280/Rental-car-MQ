@@ -16,6 +16,8 @@
     "pickupTime": "Heure de Prise",
     "returnDate": "Date de Retour",
     "returnTime": "Heure de Retour",
+    "rentalPeriod": "Période de Location",
+    "selectPeriod": "Sélectionner une période",
     "differentDropoff": "Retourner dans un bureau différent",
     "driverAge": "Âge du conducteur",
     "searchButton": "Rechercher Voitures Disponibles",

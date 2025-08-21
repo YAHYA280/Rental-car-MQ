@@ -13,12 +13,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import {
   MapPin,
   Calendar as CalendarIcon,
   Clock,
   Search,
   RotateCcw,
 } from "lucide-react";
+import { format } from "date-fns";
+import { DateRange } from "react-day-picker";
+import { cn } from "@/lib/utils";
 
 interface SearchFormData {
   pickupLocation: string;
@@ -52,6 +61,10 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
     driverAge: "",
   });
 
+  // Date range state for the picker
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Search data:", searchData);
@@ -70,6 +83,21 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
     }));
   };
 
+  // Handle date range selection
+  const handleDateRangeSelect = (range: DateRange | undefined) => {
+    setDateRange(range);
+    if (range?.from) {
+      handleInputChange("pickupDate", format(range.from, "yyyy-MM-dd"));
+    }
+    if (range?.to) {
+      handleInputChange("returnDate", format(range.to, "yyyy-MM-dd"));
+    }
+    // Close picker when both dates are selected
+    if (range?.from && range?.to) {
+      setIsDatePickerOpen(false);
+    }
+  };
+
   // Generate time options
   const timeOptions = Array.from({ length: 24 }, (_, i) => {
     const hour = i.toString().padStart(2, "0");
@@ -82,8 +110,21 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
     { value: "25+", label: "25+" },
   ];
 
-  // Get today's date in YYYY-MM-DD format for min attribute
-  const today = new Date().toISOString().split("T")[0];
+  // Get today's date for min attribute
+  const today = new Date();
+
+  // Format date range display text
+  const getDateRangeText = () => {
+    if (dateRange?.from && dateRange?.to) {
+      return `${format(dateRange.from, "MMM dd")} - ${format(
+        dateRange.to,
+        "MMM dd, yyyy"
+      )}`;
+    } else if (dateRange?.from) {
+      return format(dateRange.from, "MMM dd, yyyy");
+    }
+    return t("selectPeriod");
+  };
 
   return (
     <div className={`relative ${className}`}>
@@ -107,8 +148,8 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
 
           {/* Main Search Container */}
           <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl border border-white/20 overflow-hidden">
-            {/* Desktop Layout - 5 columns */}
-            <div className="hidden lg:grid lg:grid-cols-5 divide-x divide-gray-200/50">
+            {/* Desktop Layout - 4 columns */}
+            <div className="hidden lg:grid lg:grid-cols-4 divide-x divide-gray-200/50">
               {/* Pickup Location */}
               <div className="p-6 flex flex-col justify-between h-24">
                 <Label className="text-xs text-[#3D0000] uppercase tracking-wide mb-2 block font-semibold">
@@ -129,24 +170,46 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
                 </div>
               </div>
 
-              {/* Pickup Date */}
+              {/* Date Range Picker */}
               <div className="p-6 flex flex-col justify-between h-24">
                 <Label className="text-xs text-[#3D0000] uppercase tracking-wide mb-2 block font-semibold">
-                  {t("pickupDate")}
+                  {t("rentalPeriod")}
                 </Label>
-                <div className="flex items-center gap-3">
-                  <CalendarIcon className="h-5 w-5 text-[#950101] flex-shrink-0" />
-                  <Input
-                    type="date"
-                    value={searchData.pickupDate}
-                    onChange={(e) =>
-                      handleInputChange("pickupDate", e.target.value)
-                    }
-                    min={today}
-                    className="border-0 p-0 text-gray-900 focus:ring-0 font-medium bg-transparent text-sm w-full cursor-pointer"
-                    required
-                  />
-                </div>
+                <Popover
+                  open={isDatePickerOpen}
+                  onOpenChange={setIsDatePickerOpen}
+                >
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      className={cn(
+                        "w-full flex items-center justify-start text-left font-medium p-0 h-auto bg-transparent hover:bg-gray-50 text-sm rounded transition-colors",
+                        !dateRange && "text-gray-500"
+                      )}
+                    >
+                      <CalendarIcon className="h-5 w-5 text-[#950101] mr-3 flex-shrink-0" />
+                      <span className="text-gray-900 font-medium truncate">
+                        {getDateRangeText()}
+                      </span>
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className="w-auto p-0 z-50"
+                    align="start"
+                    sideOffset={5}
+                  >
+                    <Calendar
+                      initialFocus
+                      mode="range"
+                      defaultMonth={dateRange?.from || today}
+                      selected={dateRange}
+                      onSelect={handleDateRangeSelect}
+                      numberOfMonths={2}
+                      disabled={(date) => date < today}
+                      className="rounded-md border shadow-md"
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
 
               {/* Pickup Time */}
@@ -174,26 +237,6 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
-              </div>
-
-              {/* Return Date */}
-              <div className="p-6 flex flex-col justify-between h-24">
-                <Label className="text-xs text-[#3D0000] uppercase tracking-wide mb-2 block font-semibold">
-                  {t("returnDate")}
-                </Label>
-                <div className="flex items-center gap-3">
-                  <CalendarIcon className="h-5 w-5 text-[#950101] flex-shrink-0" />
-                  <Input
-                    type="date"
-                    value={searchData.returnDate}
-                    onChange={(e) =>
-                      handleInputChange("returnDate", e.target.value)
-                    }
-                    min={searchData.pickupDate || today}
-                    className="border-0 p-0 text-gray-900 focus:ring-0 font-medium bg-transparent text-sm w-full cursor-pointer"
-                    required
-                  />
                 </div>
               </div>
 
@@ -248,47 +291,46 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
                 </div>
               </div>
 
-              {/* Date Row */}
-              <div className="grid grid-cols-2 gap-4">
-                {/* Pickup Date */}
-                <div>
-                  <Label className="text-xs text-[#3D0000] uppercase tracking-wide mb-3 block font-semibold">
-                    {t("pickupDate")}
-                  </Label>
-                  <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg min-h-[48px]">
-                    <CalendarIcon className="h-4 w-4 text-[#950101] flex-shrink-0" />
-                    <Input
-                      type="date"
-                      value={searchData.pickupDate}
-                      onChange={(e) =>
-                        handleInputChange("pickupDate", e.target.value)
-                      }
-                      min={today}
-                      className="border-0 p-0 text-gray-900 focus:ring-0 font-medium bg-transparent text-sm w-full min-w-0 cursor-pointer"
-                      required
+              {/* Date Range Picker - Mobile */}
+              <div>
+                <Label className="text-xs text-[#3D0000] uppercase tracking-wide mb-3 block font-semibold">
+                  {t("rentalPeriod")}
+                </Label>
+                <Popover
+                  open={isDatePickerOpen}
+                  onOpenChange={setIsDatePickerOpen}
+                >
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      className={cn(
+                        "w-full flex items-center justify-start text-left font-medium p-3 bg-gray-50 rounded-lg min-h-[48px] hover:bg-gray-100 transition-colors",
+                        !dateRange && "text-gray-500"
+                      )}
+                    >
+                      <CalendarIcon className="h-5 w-5 text-[#950101] mr-3 flex-shrink-0" />
+                      <span className="text-gray-900 font-medium text-sm">
+                        {getDateRangeText()}
+                      </span>
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className="w-auto p-0 z-50"
+                    align="center"
+                    sideOffset={5}
+                  >
+                    <Calendar
+                      initialFocus
+                      mode="range"
+                      defaultMonth={dateRange?.from || today}
+                      selected={dateRange}
+                      onSelect={handleDateRangeSelect}
+                      numberOfMonths={1}
+                      disabled={(date) => date < today}
+                      className="rounded-md border shadow-md"
                     />
-                  </div>
-                </div>
-
-                {/* Return Date */}
-                <div>
-                  <Label className="text-xs text-[#3D0000] uppercase tracking-wide mb-3 block font-semibold">
-                    {t("returnDate")}
-                  </Label>
-                  <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg min-h-[48px]">
-                    <CalendarIcon className="h-4 w-4 text-[#950101] flex-shrink-0" />
-                    <Input
-                      type="date"
-                      value={searchData.returnDate}
-                      onChange={(e) =>
-                        handleInputChange("returnDate", e.target.value)
-                      }
-                      min={searchData.pickupDate || today}
-                      className="border-0 p-0 text-gray-900 focus:ring-0 font-medium bg-transparent text-sm w-full min-w-0 cursor-pointer"
-                      required
-                    />
-                  </div>
-                </div>
+                  </PopoverContent>
+                </Popover>
               </div>
 
               {/* Time Row */}

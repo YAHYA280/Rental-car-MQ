@@ -16,6 +16,8 @@
     "pickupTime": "Pickup Time",
     "returnDate": "Return Date",
     "returnTime": "Return Time",
+    "rentalPeriod": "Rental Period",
+    "selectPeriod": "Select a period",
     "differentDropoff": "Return to a different office",
     "driverAge": "Driver's age",
     "searchButton": "Search Available Cars",
