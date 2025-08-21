@@ -22,8 +22,13 @@ const Navbar = () => {
   const pathname = usePathname();
 
   const handleLanguageChange = (newLocale: string) => {
-    const currentPath = pathname.split("/").slice(2).join("/");
-    router.push(`/${newLocale}/${currentPath}`);
+    // Remove the current locale from the pathname
+    const segments = pathname.split("/").filter(Boolean);
+    const pathWithoutLocale = segments.slice(1).join("/");
+    const newPath = `/${newLocale}${
+      pathWithoutLocale ? `/${pathWithoutLocale}` : ""
+    }`;
+    router.push(newPath);
   };
 
   const menuItems = [
@@ -61,7 +66,7 @@ const Navbar = () => {
             <div className="flex items-center space-x-2">
               <Globe className="h-4 w-4" />
               <Select value={locale} onValueChange={handleLanguageChange}>
-                <SelectTrigger className="w-16 h-6 text-xs border-none bg-transparent text-white">
+                <SelectTrigger className="w-16 h-6 text-xs border-none bg-transparent text-white hover:bg-white/10">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -108,8 +113,20 @@ const Navbar = () => {
               ))}
             </div>
 
-            {/* CTA Button */}
-            <div className="hidden md:block">
+            {/* Desktop Language Switcher */}
+            <div className="hidden md:flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <Globe className="h-4 w-4 text-white" />
+                <Select value={locale} onValueChange={handleLanguageChange}>
+                  <SelectTrigger className="w-20 h-8 text-sm border border-white/20 bg-transparent text-white hover:bg-white/10">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="en">EN</SelectItem>
+                    <SelectItem value="fr">FR</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <Button className="bg-elhor-red hover:bg-elhor-dark-red text-white font-semibold px-6">
                 {t("signIn")}
               </Button>
@@ -134,7 +151,7 @@ const Navbar = () => {
 
           {/* Mobile Menu */}
           {isMenuOpen && (
-            <div className="md:hidden py-4 border-t border-gray-700 animate-in slide-in-from-top duration-200">
+            <div className="md:hidden py-4 border-t border-gray-700">
               <div className="flex flex-col space-y-4">
                 {menuItems.map((item) => (
                   <Link
@@ -146,6 +163,21 @@ const Navbar = () => {
                     {item.label}
                   </Link>
                 ))}
+
+                {/* Mobile Language Switcher */}
+                <div className="flex items-center space-x-2 py-2">
+                  <Globe className="h-4 w-4 text-white" />
+                  <Select value={locale} onValueChange={handleLanguageChange}>
+                    <SelectTrigger className="w-24 h-8 text-sm border border-white/20 bg-transparent text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="en">EN</SelectItem>
+                      <SelectItem value="fr">FR</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 <Button className="bg-elhor-red hover:bg-elhor-dark-red text-white w-fit font-semibold mt-4">
                   {t("signIn")}
                 </Button>

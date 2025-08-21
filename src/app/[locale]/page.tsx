@@ -14,7 +14,7 @@ export default async function HomePage({ params }: Props) {
   const { locale } = await params;
 
   return (
-    <main className="min-h-screen">
+    <div className="min-h-screen m-0 p-0">
       <Navbar />
       <HeroSection />
       <AboutSection />
@@ -22,6 +22,6 @@ export default async function HomePage({ params }: Props) {
       <TestimonialsSection />
       <CTASection />
       <Footer />
-    </main>
+    </div>
   );
 }
