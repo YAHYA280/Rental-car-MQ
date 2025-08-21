@@ -1,0 +1,128 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "vehicles": "Véhicules",
+    "about": "À Propos",
+    "contact": "Contact",
+    "signIn": "Se Connecter",
+    "reserveNow": "Réserver Maintenant"
+  },
+  "hero": {
+    "subtitle": "Votre Voyage Commence",
+    "title": "Avec La Voiture Parfaite",
+    "description": "Découvrez notre sélection premium de véhicules. Du luxe à l'économique, trouvez votre véhicule parfait pour toute occasion.",
+    "cta": "Parcourir les Voitures Disponibles",
+    "stats": {
+      "availableCars": "1000+",
+      "availableCarsLabel": "Voitures Disponibles",
+      "happyCustomers": "10,000+",
+      "happyCustomersLabel": "Clients Satisfaits",
+      "clientRating": "4.8/5",
+      "clientRatingLabel": "Note Client"
+    }
+  },
+  "about": {
+    "title": "Pourquoi Choisir Notre Service",
+    "subtitle": "Découvrez le meilleur service de location de voitures avec nos fonctionnalités et avantages premium",
+    "features": {
+      "wideSelection": {
+        "title": "Large Sélection",
+        "description": "Choisissez parmi notre vaste flotte de véhicules pour toute occasion"
+      },
+      "safeSecure": {
+        "title": "Sûr et Sécurisé",
+        "description": "Tous les véhicules sont régulièrement entretenus et entièrement assurés"
+      },
+      "support": {
+        "title": "Support 24/7",
+        "description": "Service client 24h/24 pour votre tranquillité d'esprit"
+      },
+      "topRated": {
+        "title": "Service Très Bien Noté",
+        "description": "Constamment noté 5 étoiles par nos clients satisfaits"
+      },
+      "bestPrice": {
+        "title": "Garantie Meilleur Prix",
+        "description": "Tarifs compétitifs sans frais cachés"
+      },
+      "premiumQuality": {
+        "title": "Qualité Premium",
+        "description": "Luxe et confort garantis à chaque location"
+      }
+    },
+    "cta": "Parcourir Nos Véhicules"
+  },
+  "vehicles": {
+    "title": "Véhicules Populaires",
+    "subtitle": "Découvrez nos véhicules les plus recherchés",
+    "viewAll": "Voir Tous les Véhicules",
+    "day": "/jour",
+    "viewDetails": "Voir Détails",
+    "features": {
+      "electric": "Électrique",
+      "luxury": "Luxe",
+      "suv": "SUV"
+    }
+  },
+  "testimonials": {
+    "title": "Ce Que Disent Nos Clients",
+    "subtitle": "Découvrez les expériences de nos clients satisfaits",
+    "customers": {
+      "sarah": {
+        "name": "Sarah Johnson",
+        "role": "Directrice d'Entreprise",
+        "text": "Le service était exceptionnel ! La voiture était en parfait état et le processus de location était fluide et sans tracas."
+      },
+      "michael": {
+        "name": "Michael Chen",
+        "role": "Blogueur Voyage",
+        "text": "Meilleure expérience de location de voiture que j'aie eue. La sélection de véhicules est incroyable et le personnel est extrêmement serviable."
+      },
+      "emma": {
+        "name": "Emma Davis",
+        "role": "Photographe",
+        "text": "Service fantastique et belles voitures. A rendu mes vacances encore plus spéciales avec leur sélection de véhicules premium."
+      }
+    }
+  },
+  "cta": {
+    "title": "Prêt à Commencer Votre Voyage ?",
+    "subtitle": "Découvrez la liberté des services de location de voitures premium. Réservez votre véhicule parfait aujourd'hui !",
+    "browseVehicles": "Parcourir les Véhicules",
+    "contactUs": "Nous Contacter",
+    "phone": "+1 (555) 123-4566",
+    "email": "support@rentacar.com"
+  },
+  "newsletter": {
+    "title": "Abonnez-vous à Notre Newsletter",
+    "subtitle": "Restez informé de nos dernières offres et mises à jour",
+    "placeholder": "Entrez votre email",
+    "subscribe": "S'abonner"
+  },
+  "footer": {
+    "company": "CarBookers",
+    "description": "Votre partenaire de confiance pour des réservations de billets de bus pratiques et fiables à travers le pays.",
+    "quickLinks": "Liens Rapides",
+    "services": "Nos Services",
+    "contactInfo": "Infos Contact",
+    "address": "1234 Rue des Bus, Ville, État 12345",
+    "phone": "1-800-BUS-HELP",
+    "email": "info@busbooker.com",
+    "links": {
+      "home": "Accueil",
+      "routes": "Itinéraires",
+      "faq": "FAQ",
+      "contact": "Contact",
+      "luxuryBuses": "Bus de Luxe",
+      "airportTransfer": "Transfert Aéroport",
+      "weddingBuses": "Bus de Mariage",
+      "businessTravel": "Voyage d'Affaires"
+    },
+    "copyright": "© 2025 BusBooker. Tous droits réservés.",
+    "policies": {
+      "privacy": "Politique de Confidentialité",
+      "terms": "Conditions de Service",
+      "cookies": "Politique des Cookies"
+    }
+  }
+}
