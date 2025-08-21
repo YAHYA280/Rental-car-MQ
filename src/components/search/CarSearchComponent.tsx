@@ -213,7 +213,7 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
           <div className="p-2">
             <Button
               type="submit"
-              className="w-full h-full bg-gradient-to-r from-yellow-400 to-red-500 hover:from-yellow-500 hover:to-red-600 text-black font-bold text-lg rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2"
+              className="w-full h-full bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-black font-bold text-lg rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2"
             >
               <Search className="h-5 w-5" />
               Search
