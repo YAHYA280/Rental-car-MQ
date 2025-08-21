@@ -2,7 +2,6 @@
 
 import React, { useState, useTransition } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -12,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Menu, X, Phone, MapPin, Clock, Globe } from "lucide-react";
-import { Link, useRouter } from "@/i18n/routing";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -23,18 +22,19 @@ const Navbar = () => {
   const pathname = usePathname();
 
   const handleLanguageChange = (newLocale: "en" | "fr") => {
-    if (newLocale === locale) return;
+    if (newLocale === locale || isPending) return;
 
     startTransition(() => {
+      // Use next-intl's router for proper locale switching
       router.replace(pathname, { locale: newLocale });
     });
   };
 
   const menuItems = [
-    { label: t("home"), href: "/" },
-    { label: t("vehicles"), href: "/vehicles" },
-    { label: t("about"), href: "/about" },
-    { label: t("contact"), href: "/contact" },
+    { label: t("home"), href: "/" as const },
+    { label: t("vehicles"), href: "/vehicles" as const },
+    { label: t("about"), href: "/about" as const },
+    { label: t("contact"), href: "/contact" as const },
   ];
 
   return (
@@ -126,7 +126,9 @@ const Navbar = () => {
                   disabled={isPending}
                 >
                   <SelectTrigger className="w-20 h-8 text-sm border border-white/20 bg-transparent text-white hover:bg-white/10">
-                    <SelectValue>{locale.toUpperCase()}</SelectValue>
+                    <SelectValue>
+                      {isPending ? "..." : locale.toUpperCase()}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="en">EN</SelectItem>
@@ -183,7 +185,9 @@ const Navbar = () => {
                     disabled={isPending}
                   >
                     <SelectTrigger className="w-24 h-8 text-sm border border-white/20 bg-transparent text-white">
-                      <SelectValue>{locale.toUpperCase()}</SelectValue>
+                      <SelectValue>
+                        {isPending ? "..." : locale.toUpperCase()}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="en">EN</SelectItem>

@@ -8,6 +8,14 @@ import "../globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
+// Type for valid locales
+type ValidLocale = (typeof routing.locales)[number];
+
+// Type guard function to check if a string is a valid locale
+function isValidLocale(locale: string): locale is ValidLocale {
+  return routing.locales.includes(locale as ValidLocale);
+}
+
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
@@ -18,6 +26,8 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+
+  console.log(locale);
 
   return {
     title: "CarBookers - Premium Car Rental Service",
@@ -35,8 +45,8 @@ export default async function LocaleLayout({
 }) {
   const { locale } = await params;
 
-  // Validate that the incoming `locale` parameter is valid
-  if (!routing.locales.includes(locale as any)) {
+  // Validate that the incoming `locale` parameter is valid using type guard
+  if (!isValidLocale(locale)) {
     notFound();
   }
 
