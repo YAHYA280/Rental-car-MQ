@@ -4,7 +4,7 @@ import HeroSection from "@/components/layout/HeroSection";
 import AboutSection from "@/components/layout/AboutSection";
 import PopularVehicles from "@/components/layout/PopularVehicles";
 import TestimonialsSection from "@/components/layout/TestimonialsSection";
-import CTASection from "@/components/layout/CTASection";
+import MapSection from "@/components/layout/MapSection";
 import Footer from "@/components/layout/Footer";
 
 type Props = {
@@ -24,7 +24,7 @@ export default async function HomePage({ params }: Props) {
       <AboutSection />
       <PopularVehicles />
       <TestimonialsSection />
-      <CTASection />
+      <MapSection />
       <Footer />
     </div>
   );

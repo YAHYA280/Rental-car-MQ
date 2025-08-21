@@ -8,8 +8,8 @@
     "reserveNow": "Réserver Maintenant"
   },
   "search": {
-    "title": "Trouvez Votre Véhicule Parfait",
-    "subtitle": "Recherchez dans notre flotte premium de véhicules",
+    "title": "Trouvez Votre Voiture de Location Parfaite",
+    "subtitle": "Choisissez parmi notre flotte premium",
     "pickupLocation": "Lieu de Prise",
     "dropoffLocation": "Lieu de Retour",
     "pickupDate": "Date de Prise",
@@ -17,13 +17,13 @@
     "returnDate": "Date de Retour",
     "returnTime": "Heure de Retour",
     "rentalPeriod": "Période de Location",
-    "selectPeriod": "Sélectionner une période",
-    "differentDropoff": "Retourner dans un bureau différent",
+    "selectPeriod": "Sélectionner les dates",
+    "differentDropoff": "Retourner à un endroit différent",
     "driverAge": "Âge du conducteur",
-    "searchButton": "Rechercher Voitures Disponibles",
+    "searchButton": "Rechercher des Voitures",
     "placeholders": {
-      "pickupLocation": "Aéroport, ville, hôtel...",
-      "dropoffLocation": "Aéroport, ville, hôtel...",
+      "pickupLocation": "Entrez le lieu de prise",
+      "dropoffLocation": "Entrez le lieu de retour",
       "selectDate": "Sélectionner une date",
       "selectTime": "Sélectionner l'heure"
     }
@@ -138,14 +138,14 @@
     "subscribe": "S'abonner"
   },
   "footer": {
-    "company": "CarBookers",
-    "description": "Votre partenaire de confiance pour des services de location de voitures pratiques et fiables à travers le pays.",
+    "company": "MELHOR QUE NADA",
+    "description": "Votre partenaire de confiance pour des services de location de voitures pratiques et fiables à travers le Maroc.",
     "quickLinks": "Liens Rapides",
     "services": "Nos Services",
     "contactInfo": "Infos Contact",
-    "address": "1234 Rue des Voitures, Ville, État 12345",
-    "phone": "1-800-CAR-HELP",
-    "email": "info@carbookers.com",
+    "address": "RUE 8 ENNASR LOT 635 TANGER",
+    "phone": "+212612077309",
+    "email": "info@melhorquenada.com",
     "links": {
       "home": "Accueil",
       "routes": "Véhicules",
@@ -153,10 +153,9 @@
       "contact": "Contact",
       "luxuryBuses": "Voitures de Luxe",
       "airportTransfer": "Transfert Aéroport",
-      "weddingBuses": "Voitures de Mariage",
-      "businessTravel": "Voyage d'Affaires"
+      "weddingBuses": "Voitures de Mariage"
     },
-    "copyright": "© 2025 CarBookers. Tous droits réservés.",
+    "copyright": "© 2025 MELHOR QUE NADA. Tous droits réservés.",
     "policies": {
       "privacy": "Politique de Confidentialité",
       "terms": "Conditions de Service",

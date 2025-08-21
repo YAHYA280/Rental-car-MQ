@@ -8,35 +8,20 @@ import { Badge } from "@/components/ui/badge";
 import { Star, ArrowRight } from "lucide-react";
 import AnimatedContainer from "@/components/ui/animated-container";
 import { featuredCars } from "@/components/data/cars";
+import Image from "next/image";
 
 const PopularVehicles = () => {
   const t = useTranslations("vehicles");
 
-  // Car placeholder images with gradients based on category
-  const getCarGradient = (category: string) => {
-    switch (category) {
-      case "Electric":
-        return "from-green-400 to-blue-500";
-      case "Luxury":
-        return "from-purple-500 to-pink-500";
-      case "SUV":
-        return "from-orange-400 to-red-500";
-      default:
-        return "from-gray-400 to-gray-600";
-    }
+  // Map car images to your uploaded files
+  const getCarImage = (index: number) => {
+    const images = ["/cars/car1.jpg", "/cars/car2.jpg", "/cars/car3.jpg"];
+    return images[index % 3]; // Cycle through the 3 images
   };
 
-  const getCarEmoji = (brand: string) => {
-    switch (brand.toLowerCase()) {
-      case "tesla":
-        return "⚡";
-      case "bmw":
-        return "🚗";
-      case "land rover":
-        return "🚙";
-      default:
-        return "🚗";
-    }
+  // Simple edge gradient for all images
+  const getCarGradient = () => {
+    return "from-transparent via-transparent to-gray-900/30";
   };
 
   return (
@@ -72,32 +57,39 @@ const PopularVehicles = () => {
             >
               <Card className="h-full overflow-hidden hover:shadow-2xl transition-all duration-500 border-0 shadow-lg group">
                 <div className="relative overflow-hidden">
-                  {/* Car Image Placeholder */}
-                  <div
-                    className={`h-64 bg-gradient-to-br ${getCarGradient(
-                      car.category
-                    )} flex items-center justify-center relative group-hover:scale-110 transition-transform duration-500`}
-                  >
-                    <div className="text-center text-white">
-                      <div className="text-8xl mb-4 filter drop-shadow-lg">
-                        {getCarEmoji(car.brand)}
-                      </div>
-                      <div className="text-sm font-medium opacity-90">
+                  {/* Car Image */}
+                  <div className="h-64 relative group-hover:scale-110 transition-transform duration-500">
+                    <Image
+                      src={getCarImage(index)}
+                      alt={`${car.brand} ${car.name}`}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    />
+
+                    {/* Subtle edge gradient for all images */}
+                    <div
+                      className={`absolute inset-0 bg-gradient-to-b ${getCarGradient()} group-hover:opacity-75 transition-opacity duration-300`}
+                    ></div>
+
+                    {/* Dark overlay for text readability */}
+                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300"></div>
+
+                    {/* Brand overlay */}
+                    <div className="absolute bottom-4 left-4 text-white">
+                      <div className="text-sm font-medium opacity-90 bg-black/30 backdrop-blur-sm px-3 py-1 rounded-full">
                         {car.brand}
                       </div>
                     </div>
-
-                    {/* Overlay gradient */}
-                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300"></div>
                   </div>
 
                   {/* Category Badge */}
-                  <Badge className="absolute top-4 left-4 bg-white text-gray-900 font-semibold">
+                  <Badge className="absolute top-4 left-4 bg-white text-gray-900 font-semibold shadow-lg">
                     {t(`features.${car.category?.toLowerCase()}`)}
                   </Badge>
 
                   {/* Rating */}
-                  <div className="absolute top-4 right-4 flex items-center bg-white/90 backdrop-blur-sm rounded-full px-3 py-1">
+                  <div className="absolute top-4 right-4 flex items-center bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 shadow-lg">
                     <Star className="h-4 w-4 text-yellow-400 fill-current mr-1" />
                     <span className="text-sm font-semibold text-gray-900">
                       {car.rating}
@@ -134,7 +126,7 @@ const PopularVehicles = () => {
                   </div>
 
                   {/* Action Button */}
-                  <Button className="w-full bg-black hover:bg-gray-800 text-white font-semibold py-3 group-hover:bg-gradient-to-r group-hover:from-blue-500 group-hover:to-purple-600 transition-all duration-300">
+                  <Button className="w-full bg-black hover:bg-red-600 text-white font-semibold py-3 transition-all duration-300">
                     {t("viewDetails")}
                   </Button>
                 </CardContent>

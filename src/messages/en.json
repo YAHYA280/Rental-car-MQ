@@ -8,22 +8,22 @@
     "reserveNow": "Reserve Now"
   },
   "search": {
-    "title": "Find Your Perfect Ride",
-    "subtitle": "Search from our premium fleet of vehicles",
+    "title": "Find Your Perfect Rental Car",
+    "subtitle": "Choose from our premium fleet",
     "pickupLocation": "Pickup Location",
-    "dropoffLocation": "Drop-off Location",
+    "dropoffLocation": "Return Location",
     "pickupDate": "Pickup Date",
     "pickupTime": "Pickup Time",
     "returnDate": "Return Date",
     "returnTime": "Return Time",
     "rentalPeriod": "Rental Period",
-    "selectPeriod": "Select a period",
-    "differentDropoff": "Return to a different office",
-    "driverAge": "Driver's age",
-    "searchButton": "Search Available Cars",
+    "selectPeriod": "Select dates",
+    "differentDropoff": "Return to different location",
+    "driverAge": "Driver Age",
+    "searchButton": "Search Cars",
     "placeholders": {
-      "pickupLocation": "Airport, city, hotel...",
-      "dropoffLocation": "Airport, city, hotel...",
+      "pickupLocation": "Enter pickup location",
+      "dropoffLocation": "Enter return location",
       "selectDate": "Select date",
       "selectTime": "Select time"
     }
@@ -138,14 +138,14 @@
     "subscribe": "Subscribe"
   },
   "footer": {
-    "company": "CarBookers",
-    "description": "Your trusted partner for convenient and reliable car rental services across the country.",
+    "company": "MELHOR QUE NADA",
+    "description": "Your trusted partner for convenient and reliable car rental services across Morocco.",
     "quickLinks": "Quick Links",
     "services": "Our Services",
     "contactInfo": "Contact Info",
-    "address": "1234 Car Street, City, State 12345",
-    "phone": "1-800-CAR-HELP",
-    "email": "info@carbookers.com",
+    "address": "RUE 8 ENNASR LOT 635 TANGER",
+    "phone": "+212612077309",
+    "email": "info@melhorquenada.com",
     "links": {
       "home": "Home",
       "routes": "Vehicles",
@@ -153,10 +153,9 @@
       "contact": "Contact",
       "luxuryBuses": "Luxury Cars",
       "airportTransfer": "Airport Transfer",
-      "weddingBuses": "Wedding Cars",
-      "businessTravel": "Business Travel"
+      "weddingBuses": "Wedding Cars"
     },
-    "copyright": "© 2025 CarBookers. All rights reserved.",
+    "copyright": "© 2025 MELHOR QUE NADA. All rights reserved.",
     "policies": {
       "privacy": "Privacy Policy",
       "terms": "Terms of Service",

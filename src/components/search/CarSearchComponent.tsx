@@ -2,9 +2,16 @@
 
 import React, { useState } from "react";
 import { useTranslations } from "next-intl";
+import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -13,21 +20,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import {
   MapPin,
   Calendar as CalendarIcon,
   Clock,
   Search,
   RotateCcw,
 } from "lucide-react";
-import { format } from "date-fns";
-import { DateRange } from "react-day-picker";
 import { cn } from "@/lib/utils";
+import { DateRange } from "react-day-picker";
 
 interface SearchFormData {
   pickupLocation: string;
@@ -61,9 +61,7 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
     driverAge: "",
   });
 
-  // Date range state for the picker
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
-  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,7 +81,6 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
     }));
   };
 
-  // Handle date range selection
   const handleDateRangeSelect = (range: DateRange | undefined) => {
     setDateRange(range);
     if (range?.from) {
@@ -92,13 +89,8 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
     if (range?.to) {
       handleInputChange("returnDate", format(range.to, "yyyy-MM-dd"));
     }
-    // Close picker when both dates are selected
-    if (range?.from && range?.to) {
-      setIsDatePickerOpen(false);
-    }
   };
 
-  // Generate time options
   const timeOptions = Array.from({ length: 24 }, (_, i) => {
     const hour = i.toString().padStart(2, "0");
     return { value: `${hour}:00`, label: `${hour}:00` };
@@ -110,10 +102,6 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
     { value: "25+", label: "25+" },
   ];
 
-  // Get today's date for min attribute
-  const today = new Date();
-
-  // Format date range display text
   const getDateRangeText = () => {
     if (dateRange?.from && dateRange?.to) {
       return `${format(dateRange.from, "MMM dd")} - ${format(
@@ -123,7 +111,7 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
     } else if (dateRange?.from) {
       return format(dateRange.from, "MMM dd, yyyy");
     }
-    return t("selectPeriod");
+    return t("selectPeriod") || "Select dates";
   };
 
   return (
@@ -136,30 +124,30 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
           {/* Title */}
           <div className="text-center mb-8">
             <h3 className="text-3xl lg:text-4xl font-bold text-white mb-3">
-              <span className="text-white">
-                {t("title").split(" ").slice(0, 2).join(" ")}
-              </span>{" "}
+              <span className="text-white">Find Your Perfect</span>{" "}
               <span className="bg-gradient-to-r from-red-400 via-red-500 to-red-600 bg-clip-text text-transparent">
-                {t("title").split(" ").slice(2).join(" ")}
+                Rental Car
               </span>
             </h3>
-            <p className="text-gray-200 text-lg opacity-90">{t("subtitle")}</p>
+            <p className="text-gray-200 text-lg opacity-90">
+              Choose from our premium fleet
+            </p>
           </div>
 
           {/* Main Search Container */}
           <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl border border-white/20 overflow-hidden">
-            {/* Desktop Layout - 4 columns */}
+            {/* Desktop Layout */}
             <div className="hidden lg:grid lg:grid-cols-4 divide-x divide-gray-200/50">
               {/* Pickup Location */}
               <div className="p-6 flex flex-col justify-between h-24">
                 <Label className="text-xs text-[#3D0000] uppercase tracking-wide mb-2 block font-semibold">
-                  {t("pickupLocation")}
+                  Pickup Location
                 </Label>
                 <div className="flex items-center gap-3">
                   <MapPin className="h-5 w-5 text-[#950101] flex-shrink-0" />
                   <Input
                     type="text"
-                    placeholder={t("placeholders.pickupLocation")}
+                    placeholder="Enter pickup location"
                     value={searchData.pickupLocation}
                     onChange={(e) =>
                       handleInputChange("pickupLocation", e.target.value)
@@ -173,17 +161,14 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
               {/* Date Range Picker */}
               <div className="p-6 flex flex-col justify-between h-24">
                 <Label className="text-xs text-[#3D0000] uppercase tracking-wide mb-2 block font-semibold">
-                  {t("rentalPeriod")}
+                  Rental Period
                 </Label>
-                <Popover
-                  open={isDatePickerOpen}
-                  onOpenChange={setIsDatePickerOpen}
-                >
+                <Popover>
                   <PopoverTrigger asChild>
-                    <button
-                      type="button"
+                    <Button
+                      variant="ghost"
                       className={cn(
-                        "w-full flex items-center justify-start text-left font-medium p-0 h-auto bg-transparent hover:bg-gray-50 text-sm rounded transition-colors",
+                        "w-full justify-start text-left font-medium p-0 h-auto bg-transparent hover:bg-gray-50 text-sm",
                         !dateRange && "text-gray-500"
                       )}
                     >
@@ -191,22 +176,17 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
                       <span className="text-gray-900 font-medium truncate">
                         {getDateRangeText()}
                       </span>
-                    </button>
+                    </Button>
                   </PopoverTrigger>
-                  <PopoverContent
-                    className="w-auto p-0 z-50"
-                    align="start"
-                    sideOffset={5}
-                  >
+                  <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       initialFocus
                       mode="range"
-                      defaultMonth={dateRange?.from || today}
+                      defaultMonth={dateRange?.from}
                       selected={dateRange}
                       onSelect={handleDateRangeSelect}
                       numberOfMonths={2}
-                      disabled={(date) => date < today}
-                      className="rounded-md border shadow-md"
+                      disabled={(date) => date < new Date()}
                     />
                   </PopoverContent>
                 </Popover>
@@ -215,7 +195,7 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
               {/* Pickup Time */}
               <div className="p-6 flex flex-col justify-between h-24">
                 <Label className="text-xs text-[#3D0000] uppercase tracking-wide mb-2 block font-semibold">
-                  {t("pickupTime")}
+                  Pickup Time
                 </Label>
                 <div className="flex items-center gap-3">
                   <Clock className="h-5 w-5 text-[#950101] flex-shrink-0" />
@@ -224,10 +204,9 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
                     onValueChange={(value) =>
                       handleInputChange("pickupTime", value)
                     }
-                    required
                   >
                     <SelectTrigger className="border-0 p-0 text-gray-900 focus:ring-0 font-medium h-auto bg-transparent text-sm w-full">
-                      <SelectValue placeholder={t("placeholders.selectTime")} />
+                      <SelectValue placeholder="Select time" />
                     </SelectTrigger>
                     <SelectContent>
                       {timeOptions.map((time) => (
@@ -243,7 +222,7 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
               {/* Return Time */}
               <div className="p-6 flex flex-col justify-between h-24">
                 <Label className="text-xs text-[#3D0000] uppercase tracking-wide mb-2 block font-semibold">
-                  {t("returnTime")}
+                  Return Time
                 </Label>
                 <div className="flex items-center gap-3">
                   <Clock className="h-5 w-5 text-[#950101] flex-shrink-0" />
@@ -252,10 +231,9 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
                     onValueChange={(value) =>
                       handleInputChange("returnTime", value)
                     }
-                    required
                   >
                     <SelectTrigger className="border-0 p-0 text-gray-900 focus:ring-0 font-medium h-auto bg-transparent text-sm w-full">
-                      <SelectValue placeholder={t("placeholders.selectTime")} />
+                      <SelectValue placeholder="Select time" />
                     </SelectTrigger>
                     <SelectContent>
                       {timeOptions.map((time) => (
@@ -274,13 +252,13 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
               {/* Pickup Location */}
               <div>
                 <Label className="text-xs text-[#3D0000] uppercase tracking-wide mb-3 block font-semibold">
-                  {t("pickupLocation")}
+                  Pickup Location
                 </Label>
                 <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg min-h-[48px]">
                   <MapPin className="h-5 w-5 text-[#950101] flex-shrink-0" />
                   <Input
                     type="text"
-                    placeholder={t("placeholders.pickupLocation")}
+                    placeholder="Enter pickup location"
                     value={searchData.pickupLocation}
                     onChange={(e) =>
                       handleInputChange("pickupLocation", e.target.value)
@@ -294,17 +272,14 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
               {/* Date Range Picker - Mobile */}
               <div>
                 <Label className="text-xs text-[#3D0000] uppercase tracking-wide mb-3 block font-semibold">
-                  {t("rentalPeriod")}
+                  Rental Period
                 </Label>
-                <Popover
-                  open={isDatePickerOpen}
-                  onOpenChange={setIsDatePickerOpen}
-                >
+                <Popover>
                   <PopoverTrigger asChild>
-                    <button
-                      type="button"
+                    <Button
+                      variant="ghost"
                       className={cn(
-                        "w-full flex items-center justify-start text-left font-medium p-3 bg-gray-50 rounded-lg min-h-[48px] hover:bg-gray-100 transition-colors",
+                        "w-full justify-start text-left font-medium p-3 bg-gray-50 rounded-lg min-h-[48px] hover:bg-gray-100 transition-colors",
                         !dateRange && "text-gray-500"
                       )}
                     >
@@ -312,22 +287,17 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
                       <span className="text-gray-900 font-medium text-sm">
                         {getDateRangeText()}
                       </span>
-                    </button>
+                    </Button>
                   </PopoverTrigger>
-                  <PopoverContent
-                    className="w-auto p-0 z-50"
-                    align="center"
-                    sideOffset={5}
-                  >
+                  <PopoverContent className="w-auto p-0" align="center">
                     <Calendar
                       initialFocus
                       mode="range"
-                      defaultMonth={dateRange?.from || today}
+                      defaultMonth={dateRange?.from}
                       selected={dateRange}
                       onSelect={handleDateRangeSelect}
                       numberOfMonths={1}
-                      disabled={(date) => date < today}
-                      className="rounded-md border shadow-md"
+                      disabled={(date) => date < new Date()}
                     />
                   </PopoverContent>
                 </Popover>
@@ -338,7 +308,7 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
                 {/* Pickup Time */}
                 <div>
                   <Label className="text-xs text-[#3D0000] uppercase tracking-wide mb-3 block font-semibold">
-                    {t("pickupTime")}
+                    Pickup Time
                   </Label>
                   <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg min-h-[48px]">
                     <Clock className="h-4 w-4 text-[#950101] flex-shrink-0" />
@@ -347,10 +317,9 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
                       onValueChange={(value) =>
                         handleInputChange("pickupTime", value)
                       }
-                      required
                     >
                       <SelectTrigger className="border-0 p-0 text-gray-900 focus:ring-0 font-medium h-auto bg-transparent text-sm w-full min-w-0">
-                        <SelectValue placeholder="Heure" />
+                        <SelectValue placeholder="Time" />
                       </SelectTrigger>
                       <SelectContent>
                         {timeOptions.map((time) => (
@@ -366,7 +335,7 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
                 {/* Return Time */}
                 <div>
                   <Label className="text-xs text-[#3D0000] uppercase tracking-wide mb-3 block font-semibold">
-                    {t("returnTime")}
+                    Return Time
                   </Label>
                   <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg min-h-[48px]">
                     <Clock className="h-4 w-4 text-[#950101] flex-shrink-0" />
@@ -375,10 +344,9 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
                       onValueChange={(value) =>
                         handleInputChange("returnTime", value)
                       }
-                      required
                     >
                       <SelectTrigger className="border-0 p-0 text-gray-900 focus:ring-0 font-medium h-auto bg-transparent text-sm w-full min-w-0">
-                        <SelectValue placeholder="Heure" />
+                        <SelectValue placeholder="Time" />
                       </SelectTrigger>
                       <SelectContent>
                         {timeOptions.map((time) => (
@@ -401,7 +369,7 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
               className="bg-gradient-to-r from-red-600 via-[#950101] to-[#FF0000] hover:from-[#950101] hover:via-[#FF0000] hover:to-[#3D0000] text-white font-bold text-lg px-12 py-4 rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 flex items-center gap-3"
             >
               <Search className="h-6 w-6" />
-              {t("searchButton")}
+              Search Cars
             </Button>
           </div>
 
@@ -422,14 +390,14 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
                 htmlFor="different-office"
                 className="text-sm text-gray-200 font-medium cursor-pointer"
               >
-                {t("differentDropoff")}
+                Return to different location
               </label>
             </div>
 
             {/* Driver's Age Selection */}
             <div className="flex flex-col sm:flex-row items-center gap-4">
               <span className="text-sm text-gray-200 font-medium">
-                {t("driverAge")}:
+                Driver Age:
               </span>
               <div className="flex gap-2">
                 {ageRanges.map((age) => (
@@ -454,13 +422,13 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
           {searchData.differentDropoff && (
             <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-lg">
               <Label className="text-xs text-[#3D0000] uppercase tracking-wide mb-3 block font-semibold">
-                {t("dropoffLocation")}
+                Return Location
               </Label>
               <div className="flex items-center gap-3">
                 <RotateCcw className="h-5 w-5 text-[#950101]" />
                 <Input
                   type="text"
-                  placeholder={t("placeholders.dropoffLocation")}
+                  placeholder="Enter return location"
                   value={searchData.dropoffLocation}
                   onChange={(e) =>
                     handleInputChange("dropoffLocation", e.target.value)

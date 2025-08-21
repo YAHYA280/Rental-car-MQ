@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Menu, X, Phone, MapPin, Clock, Globe } from "lucide-react";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
+import Image from "next/image";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -45,8 +46,10 @@ const Navbar = () => {
           <div className="flex items-center space-x-4 lg:space-x-6">
             <div className="flex items-center space-x-2">
               <MapPin className="h-4 w-4" />
-              <span className="hidden sm:inline">Tangier, Morocco</span>
-              <span className="sm:hidden">Tangier</span>
+              <span className="hidden sm:inline">
+                RUE 8 ENNASR LOT 635 TANGER
+              </span>
+              <span className="sm:hidden">Tanger</span>
             </div>
             <div className="flex items-center space-x-2">
               <Clock className="h-4 w-4" />
@@ -57,8 +60,8 @@ const Navbar = () => {
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
               <Phone className="h-4 w-4" />
-              <span className="hidden sm:inline">+212 123 456 789</span>
-              <span className="sm:hidden">+212 123 456</span>
+              <span className="hidden sm:inline">+212612077309</span>
+              <span className="sm:hidden">+212612077309</span>
             </div>
 
             {/* Language Switcher */}
@@ -87,20 +90,14 @@ const Navbar = () => {
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
-            <Link href="/" className="flex items-center space-x-2">
-              <div className="bg-red-600 p-2 rounded">
-                <span className="text-white font-bold text-lg sm:text-xl">
-                  CB
-                </span>
-              </div>
-              <div>
-                <span className="text-lg sm:text-xl font-bold text-white">
-                  Car
-                </span>
-                <span className="text-red-500 ml-1 text-lg sm:text-xl">
-                  Bookers
-                </span>
-              </div>
+            <Link href="/" className="flex items-center">
+              <Image
+                src="/Logo.png"
+                alt="MELHOR QUE NADA"
+                width={140}
+                height={140}
+                className="rounded hover:scale-105 transition-transform duration-200"
+              />
             </Link>
 
             {/* Desktop Menu */}
