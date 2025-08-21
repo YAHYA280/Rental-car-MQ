@@ -8,14 +8,31 @@
     "reserveNow": "Reserve Now"
   },
   "hero": {
-    "subtitle": "Your Journey Begins",
-    "title": "With The Perfect Car",
-    "description": "Discover our premium selection of vehicles. From luxury to economy, find your perfect ride for any occasion.",
-    "cta": "Browse Available Cars",
+    "subtitle": "Find Your",
+    "title": "Perfect Ride",
+    "description": "Discover premium vehicles for every journey. From luxury cars to family SUVs, we have the perfect vehicle waiting for you.",
+    "cta": "Search Available Cars",
+    "search": {
+      "pickupLocation": "Pickup Location",
+      "dropoffLocation": "Drop-off Location",
+      "pickupDate": "Pickup Date",
+      "pickupTime": "Pickup Time",
+      "returnDate": "Return Date",
+      "returnTime": "Return Time",
+      "differentLocation": "Different location",
+      "sameAsPickup": "Same as pickup",
+      "searchButton": "Search Available Cars",
+      "placeholders": {
+        "pickupLocation": "Enter pickup location",
+        "dropoffLocation": "Enter drop-off location",
+        "sameLocation": "Same as pickup",
+        "selectTime": "Select time"
+      }
+    },
     "stats": {
-      "availableCars": "1000+",
+      "availableCars": "40+",
       "availableCarsLabel": "Available Cars",
-      "happyCustomers": "10,000+",
+      "happyCustomers": "1,000+",
       "happyCustomersLabel": "Happy Customers",
       "clientRating": "4.8/5",
       "clientRatingLabel": "Client Rating"
@@ -101,24 +118,24 @@
   },
   "footer": {
     "company": "CarBookers",
-    "description": "Your trusted partner for convenient and reliable bus ticket bookings across the country.",
+    "description": "Your trusted partner for convenient and reliable car rental services across the country.",
     "quickLinks": "Quick Links",
     "services": "Our Services",
     "contactInfo": "Contact Info",
-    "address": "1234 Bus Street, City, State 12345",
-    "phone": "1-800-BUS-HELP",
-    "email": "info@busbooker.com",
+    "address": "1234 Car Street, City, State 12345",
+    "phone": "1-800-CAR-HELP",
+    "email": "info@carbookers.com",
     "links": {
       "home": "Home",
-      "routes": "Routes",
+      "routes": "Vehicles",
       "faq": "FAQ",
       "contact": "Contact",
-      "luxuryBuses": "Luxury Buses",
+      "luxuryBuses": "Luxury Cars",
       "airportTransfer": "Airport Transfer",
-      "weddingBuses": "Wedding Buses",
+      "weddingBuses": "Wedding Cars",
       "businessTravel": "Business Travel"
     },
-    "copyright": "© 2025 BusBooker. All rights reserved.",
+    "copyright": "© 2025 CarBookers. All rights reserved.",
     "policies": {
       "privacy": "Privacy Policy",
       "terms": "Terms of Service",

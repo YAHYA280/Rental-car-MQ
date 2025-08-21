@@ -8,14 +8,31 @@
     "reserveNow": "Réserver Maintenant"
   },
   "hero": {
-    "subtitle": "Votre Voyage Commence",
-    "title": "Avec La Voiture Parfaite",
-    "description": "Découvrez notre sélection premium de véhicules. Du luxe à l'économique, trouvez votre véhicule parfait pour toute occasion.",
-    "cta": "Parcourir les Voitures Disponibles",
+    "subtitle": "Trouvez Votre",
+    "title": "Véhicule Parfait",
+    "description": "Découvrez des véhicules premium pour chaque voyage. Des voitures de luxe aux SUV familiaux, nous avons le véhicule parfait qui vous attend.",
+    "cta": "Rechercher Voitures Disponibles",
+    "search": {
+      "pickupLocation": "Lieu de Prise",
+      "dropoffLocation": "Lieu de Retour",
+      "pickupDate": "Date de Prise",
+      "pickupTime": "Heure de Prise",
+      "returnDate": "Date de Retour",
+      "returnTime": "Heure de Retour",
+      "differentLocation": "Lieu différent",
+      "sameAsPickup": "Même que la prise",
+      "searchButton": "Rechercher Voitures Disponibles",
+      "placeholders": {
+        "pickupLocation": "Entrez le lieu de prise",
+        "dropoffLocation": "Entrez le lieu de retour",
+        "sameLocation": "Même que la prise",
+        "selectTime": "Sélectionner l'heure"
+      }
+    },
     "stats": {
-      "availableCars": "1000+",
+      "availableCars": "40+",
       "availableCarsLabel": "Voitures Disponibles",
-      "happyCustomers": "10,000+",
+      "happyCustomers": "1,000+",
       "happyCustomersLabel": "Clients Satisfaits",
       "clientRating": "4.8/5",
       "clientRatingLabel": "Note Client"
@@ -101,24 +118,24 @@
   },
   "footer": {
     "company": "CarBookers",
-    "description": "Votre partenaire de confiance pour des réservations de billets de bus pratiques et fiables à travers le pays.",
+    "description": "Votre partenaire de confiance pour des services de location de voitures pratiques et fiables à travers le pays.",
     "quickLinks": "Liens Rapides",
     "services": "Nos Services",
     "contactInfo": "Infos Contact",
-    "address": "1234 Rue des Bus, Ville, État 12345",
-    "phone": "1-800-BUS-HELP",
-    "email": "info@busbooker.com",
+    "address": "1234 Rue des Voitures, Ville, État 12345",
+    "phone": "1-800-CAR-HELP",
+    "email": "info@carbookers.com",
     "links": {
       "home": "Accueil",
-      "routes": "Itinéraires",
+      "routes": "Véhicules",
       "faq": "FAQ",
       "contact": "Contact",
-      "luxuryBuses": "Bus de Luxe",
+      "luxuryBuses": "Voitures de Luxe",
       "airportTransfer": "Transfert Aéroport",
-      "weddingBuses": "Bus de Mariage",
+      "weddingBuses": "Voitures de Mariage",
       "businessTravel": "Voyage d'Affaires"
     },
-    "copyright": "© 2025 BusBooker. Tous droits réservés.",
+    "copyright": "© 2025 CarBookers. Tous droits réservés.",
     "policies": {
       "privacy": "Politique de Confidentialité",
       "terms": "Conditions de Service",
