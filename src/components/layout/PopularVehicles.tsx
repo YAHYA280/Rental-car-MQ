@@ -58,12 +58,12 @@ const PopularVehicles = () => {
               <Card className="h-full overflow-hidden hover:shadow-2xl transition-all duration-500 border-0 shadow-lg group">
                 <div className="relative overflow-hidden">
                   {/* Car Image */}
-                  <div className="h-64 relative group-hover:scale-110 transition-transform duration-500">
+                  <div className="h-64 relative overflow-hidden">
                     <Image
                       src={getCarImage(index)}
                       alt={`${car.brand} ${car.name}`}
                       fill
-                      className="object-cover"
+                      className="object-cover group-hover:scale-110 transition-transform duration-500"
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     />
 

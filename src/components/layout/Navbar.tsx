@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Menu, X, Phone, MapPin, Clock, Globe } from "lucide-react";
+import { Menu, X, Globe } from "lucide-react";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import Image from "next/image";
 
@@ -68,7 +68,7 @@ const Navbar = () => {
               ))}
             </div>
 
-            {/* Desktop Language Switcher */}
+            {/* Desktop Language Switcher and Sign In */}
             <div className="hidden md:flex items-center space-x-4">
               <div className="flex items-center space-x-2">
                 <Globe className="h-4 w-4 text-white" />
@@ -93,6 +93,28 @@ const Navbar = () => {
               </Button>
             </div>
 
+            {/* Mobile Language Switcher - Between logo and hamburger */}
+            <div className="md:hidden flex items-center">
+              <div className="flex items-center space-x-2 mr-4">
+                <Globe className="h-4 w-4 text-white" />
+                <Select
+                  value={locale}
+                  onValueChange={handleLanguageChange}
+                  disabled={isPending}
+                >
+                  <SelectTrigger className="w-20 h-8 text-sm border border-white/20 bg-transparent text-white hover:bg-white/10">
+                    <SelectValue>
+                      {isPending ? "..." : locale.toUpperCase()}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="en">EN</SelectItem>
+                    <SelectItem value="fr">FR</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             {/* Mobile Menu Button */}
             <div className="md:hidden">
               <Button
@@ -110,10 +132,11 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Mobile Menu */}
+          {/* Mobile Menu - Only shows when menu is open */}
           {isMenuOpen && (
             <div className="md:hidden py-4 border-t border-gray-700">
               <div className="flex flex-col space-y-4">
+                {/* Menu Items */}
                 {menuItems.map((item) => (
                   <Link
                     key={item.href}
@@ -125,30 +148,11 @@ const Navbar = () => {
                   </Link>
                 ))}
 
-                {/* Mobile Language Switcher */}
-                <div className="flex items-center space-x-2 py-2">
-                  <Globe className="h-4 w-4 text-white" />
-                  <Select
-                    value={locale}
-                    onValueChange={(newLocale: "en" | "fr") => {
-                      handleLanguageChange(newLocale);
-                      setIsMenuOpen(false);
-                    }}
-                    disabled={isPending}
-                  >
-                    <SelectTrigger className="w-24 h-8 text-sm border border-white/20 bg-transparent text-white">
-                      <SelectValue>
-                        {isPending ? "..." : locale.toUpperCase()}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="en">EN</SelectItem>
-                      <SelectItem value="fr">FR</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <Button className="bg-red-600 hover:bg-red-700 text-white w-fit font-semibold mt-4">
+                {/* Mobile Sign In Button */}
+                <Button
+                  className="bg-red-600 hover:bg-red-700 text-white w-fit font-semibold mt-4"
+                  onClick={() => setIsMenuOpen(false)}
+                >
                   {t("signIn")}
                 </Button>
               </div>

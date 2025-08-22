@@ -1,3 +1,4 @@
+// src/components/layout/HeroSection.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -79,7 +80,7 @@ const HeroSection = () => {
             <div className="space-y-6">
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
                 <span className="block text-white mb-2">{t("subtitle")}</span>
-                <span className="bg-gradient-to-r from-red-400 via-red-500 to-red-600 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-carbookers-red-400 via-carbookers-red-500 to-carbookers-red-600 bg-clip-text text-transparent">
                   {t("title")}
                 </span>
               </h1>
@@ -93,7 +94,7 @@ const HeroSection = () => {
           <AnimatedContainer direction="up" delay={0.4}>
             <Button
               size="lg"
-              className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white px-8 py-4 text-lg font-semibold rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
+              className="bg-gradient-to-r from-carbookers-red-600 to-carbookers-red-500 hover:from-carbookers-red-700 hover:to-carbookers-red-600 text-white px-8 py-4 text-lg font-semibold rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border-0"
             >
               {t("cta")}
             </Button>

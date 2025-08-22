@@ -17,7 +17,7 @@ const TestimonialsSection = () => {
       rating: 5,
       image: "👩‍💼",
       testimonial: t("customers.sarah.text"),
-      gradient: "from-pink-400 to-red-400",
+      initial: "S",
     },
     {
       id: 2,
@@ -26,7 +26,7 @@ const TestimonialsSection = () => {
       rating: 5,
       image: "👨‍🦱",
       testimonial: t("customers.michael.text"),
-      gradient: "from-blue-400 to-cyan-400",
+      initial: "M",
     },
     {
       id: 3,
@@ -35,9 +35,132 @@ const TestimonialsSection = () => {
       rating: 5,
       image: "👩‍🎓",
       testimonial: t("customers.emma.text"),
-      gradient: "from-green-400 to-emerald-400",
+      initial: "E",
+    },
+    {
+      id: 4,
+      name: "Ahmed Hassan",
+      role: "Travel Photographer",
+      rating: 5,
+      image: "👨‍💻",
+      testimonial:
+        "Exceptional service from start to finish. The vehicle was pristine and the rental process was incredibly smooth.",
+      initial: "A",
+    },
+    {
+      id: 5,
+      name: "Fatima Al-Zahra",
+      role: "Business Owner",
+      rating: 4,
+      image: "👩‍💼",
+      testimonial:
+        "Great selection of cars and competitive prices. The staff was very helpful in finding the perfect vehicle for my needs.",
+      initial: "F",
+    },
+    {
+      id: 6,
+      name: "Omar Benali",
+      role: "Tour Guide",
+      rating: 5,
+      image: "👨‍🎓",
+      testimonial:
+        "I've used many rental services, but this one stands out. Professional, reliable, and excellent customer support.",
+      initial: "O",
+    },
+    {
+      id: 7,
+      name: "Yasmine Cherkaoui",
+      role: "Marketing Manager",
+      rating: 5,
+      image: "👩‍🎨",
+      testimonial:
+        "The luxury cars are in perfect condition and the booking process is so easy. Highly recommend for special occasions.",
+      initial: "Y",
+    },
+    {
+      id: 8,
+      name: "Karim Sedki",
+      role: "Event Planner",
+      rating: 4,
+      image: "👨‍💼",
+      testimonial:
+        "Excellent fleet quality and punctual service. They made our corporate event transportation seamless and professional.",
+      initial: "K",
+    },
+    {
+      id: 9,
+      name: "Laila Moussaoui",
+      role: "Architect",
+      rating: 5,
+      image: "👩‍🔬",
+      testimonial:
+        "Premium service at reasonable prices. The vehicles are well-maintained and the team is always responsive to requests.",
+      initial: "L",
+    },
+    {
+      id: 10,
+      name: "Youssef Tazi",
+      role: "Film Director",
+      rating: 5,
+      image: "🎬",
+      testimonial:
+        "Outstanding experience for our film production. The cars looked amazing on camera and the service was flawless.",
+      initial: "T",
+    },
+    {
+      id: 11,
+      name: "Nadia Alaoui",
+      role: "Wedding Planner",
+      rating: 5,
+      image: "👰‍♀️",
+      testimonial:
+        "Perfect for weddings! The luxury fleet made our special day even more memorable. Professional drivers and immaculate vehicles.",
+      initial: "N",
+    },
+    {
+      id: 12,
+      name: "Rachid Bennani",
+      role: "Corporate Executive",
+      rating: 5,
+      image: "👨‍💼",
+      testimonial:
+        "Reliable partner for all our business trips. The premium service and attention to detail sets them apart from competitors.",
+      initial: "R",
+    },
+    {
+      id: 13,
+      name: "Salma Idrissi",
+      role: "Fashion Designer",
+      rating: 4,
+      image: "👩‍🎨",
+      testimonial:
+        "Stylish cars that complement any occasion. The booking app is user-friendly and customer service is top-notch.",
+      initial: "S",
+    },
+    {
+      id: 14,
+      name: "Mehdi Ouali",
+      role: "Tech Entrepreneur",
+      rating: 5,
+      image: "👨‍💻",
+      testimonial:
+        "Innovation meets luxury! The digital experience is seamless and the vehicle quality exceeds expectations every time.",
+      initial: "M",
+    },
+    {
+      id: 15,
+      name: "Amina Zerouali",
+      role: "Real Estate Agent",
+      rating: 5,
+      image: "🏢",
+      testimonial:
+        "Impressed my clients with the premium vehicles. Professional service that helps me maintain my reputation for excellence.",
+      initial: "A",
     },
   ];
+
+  // Duplicate testimonials for infinite scroll
+  const duplicatedTestimonials = [...testimonials, ...testimonials];
 
   return (
     <section className="py-20 bg-gray-50">
@@ -52,65 +175,103 @@ const TestimonialsSection = () => {
           </p>
         </AnimatedContainer>
 
-        {/* Testimonials Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {testimonials.map((testimonial, index) => (
-            <AnimatedContainer
-              key={testimonial.id}
-              delay={index * 0.2}
-              className="h-full"
-            >
-              <Card className="h-full bg-white border-0 shadow-lg hover:shadow-2xl transition-all duration-500 group overflow-hidden relative">
-                {/* Background Pattern */}
-                <div className="absolute top-0 right-0 w-32 h-32 opacity-5">
-                  <Quote className="w-full h-full transform rotate-12" />
-                </div>
-
-                <CardContent className="p-8 relative">
-                  {/* Quote Icon */}
-                  <div className="mb-6">
-                    <div
-                      className={`w-12 h-12 bg-gradient-to-r ${testimonial.gradient} rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
-                    >
-                      <Quote className="h-6 w-6 text-white" />
-                    </div>
+        {/* Testimonials Infinite Scroll */}
+        <div className="relative overflow-hidden">
+          <div className="flex animate-scroll-responsive gap-6">
+            {duplicatedTestimonials.map((testimonial, index) => (
+              <div
+                key={`${testimonial.id}-${index}`}
+                className="flex-shrink-0 w-80"
+              >
+                <Card className="h-full bg-white shadow-lg hover:shadow-xl transition-all duration-300 group overflow-hidden relative border-0">
+                  {/* Half Black, Half Red Border */}
+                  <div className="absolute inset-0 p-[2px] bg-gradient-to-r from-black via-black to-carbookers-red-600 rounded-xl">
+                    <div className="h-full w-full bg-white rounded-[10px]"></div>
                   </div>
 
-                  {/* Testimonial Text */}
-                  <blockquote className="text-gray-700 mb-6 leading-relaxed text-lg italic">
-                    `&quot;{testimonial.testimonial}`&quot;
-                  </blockquote>
-
-                  {/* Rating */}
-                  <div className="flex items-center mb-6">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className="h-5 w-5 text-yellow-400 fill-current"
-                      />
-                    ))}
+                  {/* Background Pattern */}
+                  <div className="absolute top-0 right-0 w-16 h-16 opacity-5">
+                    <Quote className="w-full h-full transform rotate-12" />
                   </div>
 
-                  {/* Author Info */}
-                  <div className="flex items-center">
-                    <div
-                      className={`w-16 h-16 rounded-full bg-gradient-to-r ${testimonial.gradient} flex items-center justify-center text-2xl mr-4 group-hover:scale-110 transition-transform duration-300`}
-                    >
-                      {testimonial.image}
-                    </div>
-                    <div>
-                      <div className="font-bold text-gray-900 text-lg">
-                        {testimonial.name}
+                  <CardContent className="p-6 relative z-10">
+                    {/* Horizontal layout: Quote icon and content */}
+                    <div className="flex items-start gap-4 mb-4">
+                      {/* Quote Icon */}
+                      <div className="flex-shrink-0">
+                        <div className="w-10 h-10 bg-carbookers-red-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                          <Quote className="h-5 w-5 text-white" />
+                        </div>
                       </div>
-                      <div className="text-gray-600">{testimonial.role}</div>
+
+                      {/* Rating */}
+                      <div className="flex items-center ml-auto">
+                        {[...Array(testimonial.rating)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className="h-4 w-4 text-yellow-400 fill-current"
+                          />
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </AnimatedContainer>
-          ))}
+
+                    {/* Testimonial Text */}
+                    <blockquote className="text-gray-700 mb-4 leading-relaxed text-sm">
+                      &quot;{testimonial.testimonial} &quot;
+                    </blockquote>
+
+                    {/* Author Info - Horizontal layout */}
+                    <div className="flex items-center gap-3">
+                      {/* Avatar */}
+                      <div className="flex-shrink-0">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-r from-gray-200 to-gray-300 flex items-center justify-center text-sm font-bold text-gray-700 group-hover:scale-110 transition-transform duration-300">
+                          {testimonial.initial}
+                        </div>
+                      </div>
+
+                      {/* Name and Role */}
+                      <div className="flex-grow min-w-0">
+                        <div className="font-bold text-gray-900 text-sm truncate">
+                          {testimonial.name}
+                        </div>
+                        <div className="text-gray-600 text-xs truncate">
+                          {testimonial.role}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes scroll-animation {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-50%);
+          }
+        }
+
+        .animate-scroll-responsive {
+          animation: scroll-animation 5s linear infinite;
+        }
+
+        .animate-scroll-responsive:hover {
+          animation-play-state: paused;
+        }
+
+        /* Desktop - 35s duration */
+        @media (min-width: 768px) {
+          .animate-scroll-responsive {
+            animation: scroll-animation 35s linear infinite;
+          }
+        }
+      `}</style>
     </section>
   );
 };

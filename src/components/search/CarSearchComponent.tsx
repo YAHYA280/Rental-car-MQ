@@ -1,3 +1,4 @@
+// src/components/search/CarSearchComponent.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -50,7 +51,7 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
   onSearch,
 }) => {
   const t = useTranslations("search");
-  const tCommon = useTranslations("common");
+  // const tCommon = useTranslations("common");
 
   const [searchData, setSearchData] = useState<SearchFormData>({
     pickupLocation: "",
@@ -119,7 +120,7 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
   return (
     <div className={`relative ${className}`}>
       {/* Glass Morphism Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#3D0000]/20 via-[#950101]/10 to-[#FF0000]/20 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-carbookers-red-950/30 via-carbookers-red-900/20 to-carbookers-red-800/30 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl"></div>
 
       <div className="relative z-10 p-8">
         <form onSubmit={handleSearchSubmit} className="space-y-8">
@@ -137,11 +138,11 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
             <div className="hidden lg:grid lg:grid-cols-4 divide-x divide-gray-200/50">
               {/* Pickup Location */}
               <div className="p-6 flex flex-col justify-between h-24">
-                <Label className="text-xs text-[#3D0000] uppercase tracking-wide mb-2 block font-semibold">
+                <Label className="text-xs text-carbookers-red-800 uppercase tracking-wide mb-2 block font-semibold">
                   {t("pickupLocation")}
                 </Label>
                 <div className="flex items-center gap-3">
-                  <MapPin className="h-5 w-5 text-[#950101] flex-shrink-0" />
+                  <MapPin className="h-5 w-5 text-carbookers-red-600 flex-shrink-0" />
                   <Input
                     type="text"
                     placeholder={t("placeholders.pickupLocation")}
@@ -157,7 +158,7 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
 
               {/* Date Range Picker */}
               <div className="p-6 flex flex-col justify-between h-24">
-                <Label className="text-xs text-[#3D0000] uppercase tracking-wide mb-2 block font-semibold">
+                <Label className="text-xs text-carbookers-red-800 uppercase tracking-wide mb-2 block font-semibold">
                   {t("rentalPeriod")}
                 </Label>
                 <Popover>
@@ -169,7 +170,7 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
                         !dateRange && "text-gray-500"
                       )}
                     >
-                      <CalendarIcon className="h-5 w-5 text-[#950101] mr-3 flex-shrink-0" />
+                      <CalendarIcon className="h-5 w-5 text-carbookers-red-600 mr-3 flex-shrink-0" />
                       <span className="text-gray-900 font-medium truncate">
                         {getDateRangeText()}
                       </span>
@@ -191,11 +192,11 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
 
               {/* Pickup Time */}
               <div className="p-6 flex flex-col justify-between h-24">
-                <Label className="text-xs text-[#3D0000] uppercase tracking-wide mb-2 block font-semibold">
+                <Label className="text-xs text-carbookers-red-800 uppercase tracking-wide mb-2 block font-semibold">
                   {t("pickupTime")}
                 </Label>
                 <div className="flex items-center gap-3">
-                  <Clock className="h-5 w-5 text-[#950101] flex-shrink-0" />
+                  <Clock className="h-5 w-5 text-carbookers-red-600 flex-shrink-0" />
                   <Select
                     value={searchData.pickupTime}
                     onValueChange={(value) =>
@@ -218,11 +219,11 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
 
               {/* Return Time */}
               <div className="p-6 flex flex-col justify-between h-24">
-                <Label className="text-xs text-[#3D0000] uppercase tracking-wide mb-2 block font-semibold">
+                <Label className="text-xs text-carbookers-red-800 uppercase tracking-wide mb-2 block font-semibold">
                   {t("returnTime")}
                 </Label>
                 <div className="flex items-center gap-3">
-                  <Clock className="h-5 w-5 text-[#950101] flex-shrink-0" />
+                  <Clock className="h-5 w-5 text-carbookers-red-600 flex-shrink-0" />
                   <Select
                     value={searchData.returnTime}
                     onValueChange={(value) =>
@@ -248,11 +249,11 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
             <div className="lg:hidden p-6 space-y-6">
               {/* Pickup Location */}
               <div>
-                <Label className="text-xs text-[#3D0000] uppercase tracking-wide mb-3 block font-semibold">
+                <Label className="text-xs text-carbookers-red-800 uppercase tracking-wide mb-3 block font-semibold">
                   {t("pickupLocation")}
                 </Label>
                 <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg min-h-[48px]">
-                  <MapPin className="h-5 w-5 text-[#950101] flex-shrink-0" />
+                  <MapPin className="h-5 w-5 text-carbookers-red-600 flex-shrink-0" />
                   <Input
                     type="text"
                     placeholder={t("placeholders.pickupLocation")}
@@ -268,7 +269,7 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
 
               {/* Date Range Picker - Mobile */}
               <div>
-                <Label className="text-xs text-[#3D0000] uppercase tracking-wide mb-3 block font-semibold">
+                <Label className="text-xs text-carbookers-red-800 uppercase tracking-wide mb-3 block font-semibold">
                   {t("rentalPeriod")}
                 </Label>
                 <Popover>
@@ -280,7 +281,7 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
                         !dateRange && "text-gray-500"
                       )}
                     >
-                      <CalendarIcon className="h-5 w-5 text-[#950101] mr-3 flex-shrink-0" />
+                      <CalendarIcon className="h-5 w-5 text-carbookers-red-600 mr-3 flex-shrink-0" />
                       <span className="text-gray-900 font-medium text-sm">
                         {getDateRangeText()}
                       </span>
@@ -304,11 +305,11 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
               <div className="grid grid-cols-2 gap-4">
                 {/* Pickup Time */}
                 <div>
-                  <Label className="text-xs text-[#3D0000] uppercase tracking-wide mb-3 block font-semibold">
+                  <Label className="text-xs text-carbookers-red-800 uppercase tracking-wide mb-3 block font-semibold">
                     {t("pickupTime")}
                   </Label>
                   <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg min-h-[48px]">
-                    <Clock className="h-4 w-4 text-[#950101] flex-shrink-0" />
+                    <Clock className="h-4 w-4 text-carbookers-red-600 flex-shrink-0" />
                     <Select
                       value={searchData.pickupTime}
                       onValueChange={(value) =>
@@ -333,11 +334,11 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
 
                 {/* Return Time */}
                 <div>
-                  <Label className="text-xs text-[#3D0000] uppercase tracking-wide mb-3 block font-semibold">
+                  <Label className="text-xs text-carbookers-red-800 uppercase tracking-wide mb-3 block font-semibold">
                     {t("returnTime")}
                   </Label>
                   <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg min-h-[48px]">
-                    <Clock className="h-4 w-4 text-[#950101] flex-shrink-0" />
+                    <Clock className="h-4 w-4 text-carbookers-red-600 flex-shrink-0" />
                     <Select
                       value={searchData.returnTime}
                       onValueChange={(value) =>
@@ -367,7 +368,7 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
           <div className="flex justify-center">
             <Button
               type="submit"
-              className="bg-gradient-to-r from-red-600 via-[#950101] to-[#FF0000] hover:from-[#950101] hover:via-[#FF0000] hover:to-[#3D0000] text-white font-bold text-lg px-12 py-4 rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 flex items-center gap-3"
+              className="bg-gradient-to-r from-carbookers-red-600 to-carbookers-red-500 hover:from-carbookers-red-700 hover:to-carbookers-red-600 text-white font-bold text-lg px-12 py-4 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border-0 flex items-center gap-3"
             >
               <Search className="h-6 w-6" />
               {t("searchButton")}
@@ -385,7 +386,7 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
                 onChange={(e) =>
                   handleInputChange("differentDropoff", e.target.checked)
                 }
-                className="w-5 h-5 rounded bg-white/20 border-white/30 text-[#FF0000] focus:ring-[#FF0000] focus:ring-2"
+                className="w-5 h-5 rounded bg-white/20 border-white/30 text-carbookers-red-600 focus:ring-carbookers-red-600 focus:ring-2"
               />
               <label
                 htmlFor="different-office"
@@ -408,7 +409,7 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
                     onClick={() => handleInputChange("driverAge", age.value)}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                       searchData.driverAge === age.value
-                        ? "bg-gradient-to-r from-[#3D0000] to-[#950101] text-white shadow-lg"
+                        ? "bg-gradient-to-r from-carbookers-red-700 to-carbookers-red-600 text-white shadow-lg"
                         : "bg-white/20 text-white hover:bg-white/30 border border-white/30"
                     }`}
                   >
@@ -422,11 +423,11 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
           {/* Dropoff Location (when different office is selected) */}
           {searchData.differentDropoff && (
             <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-lg">
-              <Label className="text-xs text-[#3D0000] uppercase tracking-wide mb-3 block font-semibold">
+              <Label className="text-xs text-carbookers-red-800 uppercase tracking-wide mb-3 block font-semibold">
                 {t("dropoffLocation")}
               </Label>
               <div className="flex items-center gap-3">
-                <RotateCcw className="h-5 w-5 text-[#950101]" />
+                <RotateCcw className="h-5 w-5 text-carbookers-red-600" />
                 <Input
                   type="text"
                   placeholder={t("placeholders.dropoffLocation")}

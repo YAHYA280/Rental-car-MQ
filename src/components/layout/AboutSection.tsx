@@ -75,23 +75,33 @@ const AboutSection = () => {
       <div className="container mx-auto px-4">
         {/* Stats Section */}
         <AnimatedContainer direction="down" className="mb-20">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {stats.map((stat, index) => (
               <AnimatedContainer
                 key={index}
                 delay={index * 0.2}
                 className="h-full"
               >
-                <Card className="text-center bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-200">
-                  <CardContent className="p-8">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-red-600 rounded-full mb-6">
-                      <stat.icon className="h-8 w-8 text-white" />
-                    </div>
-                    <div className="text-4xl font-bold text-gray-900 mb-2">
-                      {stat.number}
-                    </div>
-                    <div className="text-gray-600 font-medium text-lg">
-                      {stat.label}
+                <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-200">
+                  <CardContent className="p-6">
+                    {/* Horizontal layout: Icon and content side by side */}
+                    <div className="flex items-center gap-4">
+                      {/* Icon container - fixed width */}
+                      <div className="flex-shrink-0">
+                        <div className="w-12 h-12 bg-carbookers-red-600 rounded-full flex items-center justify-center">
+                          <stat.icon className="h-6 w-6 text-white" />
+                        </div>
+                      </div>
+
+                      {/* Text content */}
+                      <div className="flex-grow">
+                        <div className="text-2xl font-bold text-gray-900 mb-1">
+                          {stat.number}
+                        </div>
+                        <div className="text-gray-600 font-medium text-sm">
+                          {stat.label}
+                        </div>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -110,8 +120,8 @@ const AboutSection = () => {
           </p>
         </AnimatedContainer>
 
-        {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+        {/* Features Grid - Updated for horizontal layout */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {features.map((feature, index) => (
             <AnimatedContainer
               key={index}
@@ -119,16 +129,26 @@ const AboutSection = () => {
               className="h-full"
             >
               <Card className="h-full bg-white shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 group">
-                <CardContent className="p-8 text-center h-full flex flex-col">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-6 bg-gray-100 group-hover:bg-red-600 transition-colors duration-300">
-                    <feature.icon className="h-8 w-8 text-gray-600 group-hover:text-white transition-colors duration-300" />
+                <CardContent className="p-6 h-full flex flex-col">
+                  {/* Horizontal layout: Icon and content side by side */}
+                  <div className="flex items-start gap-4 flex-grow">
+                    {/* Icon container - fixed width */}
+                    <div className="flex-shrink-0">
+                      <div className="w-12 h-12 rounded-full bg-gray-100 group-hover:bg-carbookers-red-600 transition-colors duration-300 flex items-center justify-center">
+                        <feature.icon className="h-6 w-6 text-gray-600 group-hover:text-white transition-colors duration-300" />
+                      </div>
+                    </div>
+
+                    {/* Text content */}
+                    <div className="flex-grow">
+                      <h3 className="text-lg font-bold text-gray-900 mb-2 leading-tight">
+                        {feature.title}
+                      </h3>
+                      <p className="text-gray-600 leading-relaxed text-sm">
+                        {feature.description}
+                      </p>
+                    </div>
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">
-                    {feature.title}
-                  </h3>
-                  <p className="text-gray-600 leading-relaxed flex-grow">
-                    {feature.description}
-                  </p>
                 </CardContent>
               </Card>
             </AnimatedContainer>
@@ -139,7 +159,7 @@ const AboutSection = () => {
         <AnimatedContainer direction="up" delay={0.8} className="text-center">
           <Button
             size="lg"
-            className="bg-black hover:bg-red-700 text-white px-8 py-4 text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
+            className="bg-black hover:bg-carbookers-red-600 text-white px-8 py-4 text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
           >
             {t("cta")}
           </Button>
