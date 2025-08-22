@@ -25,7 +25,8 @@
       "pickupLocation": "Enter pickup location",
       "dropoffLocation": "Enter return location",
       "selectDate": "Select date",
-      "selectTime": "Select time"
+      "selectTime": "Select time",
+      "time": "Time"
     }
   },
   "hero": {
@@ -123,6 +124,52 @@
       }
     }
   },
+  "map": {
+    "title": "Find Us in Tangier",
+    "subtitle": "Visit our location at RUE 8 ENNASR LOT 635 TANGER. We're here to help you with all your car rental needs.",
+    "coordinates": "35°45'04.5\"N 5°49'50.2\"W",
+    "locationName": "MELHOR QUE NADA - Tangier"
+  },
+  "navbar": {
+    "topBar": {
+      "address": "RUE 8 ENNASR LOT 635 TANGER",
+      "addressShort": "Tanger",
+      "hours": "9:00am - 6:00pm",
+      "hoursShort": "9am-6pm",
+      "phone": "+212612077309"
+    },
+    "language": {
+      "label": "Language"
+    }
+  },
+  "carSearch": {
+    "title": "Find Your Perfect",
+    "titleHighlight": "Rental Car",
+    "subtitle": "Choose from our premium fleet",
+    "form": {
+      "pickupLocation": "Pickup Location",
+      "rentalPeriod": "Rental Period",
+      "pickupTime": "Pickup Time",
+      "returnTime": "Return Time",
+      "returnLocation": "Return Location",
+      "differentOffice": "Return to different location",
+      "driverAge": "Driver Age",
+      "ageRanges": {
+        "19-20": "19-20",
+        "21-24": "21-24",
+        "25+": "25+"
+      }
+    },
+    "placeholders": {
+      "pickupLocation": "Enter pickup location",
+      "returnLocation": "Enter return location",
+      "selectTime": "Select time",
+      "time": "Time"
+    },
+    "buttons": {
+      "searchCars": "Search Cars"
+    }
+  },
   "cta": {
     "title": "Ready to Start Your Journey?",
     "subtitle": "Experience the freedom of premium car rental services. Book your perfect ride today!",
@@ -155,11 +202,38 @@
       "airportTransfer": "Airport Transfer",
       "weddingBuses": "Wedding Cars"
     },
+    "socialMedia": {
+      "facebook": "Facebook",
+      "instagram": "Instagram",
+      "twitter": "Twitter",
+      "youtube": "YouTube"
+    },
     "copyright": "© 2025 MELHOR QUE NADA. All rights reserved.",
     "policies": {
       "privacy": "Privacy Policy",
       "terms": "Terms of Service",
       "cookies": "Cookie Policy"
     }
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "close": "Close",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "view": "View",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "clear": "Clear",
+    "apply": "Apply",
+    "reset": "Reset"
   }
 }

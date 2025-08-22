@@ -25,7 +25,8 @@
       "pickupLocation": "Entrez le lieu de prise",
       "dropoffLocation": "Entrez le lieu de retour",
       "selectDate": "Sélectionner une date",
-      "selectTime": "Sélectionner l'heure"
+      "selectTime": "Sélectionner l'heure",
+      "time": "Heure"
     }
   },
   "hero": {
@@ -123,6 +124,52 @@
       }
     }
   },
+  "map": {
+    "title": "Trouvez-nous à Tanger",
+    "subtitle": "Visitez notre emplacement au RUE 8 ENNASR LOT 635 TANGER. Nous sommes là pour vous aider avec tous vos besoins de location de voitures.",
+    "coordinates": "35°45'04.5\"N 5°49'50.2\"O",
+    "locationName": "MELHOR QUE NADA - Tanger"
+  },
+  "navbar": {
+    "topBar": {
+      "address": "RUE 8 ENNASR LOT 635 TANGER",
+      "addressShort": "Tanger",
+      "hours": "9h00 - 18h00",
+      "hoursShort": "9h-18h",
+      "phone": "+212612077309"
+    },
+    "language": {
+      "label": "Langue"
+    }
+  },
+  "carSearch": {
+    "title": "Trouvez Votre",
+    "titleHighlight": "Voiture de Location Parfaite",
+    "subtitle": "Choisissez parmi notre flotte premium",
+    "form": {
+      "pickupLocation": "Lieu de Prise",
+      "rentalPeriod": "Période de Location",
+      "pickupTime": "Heure de Prise",
+      "returnTime": "Heure de Retour",
+      "returnLocation": "Lieu de Retour",
+      "differentOffice": "Retourner à un endroit différent",
+      "driverAge": "Âge du conducteur",
+      "ageRanges": {
+        "19-20": "19-20",
+        "21-24": "21-24",
+        "25+": "25+"
+      }
+    },
+    "placeholders": {
+      "pickupLocation": "Entrez le lieu de prise",
+      "returnLocation": "Entrez le lieu de retour",
+      "selectTime": "Sélectionner l'heure",
+      "time": "Heure"
+    },
+    "buttons": {
+      "searchCars": "Rechercher des Voitures"
+    }
+  },
   "cta": {
     "title": "Prêt à Commencer Votre Voyage ?",
     "subtitle": "Découvrez la liberté des services de location de voitures premium. Réservez votre véhicule parfait aujourd'hui !",
@@ -155,11 +202,38 @@
       "airportTransfer": "Transfert Aéroport",
       "weddingBuses": "Voitures de Mariage"
     },
+    "socialMedia": {
+      "facebook": "Facebook",
+      "instagram": "Instagram",
+      "twitter": "Twitter",
+      "youtube": "YouTube"
+    },
     "copyright": "© 2025 MELHOR QUE NADA. Tous droits réservés.",
     "policies": {
       "privacy": "Politique de Confidentialité",
       "terms": "Conditions de Service",
       "cookies": "Politique des Cookies"
     }
+  },
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "close": "Fermer",
+    "save": "Enregistrer",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "view": "Voir",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "sort": "Trier",
+    "clear": "Effacer",
+    "apply": "Appliquer",
+    "reset": "Réinitialiser"
   }
 }

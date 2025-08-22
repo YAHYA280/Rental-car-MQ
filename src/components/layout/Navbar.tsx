@@ -40,51 +40,6 @@ const Navbar = () => {
 
   return (
     <>
-      {/* Top Info Bar */}
-      <div className="bg-red-800 text-white py-2 px-4">
-        <div className="container mx-auto flex flex-wrap justify-between items-center text-sm">
-          <div className="flex items-center space-x-4 lg:space-x-6">
-            <div className="flex items-center space-x-2">
-              <MapPin className="h-4 w-4" />
-              <span className="hidden sm:inline">
-                RUE 8 ENNASR LOT 635 TANGER
-              </span>
-              <span className="sm:hidden">Tanger</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Clock className="h-4 w-4" />
-              <span className="hidden sm:inline">9:00am - 6:00pm</span>
-              <span className="sm:hidden">9am-6pm</span>
-            </div>
-          </div>
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <Phone className="h-4 w-4" />
-              <span className="hidden sm:inline">+212612077309</span>
-              <span className="sm:hidden">+212612077309</span>
-            </div>
-
-            {/* Language Switcher */}
-            <div className="flex items-center space-x-2">
-              <Globe className="h-4 w-4" />
-              <Select
-                value={locale}
-                onValueChange={handleLanguageChange}
-                disabled={isPending}
-              >
-                <SelectTrigger className="w-16 h-6 text-xs border-none bg-transparent text-white hover:bg-white/10">
-                  <SelectValue>{locale.toUpperCase()}</SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="en">EN</SelectItem>
-                  <SelectItem value="fr">FR</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Main Navigation */}
       <nav className="bg-black text-white shadow-lg sticky top-0 z-50">
         <div className="container mx-auto px-4">

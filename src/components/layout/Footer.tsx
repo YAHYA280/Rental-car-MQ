@@ -44,31 +44,30 @@ const Footer = () => {
               >
                 <Image
                   src="/Logo.png"
-                  alt="MELHOR QUE NADA"
+                  alt={t("company")}
                   width={40}
                   height={40}
                   className="rounded"
                 />
                 <div>
                   <span className="text-xl font-bold text-white">
-                    MELHOR QUE NADA
+                    {t("company")}
                   </span>
                 </div>
               </Link>
               <p className="text-gray-400 leading-relaxed">
-                Your trusted partner for convenient and reliable car rental
-                services across Morocco.
+                {t("description")}
               </p>
             </div>
 
             <div className="space-y-3">
               <div className="flex items-center text-gray-300">
                 <MapPin className="h-5 w-5 mr-3 text-red-500" />
-                <span>RUE 8 ENNASR LOT 635 TANGER</span>
+                <span>{t("address")}</span>
               </div>
               <div className="flex items-center text-gray-300">
                 <Phone className="h-5 w-5 mr-3 text-red-500" />
-                <span>+212612077309</span>
+                <span>{t("phone")}</span>
               </div>
             </div>
           </div>
@@ -120,7 +119,7 @@ const Footer = () => {
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="text-gray-400 mb-4 md:mb-0">
-              <p>© 2025 MELHOR QUE NADA. All rights reserved.</p>
+              <p>{t("copyright")}</p>
               <div className="flex space-x-4 mt-2">
                 <Link
                   href={`/${locale}/privacy`}
@@ -148,24 +147,28 @@ const Footer = () => {
               <a
                 href="#"
                 className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center hover:bg-red-500 transition-colors duration-300 group"
+                aria-label={t("socialMedia.facebook")}
               >
                 <Facebook className="h-5 w-5 text-white group-hover:scale-110 transition-transform duration-200" />
               </a>
               <a
                 href="#"
                 className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center hover:bg-red-500 transition-colors duration-300 group"
+                aria-label={t("socialMedia.instagram")}
               >
                 <Instagram className="h-5 w-5 text-white group-hover:scale-110 transition-transform duration-200" />
               </a>
               <a
                 href="#"
                 className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center hover:bg-red-500 transition-colors duration-300 group"
+                aria-label={t("socialMedia.twitter")}
               >
                 <Twitter className="h-5 w-5 text-white group-hover:scale-110 transition-transform duration-200" />
               </a>
               <a
                 href="#"
                 className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center hover:bg-red-500 transition-colors duration-300 group"
+                aria-label={t("socialMedia.youtube")}
               >
                 <Youtube className="h-5 w-5 text-white group-hover:scale-110 transition-transform duration-200" />
               </a>

@@ -1,10 +1,13 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Card } from "@/components/ui/card";
 import AnimatedContainer from "@/components/ui/animated-container";
 
 const MapSection = () => {
+  const t = useTranslations("map");
+
   // Coordinates for Tangier location: 35°45'04.5"N 5°49'50.2"W
   // Converted to decimal: 35.751250, -5.830611
   const latitude = 35.75125;
@@ -18,11 +21,10 @@ const MapSection = () => {
         {/* Header */}
         <AnimatedContainer direction="down" className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Find Us in Tangier
+            {t("title")}
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Visit our location at RUE 8 ENNASR LOT 635 TANGER. We&apos;re here
-            to help you with all your car rental needs.
+            {t("subtitle")}
           </p>
         </AnimatedContainer>
 
@@ -38,18 +40,16 @@ const MapSection = () => {
                 allowFullScreen={true}
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
-                title="MELHOR QUE NADA Location"
+                title={t("locationName")}
                 className="absolute inset-0"
               ></iframe>
 
               {/* Overlay with coordinates */}
               <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg">
                 <p className="text-sm font-semibold text-gray-900">
-                  📍 35°45&apos;04.5&quot;N 5°49&apos;50.2&quot;W
+                  📍 {t("coordinates")}
                 </p>
-                <p className="text-xs text-gray-600">
-                  MELHOR QUE NADA - Tangier
-                </p>
+                <p className="text-xs text-gray-600">{t("locationName")}</p>
               </div>
             </div>
           </Card>
