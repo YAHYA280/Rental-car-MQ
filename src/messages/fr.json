@@ -7,6 +7,13 @@
     "signIn": "Se Connecter",
     "reserveNow": "Réserver Maintenant"
   },
+
+  "seo": {
+    "brandName": "MELHOR QUE NADA",
+    "tagline": "Location Voiture Premium Maroc",
+    "homeTitle": "MELHOR QUE NADA - Location Voiture Tanger | Voitures Luxe Maroc",
+    "aboutTitle": "À Propos de MELHOR QUE NADA - Leader Location Voiture Tanger"
+  },
   "search": {
     "title": "Trouvez Votre Voiture de Location Parfaite",
     "subtitle": "Choisissez parmi notre flotte premium",

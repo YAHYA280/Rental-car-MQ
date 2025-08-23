@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Button } from "@/components/ui/button";
 import AnimatedContainer from "@/components/ui/animated-container";
 import CarSearchComponent from "@/components/search/CarSearchComponent";
@@ -21,6 +21,7 @@ interface SearchFormData {
 
 const HeroSection = () => {
   const t = useTranslations("hero");
+  const locale = useLocale();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   // Background images from your public/HeroSection folder
@@ -38,7 +39,7 @@ const HeroSection = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImageIndex((prev) => (prev + 1) % backgroundImages.length);
-    }, 12000); // Changed to 12 seconds
+    }, 12000);
 
     return () => clearInterval(interval);
   }, [backgroundImages.length]);
@@ -75,17 +76,31 @@ const HeroSection = () => {
 
       <div className="relative z-10 container mx-auto px-4 py-20">
         <div className="text-center space-y-12 max-w-6xl mx-auto">
-          {/* Main Content */}
+          {/* SEO-optimized Main Content */}
           <AnimatedContainer direction="down" delay={0.2}>
             <div className="space-y-6">
+              {/* H1 tag with primary brand keywords */}
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
-                <span className="block text-white mb-2">{t("subtitle")}</span>
+                <span className="block text-white mb-2">MELHOR QUE NADA</span>
                 <span className="bg-gradient-to-r from-carbookers-red-400 via-carbookers-red-500 to-carbookers-red-600 bg-clip-text text-transparent">
-                  {t("title")}
+                  {locale === "fr"
+                    ? "Location Voiture Tanger"
+                    : "Car Rental Morocco"}
                 </span>
               </h1>
-              <p className="text-xl md:text-2xl text-gray-200 max-w-4xl mx-auto leading-relaxed">
-                {t("description")}
+
+              {/* H2 with supporting keywords and brand reinforcement */}
+              <h2 className="text-xl md:text-2xl text-gray-200 max-w-4xl mx-auto leading-relaxed font-medium">
+                {locale === "fr"
+                  ? "MELHOR QUE NADA - Votre expert en location de voiture au Maroc. Véhicules premium et service de qualité à Tanger depuis notre agence RUE 8 ENNASR LOT 635."
+                  : "MELHOR QUE NADA - Your premium car rental expert in Morocco. Luxury vehicles and quality service in Tangier from our RUE 8 ENNASR LOT 635 location."}
+              </h2>
+
+              {/* Additional brand-focused description */}
+              <p className="text-lg text-gray-300 max-w-3xl mx-auto">
+                {locale === "fr"
+                  ? "Découvrez pourquoi MELHOR QUE NADA est le choix privilégié pour la location voiture maroc. Notre expertise et notre flotte premium vous garantissent une expérience exceptionnelle."
+                  : "Discover why MELHOR QUE NADA is the preferred choice for car rental in Morocco. Our expertise and premium fleet guarantee you an exceptional experience."}
               </p>
             </div>
           </AnimatedContainer>
@@ -96,7 +111,9 @@ const HeroSection = () => {
               size="lg"
               className="bg-gradient-to-r from-carbookers-red-600 to-carbookers-red-500 hover:from-carbookers-red-700 hover:to-carbookers-red-600 text-white px-8 py-4 text-lg font-semibold rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border-0"
             >
-              {t("cta")}
+              {locale === "fr"
+                ? "Découvrir MELHOR QUE NADA"
+                : "Discover MELHOR QUE NADA"}
             </Button>
           </AnimatedContainer>
 
@@ -106,6 +123,38 @@ const HeroSection = () => {
               className="max-w-5xl mx-auto"
               onSearch={handleSearch}
             />
+          </AnimatedContainer>
+
+          {/* Additional SEO Content - Trust Indicators */}
+          <AnimatedContainer direction="up" delay={0.8}>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 text-center">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6">
+                <h3 className="text-2xl font-bold text-white mb-2">
+                  {locale === "fr" ? "MELHOR QUE NADA" : "MELHOR QUE NADA"}
+                </h3>
+                <p className="text-gray-200 text-sm">
+                  {locale === "fr"
+                    ? "Leader location voiture Tanger"
+                    : "Leading car rental in Tangier"}
+                </p>
+              </div>
+
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6">
+                <h3 className="text-2xl font-bold text-white mb-2">40+</h3>
+                <p className="text-gray-200 text-sm">
+                  {locale === "fr" ? "Véhicules Premium" : "Premium Vehicles"}
+                </p>
+              </div>
+
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6">
+                <h3 className="text-2xl font-bold text-white mb-2">24/7</h3>
+                <p className="text-gray-200 text-sm">
+                  {locale === "fr"
+                    ? "Service MELHOR QUE NADA"
+                    : "MELHOR QUE NADA Service"}
+                </p>
+              </div>
+            </div>
           </AnimatedContainer>
         </div>
       </div>
@@ -121,6 +170,7 @@ const HeroSection = () => {
                 ? "bg-white shadow-lg"
                 : "bg-white/40 hover:bg-white/60"
             }`}
+            aria-label={`Image ${index + 1} - MELHOR QUE NADA gallery`}
           />
         ))}
       </div>
@@ -130,6 +180,7 @@ const HeroSection = () => {
         className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
         animate={{ y: [0, 10, 0] }}
         transition={{ duration: 2, repeat: Infinity }}
+        aria-label="Scroll down to learn more about MELHOR QUE NADA"
       >
         <div className="w-6 h-10 border-2 border-white rounded-full flex justify-center">
           <div className="w-1 h-3 bg-white rounded-full mt-2"></div>

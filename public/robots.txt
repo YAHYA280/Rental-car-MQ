@@ -1,0 +1,26 @@
+User-agent: *
+Allow: /
+
+# Allow all search engines to crawl all content
+Crawl-delay: 1
+
+# Specific directives for major search engines
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+# Block admin areas if any
+Disallow: /admin/
+Disallow: /_next/
+Disallow: /api/
+
+# Sitemap location
+Sitemap: https://www.melhorquenada.com/sitemap.xml
+
+# Additional sitemaps for different languages
+Sitemap: https://www.melhorquenada.com/en/sitemap.xml
+Sitemap: https://www.melhorquenada.com/fr/sitemap.xml

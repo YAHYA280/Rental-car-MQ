@@ -21,8 +21,8 @@ export default async function HomePage({ params }: Props) {
     <div className="min-h-screen m-0 p-0">
       <Navbar />
       <HeroSection />
-      <AboutSection />
       <PopularVehicles />
+      <AboutSection />
       <TestimonialsSection />
       <MapSection />
       <Footer />
