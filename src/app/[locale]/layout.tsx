@@ -260,6 +260,10 @@ export default async function LocaleLayout({
                 "@type": "AggregateRating",
                 ratingValue: "4.8",
                 reviewCount: "150",
+                itemReviewed: {
+                  "@type": "CarRental",
+                  name: tSeo("brandName"),
+                },
               },
               serviceArea: {
                 "@type": "GeoCircle",
