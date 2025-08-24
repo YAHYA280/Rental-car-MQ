@@ -1,8 +1,9 @@
-// src/components/search/CarSearchComponent.tsx
+// src/components/search/CarSearchComponent.tsx - Fixed interface
 "use client";
 
 import React, { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,17 +42,21 @@ interface SearchFormData {
   driverAge: string;
 }
 
+// Fixed interface - added the missing compact prop
 interface CarSearchProps {
   className?: string;
   onSearch?: (data: SearchFormData) => void;
+  compact?: boolean; // This was missing - now added
 }
 
 const CarSearchComponent: React.FC<CarSearchProps> = ({
   className = "",
   onSearch,
+  compact = false,
 }) => {
   const t = useTranslations("search");
-  // const tCommon = useTranslations("common");
+  const locale = useLocale();
+  const router = useRouter();
 
   const [searchData, setSearchData] = useState<SearchFormData>({
     pickupLocation: "",
@@ -68,9 +73,29 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Search data:", searchData);
+
+    // Create URL parameters for the vehicles page
+    const params = new URLSearchParams();
+    if (searchData.pickupLocation)
+      params.set("pickup", searchData.pickupLocation);
+    if (searchData.dropoffLocation)
+      params.set("dropoff", searchData.dropoffLocation);
+    if (searchData.pickupDate) params.set("pickupDate", searchData.pickupDate);
+    if (searchData.pickupTime) params.set("pickupTime", searchData.pickupTime);
+    if (searchData.returnDate) params.set("returnDate", searchData.returnDate);
+    if (searchData.returnTime) params.set("returnTime", searchData.returnTime);
+    if (searchData.differentDropoff) params.set("differentDropoff", "true");
+    if (searchData.driverAge) params.set("driverAge", searchData.driverAge);
+
+    // Call the optional callback
     if (onSearch) {
       onSearch(searchData);
+    }
+
+    // Navigate to vehicles page with search parameters (only if not compact)
+    if (!compact) {
+      const queryString = params.toString();
+      router.push(`/vehicles${queryString ? `?${queryString}` : ""}`);
     }
   };
 
@@ -117,6 +142,124 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
     return t("selectPeriod");
   };
 
+  // Compact version for vehicle detail page
+  if (compact) {
+    return (
+      <div className={`bg-gray-50 rounded-xl p-4 ${className}`}>
+        <form onSubmit={handleSearchSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 gap-3">
+            {/* Pickup Location */}
+            <div>
+              <Label className="text-xs font-medium mb-1 block">
+                {t("pickupLocation")}
+              </Label>
+              <div className="flex items-center gap-2 p-2 bg-white rounded-md border">
+                <MapPin className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                <Input
+                  type="text"
+                  placeholder={t("placeholders.pickupLocation")}
+                  value={searchData.pickupLocation}
+                  onChange={(e) =>
+                    handleInputChange("pickupLocation", e.target.value)
+                  }
+                  className="border-0 p-0 text-sm"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Date Range */}
+            <div>
+              <Label className="text-xs font-medium mb-1 block">
+                {t("rentalPeriod")}
+              </Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start text-left font-normal p-2 h-auto"
+                  >
+                    <CalendarIcon className="h-4 w-4 mr-2" />
+                    <span className="text-sm">{getDateRangeText()}</span>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    initialFocus
+                    mode="range"
+                    defaultMonth={dateRange?.from}
+                    selected={dateRange}
+                    onSelect={handleDateRangeSelect}
+                    numberOfMonths={1}
+                    disabled={(date) => date < new Date()}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Times */}
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label className="text-xs font-medium mb-1 block">
+                  {t("pickupTime")}
+                </Label>
+                <Select
+                  value={searchData.pickupTime}
+                  onValueChange={(value) =>
+                    handleInputChange("pickupTime", value)
+                  }
+                >
+                  <SelectTrigger className="h-8">
+                    <SelectValue placeholder={t("placeholders.selectTime")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {timeOptions.map((time) => (
+                      <SelectItem key={time.value} value={time.value}>
+                        {time.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs font-medium mb-1 block">
+                  {t("returnTime")}
+                </Label>
+                <Select
+                  value={searchData.returnTime}
+                  onValueChange={(value) =>
+                    handleInputChange("returnTime", value)
+                  }
+                >
+                  <SelectTrigger className="h-8">
+                    <SelectValue placeholder={t("placeholders.selectTime")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {timeOptions.map((time) => (
+                      <SelectItem key={time.value} value={time.value}>
+                        {time.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+
+          {/* Search Button */}
+          <Button
+            type="submit"
+            className="w-full bg-carbookers-red-600 hover:bg-carbookers-red-700 text-white"
+          >
+            <Search className="h-4 w-4 mr-2" />
+            {t("searchButton")}
+          </Button>
+        </form>
+      </div>
+    );
+  }
+
+  // Full version for hero section
   return (
     <div className={`relative ${className}`}>
       {/* Glass Morphism Background */}

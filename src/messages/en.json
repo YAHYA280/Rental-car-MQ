@@ -14,6 +14,7 @@
     "homeTitle": "MELHOR QUE NADA - Car Rental Tangier | Luxury Cars Morocco",
     "aboutTitle": "About MELHOR QUE NADA - Premier Car Rental Tangier Morocco"
   },
+
   "search": {
     "title": "Find Your Perfect Rental Car",
     "subtitle": "Choose from our premium fleet",
@@ -36,6 +37,7 @@
       "time": "Time"
     }
   },
+
   "hero": {
     "subtitle": "Find Your",
     "title": "Perfect Ride",
@@ -67,6 +69,7 @@
       "clientRatingLabel": "Client Rating"
     }
   },
+
   "about": {
     "title": "Why Choose Our Service",
     "subtitle": "Experience the best car rental service with our premium features and benefits",
@@ -98,18 +101,108 @@
     },
     "cta": "Browse Our Vehicles"
   },
+
   "vehicles": {
-    "title": "Popular Vehicles",
-    "subtitle": "Discover our most sought-after vehicles",
+    "title": "Available Vehicles",
+    "subtitle": "Find your perfect ride from our collection",
     "viewAll": "View All Vehicles",
+    "perDay": "per day",
     "day": "/day",
     "viewDetails": "View Details",
+    "bookNow": "Book Now",
+    "backToVehicles": "Back to Vehicles",
+    "notFound": "Vehicle not found",
+    "seats": "seats",
+    "doors": "doors",
+    "more": "more",
     "features": {
       "electric": "Electric",
       "luxury": "Luxury",
       "suv": "SUV"
     }
   },
+
+  "vehicleDetail": {
+    "specifications": "Vehicle Specifications",
+    "features": "Features & Amenities",
+    "seats": "Seats",
+    "transmission": "Transmission",
+    "fuelType": "Fuel Type",
+    "doors": "Doors",
+    "bookings": "bookings",
+    "perDay": "per day",
+    "day": "day",
+    "bookNow": "Book Now",
+    "callNow": "Call Now",
+    "getQuote": "Get Quote",
+    "needHelp": "Need help? Call us",
+    "vehicleStats": "Vehicle Information",
+    "mileage": "Mileage",
+    "availability": "Availability",
+    "totalBookings": "Total Bookings",
+    "airConditioning": "Air Conditioning",
+    "available": "Available",
+    "unavailable": "Unavailable",
+    "insured": "Fully Insured",
+    "fullyCovered": "Comprehensive coverage",
+    "certified": "Certified Quality",
+    "qualityGuarantee": "Quality guarantee",
+    "support": "24/7 Support",
+    "available247": "Always available",
+    "relatedVehicles": "Similar Vehicles"
+  },
+
+  "filters": {
+    "searchCriteria": "Search Criteria",
+    "pickup": "Pickup",
+    "dropoff": "Drop-off",
+    "dates": "Dates",
+    "time": "Time",
+    "resultsFound": "vehicles found",
+    "clearFilters": "Clear Filters",
+    "sortBy": "Sort by",
+    "recommended": "Recommended",
+    "priceLowToHigh": "Price: Low to High",
+    "priceHighToLow": "Price: High to Low",
+    "rating": "Highest Rating",
+    "name": "Name A-Z",
+    "brand": "Brand",
+    "allBrands": "All Brands",
+    "category": "Category",
+    "allCategories": "All Categories",
+    "transmission": "Transmission",
+    "allTransmissions": "All Transmissions",
+    "fuelType": "Fuel Type",
+    "allFuelTypes": "All Fuel Types",
+    "seats": "Seats",
+    "allSeats": "All",
+    "seatsLabel": "seats",
+    "priceRange": "Price Range (€)",
+    "previous": "Previous",
+    "next": "Next",
+    "showingResults": "Showing {start}-{end} of {total} results",
+    "noResults": "No vehicles found",
+    "noResultsDescription": "Try adjusting your filters to see more results",
+    "categories": {
+      "economy": "Economy",
+      "premium": "Premium",
+      "luxury": "Luxury",
+      "suv": "SUV",
+      "electric": "Electric",
+      "family": "Family"
+    },
+    "transmissions": {
+      "manual": "Manual",
+      "automatic": "Automatic"
+    },
+    "fuelTypes": {
+      "petrol": "Petrol",
+      "diesel": "Diesel",
+      "electric": "Electric",
+      "hybrid": "Hybrid"
+    }
+  },
+
   "testimonials": {
     "title": "What Our Customers Say",
     "subtitle": "Read about experiences from our satisfied customers",
@@ -131,12 +224,14 @@
       }
     }
   },
+
   "map": {
     "title": "Find Us in Tangier",
     "subtitle": "Visit our location at RUE 8 ENNASR LOT 635 TANGER. We're here to help you with all your car rental needs.",
     "coordinates": "35°45'04.5\"N 5°49'50.2\"W",
     "locationName": "MELHOR QUE NADA - Tangier"
   },
+
   "navbar": {
     "topBar": {
       "address": "RUE 8 ENNASR LOT 635 TANGER",
@@ -149,6 +244,7 @@
       "label": "Language"
     }
   },
+
   "carSearch": {
     "title": "Find Your Perfect",
     "titleHighlight": "Rental Car",
@@ -177,6 +273,7 @@
       "searchCars": "Search Cars"
     }
   },
+
   "cta": {
     "title": "Ready to Start Your Journey?",
     "subtitle": "Experience the freedom of premium car rental services. Book your perfect ride today!",
@@ -185,12 +282,14 @@
     "phone": "+1 (555) 123-4566",
     "email": "support@rentacar.com"
   },
+
   "newsletter": {
     "title": "Subscribe to Our Newsletter",
     "subtitle": "Stay updated with our latest offers and updates",
     "placeholder": "Enter your email",
     "subscribe": "Subscribe"
   },
+
   "footer": {
     "company": "MELHOR QUE NADA",
     "description": "Your trusted partner for convenient and reliable car rental services across Morocco.",
@@ -222,6 +321,7 @@
       "cookies": "Cookie Policy"
     }
   },
+
   "common": {
     "loading": "Loading...",
     "error": "Error",

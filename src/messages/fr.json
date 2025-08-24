@@ -14,6 +14,7 @@
     "homeTitle": "MELHOR QUE NADA - Location Voiture Tanger | Voitures Luxe Maroc",
     "aboutTitle": "À Propos de MELHOR QUE NADA - Leader Location Voiture Tanger"
   },
+
   "search": {
     "title": "Trouvez Votre Voiture de Location Parfaite",
     "subtitle": "Choisissez parmi notre flotte premium",
@@ -36,6 +37,7 @@
       "time": "Heure"
     }
   },
+
   "hero": {
     "subtitle": "Trouvez Votre",
     "title": "Véhicule Parfait",
@@ -67,6 +69,7 @@
       "clientRatingLabel": "Note Client"
     }
   },
+
   "about": {
     "title": "Pourquoi Choisir Notre Service",
     "subtitle": "Découvrez le meilleur service de location de voitures avec nos fonctionnalités et avantages premium",
@@ -98,18 +101,108 @@
     },
     "cta": "Parcourir Nos Véhicules"
   },
+
   "vehicles": {
-    "title": "Véhicules Populaires",
-    "subtitle": "Découvrez nos véhicules les plus recherchés",
+    "title": "Véhicules Disponibles",
+    "subtitle": "Trouvez votre véhicule parfait dans notre collection",
     "viewAll": "Voir Tous les Véhicules",
+    "perDay": "par jour",
     "day": "/jour",
     "viewDetails": "Voir Détails",
+    "bookNow": "Réserver Maintenant",
+    "backToVehicles": "Retour aux Véhicules",
+    "notFound": "Véhicule introuvable",
+    "seats": "places",
+    "doors": "portes",
+    "more": "plus",
     "features": {
       "electric": "Électrique",
       "luxury": "Luxe",
       "suv": "SUV"
     }
   },
+
+  "vehicleDetail": {
+    "specifications": "Spécifications du Véhicule",
+    "features": "Équipements et Commodités",
+    "seats": "Places",
+    "transmission": "Transmission",
+    "fuelType": "Type de Carburant",
+    "doors": "Portes",
+    "bookings": "réservations",
+    "perDay": "par jour",
+    "day": "jour",
+    "bookNow": "Réserver Maintenant",
+    "callNow": "Appeler Maintenant",
+    "getQuote": "Obtenir un Devis",
+    "needHelp": "Besoin d'aide? Appelez-nous",
+    "vehicleStats": "Informations du Véhicule",
+    "mileage": "Kilométrage",
+    "availability": "Disponibilité",
+    "totalBookings": "Réservations Totales",
+    "airConditioning": "Climatisation",
+    "available": "Disponible",
+    "unavailable": "Indisponible",
+    "insured": "Entièrement Assuré",
+    "fullyCovered": "Couverture complète",
+    "certified": "Qualité Certifiée",
+    "qualityGuarantee": "Garantie qualité",
+    "support": "Support 24/7",
+    "available247": "Toujours disponible",
+    "relatedVehicles": "Véhicules Similaires"
+  },
+
+  "filters": {
+    "searchCriteria": "Critères de Recherche",
+    "pickup": "Prise",
+    "dropoff": "Retour",
+    "dates": "Dates",
+    "time": "Heure",
+    "resultsFound": "véhicules trouvés",
+    "clearFilters": "Effacer les Filtres",
+    "sortBy": "Trier par",
+    "recommended": "Recommandé",
+    "priceLowToHigh": "Prix: Croissant",
+    "priceHighToLow": "Prix: Décroissant",
+    "rating": "Note la Plus Élevée",
+    "name": "Nom A-Z",
+    "brand": "Marque",
+    "allBrands": "Toutes les Marques",
+    "category": "Catégorie",
+    "allCategories": "Toutes les Catégories",
+    "transmission": "Transmission",
+    "allTransmissions": "Toutes les Transmissions",
+    "fuelType": "Type de Carburant",
+    "allFuelTypes": "Tous les Carburants",
+    "seats": "Places",
+    "allSeats": "Toutes",
+    "seatsLabel": "places",
+    "priceRange": "Gamme de Prix (€)",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "showingResults": "Affichage {start}-{end} sur {total} résultats",
+    "noResults": "Aucun véhicule trouvé",
+    "noResultsDescription": "Essayez d'ajuster vos filtres pour voir plus de résultats",
+    "categories": {
+      "economy": "Économique",
+      "premium": "Premium",
+      "luxury": "Luxe",
+      "suv": "SUV",
+      "electric": "Électrique",
+      "family": "Familiale"
+    },
+    "transmissions": {
+      "manual": "Manuelle",
+      "automatic": "Automatique"
+    },
+    "fuelTypes": {
+      "petrol": "Essence",
+      "diesel": "Diesel",
+      "electric": "Électrique",
+      "hybrid": "Hybride"
+    }
+  },
+
   "testimonials": {
     "title": "Ce Que Disent Nos Clients",
     "subtitle": "Découvrez les expériences de nos clients satisfaits",
@@ -131,12 +224,14 @@
       }
     }
   },
+
   "map": {
     "title": "Trouvez-nous à Tanger",
     "subtitle": "Visitez notre emplacement au RUE 8 ENNASR LOT 635 TANGER. Nous sommes là pour vous aider avec tous vos besoins de location de voitures.",
     "coordinates": "35°45'04.5\"N 5°49'50.2\"O",
     "locationName": "MELHOR QUE NADA - Tanger"
   },
+
   "navbar": {
     "topBar": {
       "address": "RUE 8 ENNASR LOT 635 TANGER",
@@ -149,6 +244,7 @@
       "label": "Langue"
     }
   },
+
   "carSearch": {
     "title": "Trouvez Votre",
     "titleHighlight": "Voiture de Location Parfaite",
@@ -177,6 +273,7 @@
       "searchCars": "Rechercher des Voitures"
     }
   },
+
   "cta": {
     "title": "Prêt à Commencer Votre Voyage ?",
     "subtitle": "Découvrez la liberté des services de location de voitures premium. Réservez votre véhicule parfait aujourd'hui !",
@@ -185,12 +282,14 @@
     "phone": "+1 (555) 123-4566",
     "email": "support@rentacar.com"
   },
+
   "newsletter": {
     "title": "Abonnez-vous à Notre Newsletter",
     "subtitle": "Restez informé de nos dernières offres et mises à jour",
     "placeholder": "Entrez votre email",
     "subscribe": "S'abonner"
   },
+
   "footer": {
     "company": "MELHOR QUE NADA",
     "description": "Votre partenaire de confiance pour des services de location de voitures pratiques et fiables à travers le Maroc.",
@@ -222,6 +321,7 @@
       "cookies": "Politique des Cookies"
     }
   },
+
   "common": {
     "loading": "Chargement...",
     "error": "Erreur",
