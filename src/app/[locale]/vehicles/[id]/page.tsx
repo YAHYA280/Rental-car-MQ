@@ -1,9 +1,9 @@
-// src/app/[locale]/vehicles/[id]/page.tsx - Updated with rental details collection form
+// src/app/[locale]/vehicles/[id]/page.tsx - Fixed with React.use() and updated translations
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, use } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { useParams, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { format } from "date-fns";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -57,18 +57,19 @@ import { cn } from "@/lib/utils";
 import { DateRange } from "react-day-picker";
 
 interface VehicleDetailPageProps {
-  params: { locale: string; id: string };
+  params: Promise<{ locale: string; id: string }>;
 }
 
 export default function VehicleDetailPage({ params }: VehicleDetailPageProps) {
+  // Fix: Unwrap params with React.use()
+  const { locale, id: vehicleId } = use(params);
+
   const t = useTranslations("vehicles");
   const tVehicle = useTranslations("vehicleDetail");
   const tFilters = useTranslations("filters");
   const tSearch = useTranslations("search");
-  const locale = useLocale();
+  const currentLocale = useLocale();
   const searchParams = useSearchParams();
-
-  const vehicleId = params.id;
 
   // Find the vehicle
   const vehicle = useMemo(
@@ -198,64 +199,68 @@ export default function VehicleDetailPage({ params }: VehicleDetailPageProps) {
     return tSearch("selectPeriod");
   };
 
-  // WhatsApp booking function
+  // WhatsApp booking function with proper translations
   const handleWhatsAppBooking = () => {
-    const messageTemplates = {
-      en: `Hello! I would like to book the ${vehicle.brand} ${vehicle.name} (${
-        vehicle.model
-      } ${vehicle.year}).
+    const messageContent =
+      currentLocale === "fr"
+        ? {
+            intro: `Bonjour! Je souhaiterais réserver le ${vehicle.brand} ${vehicle.name} (${vehicle.model} ${vehicle.year}).`,
+            rentalDetails: "Détails de la Location:",
+            pickupDate: `Date de Prise: ${rentalDetails.pickupDate} à ${rentalDetails.pickupTime}`,
+            returnDate: `Date de Retour: ${rentalDetails.returnDate} à ${rentalDetails.returnTime}`,
+            pickupLocation: `Lieu de Prise: ${rentalDetails.pickupLocation}`,
+            returnLocation: `Lieu de Retour: ${
+              rentalDetails.dropoffLocation || rentalDetails.pickupLocation
+            }`,
+            duration: `Durée: ${rentalInfo.rentalDays} jour${
+              rentalInfo.rentalDays > 1 ? "s" : ""
+            }`,
+            estimatedCost: `Coût Estimé: €${rentalInfo.totalPrice} (€${vehicle.price}/jour)`,
+            vehicleFeatures: "Équipements du Véhicule:",
+            confirmRequest:
+              "Veuillez confirmer la disponibilité et fournir le tarif final. Merci!",
+          }
+        : {
+            intro: `Hello! I would like to book the ${vehicle.brand} ${vehicle.name} (${vehicle.model} ${vehicle.year}).`,
+            rentalDetails: "Rental Details:",
+            pickupDate: `Pickup Date: ${rentalDetails.pickupDate} at ${rentalDetails.pickupTime}`,
+            returnDate: `Return Date: ${rentalDetails.returnDate} at ${rentalDetails.returnTime}`,
+            pickupLocation: `Pickup Location: ${rentalDetails.pickupLocation}`,
+            returnLocation: `Return Location: ${
+              rentalDetails.dropoffLocation || rentalDetails.pickupLocation
+            }`,
+            duration: `Duration: ${rentalInfo.rentalDays} day${
+              rentalInfo.rentalDays > 1 ? "s" : ""
+            }`,
+            estimatedCost: `Estimated Cost: €${rentalInfo.totalPrice} (€${vehicle.price}/day)`,
+            vehicleFeatures: "Vehicle Features:",
+            confirmRequest:
+              "Please confirm availability and provide final pricing. Thank you!",
+          };
 
-📅 Rental Details:
-• Pickup Date: ${rentalDetails.pickupDate} at ${rentalDetails.pickupTime}
-• Return Date: ${rentalDetails.returnDate} at ${rentalDetails.returnTime}
-• Pickup Location: ${rentalDetails.pickupLocation}
-• Return Location: ${
-        rentalDetails.dropoffLocation || rentalDetails.pickupLocation
-      }
-• Duration: ${rentalInfo.rentalDays} day${rentalInfo.rentalDays > 1 ? "s" : ""}
+    const message = `${messageContent.intro}
 
-💰 Estimated Cost: €${rentalInfo.totalPrice} (€${vehicle.price}/day)
+📅 ${messageContent.rentalDetails}
+• ${messageContent.pickupDate}
+• ${messageContent.returnDate}
+• ${messageContent.pickupLocation}
+• ${messageContent.returnLocation}
+• ${messageContent.duration}
 
-🚗 Vehicle Features:
+💰 ${messageContent.estimatedCost}
+
+🚗 ${messageContent.vehicleFeatures}
 ${vehicle.features
   .slice(0, 5)
   .map((feature) => `• ${feature}`)
   .join("\n")}
 
-Please confirm availability and provide final pricing. Thank you!`,
+${messageContent.confirmRequest}`;
 
-      fr: `Bonjour! Je souhaiterais réserver le ${vehicle.brand} ${
-        vehicle.name
-      } (${vehicle.model} ${vehicle.year}).
-
-📅 Détails de la Location:
-• Date de Prise: ${rentalDetails.pickupDate} à ${rentalDetails.pickupTime}
-• Date de Retour: ${rentalDetails.returnDate} à ${rentalDetails.returnTime}
-• Lieu de Prise: ${rentalDetails.pickupLocation}
-• Lieu de Retour: ${
-        rentalDetails.dropoffLocation || rentalDetails.pickupLocation
-      }
-• Durée: ${rentalInfo.rentalDays} jour${rentalInfo.rentalDays > 1 ? "s" : ""}
-
-💰 Coût Estimé: €${rentalInfo.totalPrice} (€${vehicle.price}/jour)
-
-🚗 Équipements du Véhicule:
-${vehicle.features
-  .slice(0, 5)
-  .map((feature) => `• ${feature}`)
-  .join("\n")}
-
-Veuillez confirmer la disponibilité et fournir le tarif final. Merci!`,
-    };
-
-    const message =
-      messageTemplates[locale as keyof typeof messageTemplates] ||
-      messageTemplates.en;
     const phoneNumber = "+212612077309";
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
       message
     )}`;
-
     window.open(whatsappUrl, "_blank");
   };
 
@@ -548,7 +553,7 @@ Veuillez confirmer la disponibilité et fournir le tarif final. Merci!`,
                 <Card className="border-0 shadow-xl">
                   <CardContent className="p-6">
                     <h3 className="text-lg font-bold text-gray-900 mb-4">
-                      More {vehicle.brand} Vehicles
+                      {tVehicle("relatedVehicles")} {vehicle.brand}
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       {relatedVehicles.map((relatedVehicle) => (
@@ -630,11 +635,14 @@ Veuillez confirmer la disponibilité et fournir le tarif final. Merci!`,
                       {showTotalPrice && rentalInfo.hasValidDates ? (
                         <>
                           <div className="text-lg font-semibold">
-                            {rentalInfo.rentalDays} day
-                            {rentalInfo.rentalDays > 1 ? "s" : ""} total
+                            {rentalInfo.rentalDays}{" "}
+                            {rentalInfo.rentalDays > 1
+                              ? tVehicle("days")
+                              : tVehicle("day")}{" "}
+                            {currentLocale === "fr" ? "au total" : "total"}
                           </div>
                           <div className="text-sm text-gray-500">
-                            €{vehicle.price}/day
+                            €{vehicle.price}/{tVehicle("day")}
                           </div>
                         </>
                       ) : (
@@ -651,12 +659,12 @@ Veuillez confirmer la disponibilité et fournir le tarif final. Merci!`,
                         <AlertTriangle className="h-5 w-5 text-yellow-600" />
                         <div>
                           <h4 className="font-semibold text-yellow-800">
-                            {locale === "fr"
+                            {currentLocale === "fr"
                               ? "Détails de Location Requis"
                               : "Rental Details Required"}
                           </h4>
                           <p className="text-sm text-yellow-700">
-                            {locale === "fr"
+                            {currentLocale === "fr"
                               ? "Complétez vos informations pour réserver"
                               : "Complete your details to book this vehicle"}
                           </p>
@@ -689,7 +697,7 @@ Veuillez confirmer la disponibilité et fournir le tarif final. Merci!`,
                       <div>
                         <Label className="text-sm font-medium mb-2 block">
                           {tSearch("rentalPeriod")} * (min. 2{" "}
-                          {locale === "fr" ? "jours" : "days"})
+                          {currentLocale === "fr" ? "jours" : "days"})
                         </Label>
                         <Popover>
                           <PopoverTrigger asChild>
@@ -704,7 +712,7 @@ Veuillez confirmer la disponibilité et fournir le tarif final. Merci!`,
                               {rentalInfo.rentalDays > 0 && (
                                 <span className="ml-auto text-xs text-gray-500">
                                   {rentalInfo.rentalDays}{" "}
-                                  {locale === "fr" ? "j" : "d"}
+                                  {currentLocale === "fr" ? "j" : "d"}
                                 </span>
                               )}
                             </Button>
@@ -837,13 +845,11 @@ Veuillez confirmer la disponibilité et fournir le tarif final. Merci!`,
                         }`}
                       >
                         <CalendarIcon className="h-4 w-4" />
-                        {locale === "fr"
-                          ? "Appliquer la Période"
-                          : "Apply Period"}
+                        {tSearch("applyPeriod")}
                         {rentalInfo.rentalDays > 0 && rentalInfo.isComplete && (
                           <span className="text-xs opacity-90">
                             ({rentalInfo.rentalDays}{" "}
-                            {locale === "fr" ? "j" : "d"})
+                            {currentLocale === "fr" ? "j" : "d"})
                           </span>
                         )}
                       </Button>
@@ -851,9 +857,7 @@ Veuillez confirmer la disponibilité et fournir le tarif final. Merci!`,
                       {/* Incomplete fields notice */}
                       {!rentalInfo.isComplete && (
                         <div className="text-center text-sm text-gray-600 p-3 bg-gray-50 rounded-lg">
-                          {locale === "fr"
-                            ? "Complétez tous les champs requis (*) pour continuer"
-                            : "Complete all required fields (*) to continue"}
+                          {tSearch("validation.completeAllFields")}
                         </div>
                       )}
                     </div>
@@ -863,7 +867,7 @@ Veuillez confirmer la disponibilité et fournir le tarif final. Merci!`,
                       {/* Booking Summary */}
                       <div className="p-4 bg-green-50 rounded-lg border border-green-200">
                         <h4 className="font-semibold text-green-800 mb-3">
-                          {locale === "fr"
+                          {currentLocale === "fr"
                             ? "Résumé de la Réservation"
                             : "Booking Summary"}
                         </h4>
@@ -891,7 +895,9 @@ Veuillez confirmer la disponibilité et fournir le tarif final. Merci!`,
                               <div className="flex items-center gap-2">
                                 <MapPin className="h-4 w-4" />
                                 <span>
-                                  {locale === "fr" ? "Retour:" : "Return:"}{" "}
+                                  {currentLocale === "fr"
+                                    ? "Retour:"
+                                    : "Return:"}{" "}
                                   {rentalDetails.dropoffLocation}
                                 </span>
                               </div>
@@ -900,8 +906,10 @@ Veuillez confirmer la disponibilité et fournir le tarif final. Merci!`,
                             <span>Total: €{rentalInfo.totalPrice}</span>
                             <span className="text-xs">
                               ({rentalInfo.rentalDays}{" "}
-                              {locale === "fr" ? "jour" : "day"}
-                              {rentalInfo.rentalDays > 1 ? "s" : ""})
+                              {rentalInfo.rentalDays > 1
+                                ? tVehicle("days")
+                                : tVehicle("day")}
+                              )
                             </span>
                           </div>
                         </div>
@@ -913,7 +921,7 @@ Veuillez confirmer la disponibilité et fournir le tarif final. Merci!`,
                         className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-4 flex items-center gap-3 text-lg"
                       >
                         <MessageCircle className="h-5 w-5" />
-                        {locale === "fr"
+                        {currentLocale === "fr"
                           ? "Réserver via WhatsApp"
                           : "Book via WhatsApp"}
                       </Button>
@@ -925,7 +933,7 @@ Veuillez confirmer la disponibilité et fournir le tarif final. Merci!`,
                         onClick={() => window.open("tel:+212612077309")}
                       >
                         <Phone className="h-4 w-4" />
-                        {locale === "fr" ? "Appeler Maintenant" : "Call Now"}
+                        {tVehicle("callNow")}
                       </Button>
                     </div>
                   )}
@@ -934,13 +942,13 @@ Veuillez confirmer la disponibilité et fournir le tarif final. Merci!`,
                   <div className="mt-6 pt-6 border-t border-gray-200">
                     <div className="text-center">
                       <p className="text-sm text-gray-600 mb-2">
-                        {locale === "fr" ? "Besoin d'aide?" : "Need help?"}
+                        {tVehicle("needHelp")}
                       </p>
                       <p className="font-semibold text-carbookers-red-600">
                         +212612077309
                       </p>
                       <p className="text-sm text-gray-500 mt-1">
-                        {locale === "fr"
+                        {currentLocale === "fr"
                           ? "WhatsApp disponible 24/7"
                           : "WhatsApp available 24/7"}
                       </p>

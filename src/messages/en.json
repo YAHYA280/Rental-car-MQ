@@ -29,6 +29,17 @@
     "differentDropoff": "Return to different location",
     "driverAge": "Driver Age",
     "searchButton": "Search Cars",
+    "applyPeriod": "Apply Period",
+    "validation": {
+      "pickupLocationRequired": "Pickup location is required",
+      "rentalPeriodRequired": "Rental period is required",
+      "pickupTimeRequired": "Pickup time is required",
+      "returnTimeRequired": "Return time is required",
+      "dropoffLocationRequired": "Return location is required",
+      "minimumRental": "Minimum 2 days rental period required",
+      "fixErrors": "Please fix the following errors:",
+      "completeAllFields": "Complete all required fields (*) to continue"
+    },
     "placeholders": {
       "pickupLocation": "Enter pickup location",
       "dropoffLocation": "Enter return location",
@@ -103,8 +114,8 @@
   },
 
   "vehicles": {
-    "title": "Available Vehicles",
-    "subtitle": "Find your perfect ride from our collection",
+    "title": "Our Premium Fleet",
+    "subtitle": "Discover the perfect vehicle for your journey from our carefully curated collection",
     "viewAll": "View All Vehicles",
     "perDay": "per day",
     "day": "/day",
@@ -115,6 +126,14 @@
     "seats": "seats",
     "doors": "doors",
     "more": "more",
+    "totalPrice": "Total Price",
+    "dailyRate": "Daily Rate",
+    "rentalSummary": "Rental Summary",
+    "bookingDetails": "Booking Details",
+    "whatsappBooking": "Book via WhatsApp",
+    "callNow": "Call Now",
+    "needHelp": "Need help?",
+    "whatsappAvailable": "WhatsApp available 24/7",
     "features": {
       "electric": "Electric",
       "luxury": "Luxury",
@@ -132,6 +151,7 @@
     "bookings": "bookings",
     "perDay": "per day",
     "day": "day",
+    "days": "days",
     "bookNow": "Book Now",
     "callNow": "Call Now",
     "getQuote": "Get Quote",
@@ -149,7 +169,30 @@
     "qualityGuarantee": "Quality guarantee",
     "support": "24/7 Support",
     "available247": "Always available",
-    "relatedVehicles": "Similar Vehicles"
+    "relatedVehicles": "Similar Vehicles",
+    "bookingForm": {
+      "title": "Complete Your Booking",
+      "rentalDetailsRequired": "Rental Details Required",
+      "completeDetails": "Complete your details to book this vehicle",
+      "bookingSummary": "Booking Summary",
+      "bookViaWhatsApp": "Book via WhatsApp",
+      "applyPeriod": "Apply Period",
+      "totalDays": "Total: {days} day(s)",
+      "estimatedTotal": "Estimated Total",
+      "finalPricing": "Please confirm availability and provide final pricing"
+    },
+    "whatsappMessage": {
+      "intro": "Hello! I would like to book the {brand} {name} ({model} {year}).",
+      "rentalDetails": "Rental Details:",
+      "pickupDate": "Pickup Date: {date} at {time}",
+      "returnDate": "Return Date: {date} at {time}",
+      "pickupLocation": "Pickup Location: {location}",
+      "returnLocation": "Return Location: {location}",
+      "duration": "Duration: {days} day(s)",
+      "estimatedCost": "Estimated Cost: €{total} (€{daily}/day)",
+      "vehicleFeatures": "Vehicle Features:",
+      "confirmRequest": "Please confirm availability and provide final pricing. Thank you!"
+    }
   },
 
   "filters": {
@@ -183,6 +226,9 @@
     "showingResults": "Showing {start}-{end} of {total} results",
     "noResults": "No vehicles found",
     "noResultsDescription": "Try adjusting your filters to see more results",
+    "viewMode": "View Mode",
+    "gridView": "Grid View",
+    "listView": "List View",
     "categories": {
       "economy": "Economy",
       "premium": "Premium",
@@ -341,6 +387,10 @@
     "sort": "Sort",
     "clear": "Clear",
     "apply": "Apply",
-    "reset": "Reset"
+    "reset": "Reset",
+    "required": "required",
+    "optional": "optional",
+    "minimum": "minimum",
+    "maximum": "maximum"
   }
 }
