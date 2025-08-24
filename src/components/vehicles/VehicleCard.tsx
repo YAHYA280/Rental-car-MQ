@@ -1,4 +1,4 @@
-// src/components/vehicles/VehicleCard.tsx - Fixed version
+// src/components/vehicles/VehicleCard.tsx - Updated without category
 "use client";
 
 import React from "react";
@@ -38,20 +38,6 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
   const tFilters = useTranslations("filters");
   const locale = useLocale();
 
-  const getCategoryColor = (category: string) => {
-    const colors = {
-      Economy: "bg-green-100 text-green-800",
-      Premium: "bg-blue-100 text-blue-800",
-      Luxury: "bg-purple-100 text-purple-800",
-      SUV: "bg-orange-100 text-orange-800",
-      Electric: "bg-emerald-100 text-emerald-800",
-      Family: "bg-indigo-100 text-indigo-800",
-    };
-    return (
-      colors[category as keyof typeof colors] || "bg-gray-100 text-gray-800"
-    );
-  };
-
   const getFuelIcon = (fuelType: string) => {
     switch (fuelType) {
       case "Electric":
@@ -87,13 +73,9 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
                 sizes="(max-width: 768px) 100vw, 33vw"
               />
 
-              {/* Category Badge */}
-              <Badge
-                className={`absolute top-3 left-3 ${getCategoryColor(
-                  vehicle.category
-                )} font-semibold`}
-              >
-                {tFilters(`categories.${vehicle.category.toLowerCase()}`)}
+              {/* Brand Badge */}
+              <Badge className="absolute top-3 left-3 bg-carbookers-red-600 text-white font-semibold">
+                {vehicle.brand}
               </Badge>
 
               {/* Favorite Button */}
@@ -228,13 +210,9 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
           {/* Overlay gradient */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent group-hover:from-black/40 transition-all duration-300" />
 
-          {/* Category Badge */}
-          <Badge
-            className={`absolute top-4 left-4 ${getCategoryColor(
-              vehicle.category
-            )} font-semibold shadow-lg`}
-          >
-            {tFilters(`categories.${vehicle.category.toLowerCase()}`)}
+          {/* Brand Badge */}
+          <Badge className="absolute top-4 left-4 bg-carbookers-red-600 text-white font-semibold shadow-lg">
+            {vehicle.brand}
           </Badge>
 
           {/* Favorite Button */}

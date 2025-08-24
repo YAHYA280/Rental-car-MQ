@@ -1,4 +1,4 @@
-// src/components/types/vehicle.ts
+// src/components/types/vehicle.ts - Updated without category
 export interface Vehicle {
   id: string;
   name: string;
@@ -13,7 +13,6 @@ export interface Vehicle {
   features: string[];
   rating: number;
   available: boolean;
-  category: "Economy" | "Premium" | "Luxury" | "SUV" | "Electric" | "Family";
   description: string;
   mileage?: number;
   doors: number;
@@ -25,7 +24,6 @@ export interface Vehicle {
 
 export interface VehicleFilters {
   brand: string[];
-  category: string[];
   transmission: string[];
   fuelType: string[];
   priceRange: [number, number];
@@ -43,27 +41,21 @@ export interface SearchParams {
   differentDropoff?: boolean;
 }
 
-// Filter constants
+// Updated filter constants - new brands based on your car folders
 export const BRANDS = [
-  "Ford",
-  "Honda",
-  "Toyota",
-  "BMW",
+  "Cupra",
+  "Dacia",
+  "Hyundai",
+  "KIA",
   "Mercedes",
-  "Audi",
-  "Tesla",
-  "Volkswagen",
+  "Opel",
+  "Peugeot",
   "Porsche",
-  "Nissan",
+  "Renault",
+  "SEAT",
+  "Volkswagen",
 ];
-export const CATEGORIES = [
-  "Economy",
-  "Premium",
-  "Luxury",
-  "SUV",
-  "Electric",
-  "Family",
-];
+
 export const TRANSMISSIONS = ["Manual", "Automatic"];
 export const FUEL_TYPES = ["Petrol", "Diesel", "Electric", "Hybrid"];
-export const SEAT_COUNTS = ["4", "5", "7+"];
+export const SEAT_COUNTS = ["2", "4", "5", "7+"];

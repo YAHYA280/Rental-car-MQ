@@ -1,4 +1,4 @@
-// src/app/[locale]/vehicles/page.tsx
+// src/app/[locale]/vehicles/page.tsx - Updated without category filtering
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
@@ -33,10 +33,9 @@ const VehiclesPage = () => {
     differentDropoff: searchParams.get("differentDropoff") === "true",
   };
 
-  // State management
+  // State management - Updated without category
   const [filters, setFilters] = useState<Filters>({
     brand: [],
-    category: [],
     transmission: [],
     fuelType: [],
     priceRange: [0, 300],
@@ -52,19 +51,11 @@ const VehiclesPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [favorites, setFavorites] = useState<string[]>([]);
 
-  // Filter and sort vehicles
+  // Filter and sort vehicles - Updated without category filtering
   const filteredVehicles = useMemo(() => {
     let filtered = vehiclesData.filter((vehicle) => {
       // Brand filter
       if (filters.brand.length > 0 && !filters.brand.includes(vehicle.brand)) {
-        return false;
-      }
-
-      // Category filter
-      if (
-        filters.category.length > 0 &&
-        !filters.category.includes(vehicle.category)
-      ) {
         return false;
       }
 
@@ -154,7 +145,6 @@ const VehiclesPage = () => {
   const handleClearFilters = () => {
     setFilters({
       brand: [],
-      category: [],
       transmission: [],
       fuelType: [],
       priceRange: [0, 300],

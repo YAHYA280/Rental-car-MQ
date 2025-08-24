@@ -1,4 +1,4 @@
-// src/app/[locale]/vehicles/[id]/page.tsx
+// src/app/[locale]/vehicles/[id]/page.tsx - Updated without category
 "use client";
 
 import React, { useState, useMemo } from "react";
@@ -82,20 +82,6 @@ export default function VehicleDetailPage({ params }: VehicleDetailPageProps) {
     vehicle.image,
   ];
 
-  const getCategoryColor = (category: string) => {
-    const colors = {
-      Economy: "bg-green-100 text-green-800",
-      Premium: "bg-blue-100 text-blue-800",
-      Luxury: "bg-purple-100 text-purple-800",
-      SUV: "bg-orange-100 text-orange-800",
-      Electric: "bg-emerald-100 text-emerald-800",
-      Family: "bg-indigo-100 text-indigo-800",
-    };
-    return (
-      colors[category as keyof typeof colors] || "bg-gray-100 text-gray-800"
-    );
-  };
-
   const getFuelIcon = (fuelType: string) => {
     switch (fuelType) {
       case "Electric":
@@ -128,8 +114,9 @@ export default function VehicleDetailPage({ params }: VehicleDetailPageProps) {
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
   };
 
+  // Find related vehicles by brand instead of category
   const relatedVehicles = vehiclesData
-    .filter((v) => v.id !== vehicleId && v.category === vehicle.category)
+    .filter((v) => v.id !== vehicleId && v.brand === vehicle.brand)
     .slice(0, 3);
 
   return (
@@ -217,14 +204,8 @@ export default function VehicleDetailPage({ params }: VehicleDetailPageProps) {
                   <div className="flex justify-between items-start mb-6">
                     <div>
                       <div className="flex items-center gap-3 mb-2">
-                        <Badge
-                          className={`${getCategoryColor(
-                            vehicle.category
-                          )} font-semibold`}
-                        >
-                          {tFilters(
-                            `categories.${vehicle.category.toLowerCase()}`
-                          )}
+                        <Badge className="bg-carbookers-red-600 text-white font-semibold">
+                          {vehicle.brand}
                         </Badge>
                         <div className="flex items-center gap-1">
                           <Star className="h-4 w-4 text-yellow-400 fill-current" />
@@ -391,13 +372,13 @@ export default function VehicleDetailPage({ params }: VehicleDetailPageProps) {
               </Card>
             </AnimatedContainer>
 
-            {/* Related Vehicles */}
+            {/* Related Vehicles - Now shows same brand instead of category */}
             {relatedVehicles.length > 0 && (
               <AnimatedContainer direction="up" delay={0.4}>
                 <Card className="border-0 shadow-xl">
                   <CardContent className="p-6">
                     <h3 className="text-lg font-bold text-gray-900 mb-4">
-                      {tVehicle("relatedVehicles")}
+                      More {vehicle.brand} Vehicles
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       {relatedVehicles.map((relatedVehicle) => (
@@ -422,9 +403,7 @@ export default function VehicleDetailPage({ params }: VehicleDetailPageProps) {
                                 {relatedVehicle.brand} {relatedVehicle.name}
                               </h4>
                               <p className="text-xs text-gray-600 mb-1">
-                                {tFilters(
-                                  `categories.${relatedVehicle.category.toLowerCase()}`
-                                )}
+                                {relatedVehicle.model} {relatedVehicle.year}
                               </p>
                               <div className="flex justify-between items-center">
                                 <div className="flex items-center gap-1">

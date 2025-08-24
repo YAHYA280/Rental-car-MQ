@@ -1,4 +1,4 @@
-// src/components/vehicles/VehicleFilters.tsx
+// src/components/vehicles/VehicleFilters.tsx - Updated version
 "use client";
 
 import React from "react";
@@ -19,7 +19,6 @@ import {
   VehicleFilters as Filters,
   SearchParams,
   BRANDS,
-  CATEGORIES,
   TRANSMISSIONS,
   FUEL_TYPES,
   SEAT_COUNTS,
@@ -75,7 +74,6 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
   const hasActiveFilters = () => {
     return (
       filters.brand.length > 0 ||
-      filters.category.length > 0 ||
       filters.transmission.length > 0 ||
       filters.fuelType.length > 0 ||
       filters.seats.length > 0 ||
@@ -143,11 +141,13 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
 
       {/* Main Filter Controls */}
       <Card className="border-gray-200">
-        <CardContent className="p-6">
-          {/* Top Row: Results count, View toggle, Sort, Show count */}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
+        <CardContent className="p-4 lg:p-6">
+          {/* Mobile-First Layout */}
+
+          {/* Top Section: Results count and Clear Filters */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <div className="flex items-center gap-4">
-              <span className="text-gray-600">
+              <span className="text-gray-600 text-sm sm:text-base">
                 {totalResults} {tFilters("resultsFound")}
               </span>
 
@@ -156,38 +156,39 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
                   variant="outline"
                   size="sm"
                   onClick={onClearFilters}
-                  className="text-carbookers-red-600 border-carbookers-red-200 hover:bg-carbookers-red-50"
+                  className="text-carbookers-red-600 border-carbookers-red-200 hover:bg-carbookers-red-50 text-xs sm:text-sm"
                 >
-                  <X className="h-4 w-4 mr-1" />
+                  <X className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                   {tFilters("clearFilters")}
                 </Button>
               )}
             </div>
 
-            <div className="flex items-center gap-4">
+            {/* Display Controls - Mobile Optimized */}
+            <div className="flex items-center gap-2 sm:gap-4">
               {/* View Mode Toggle */}
               <div className="flex border rounded-md">
                 <Button
                   variant={viewMode === "grid" ? "default" : "ghost"}
                   size="sm"
                   onClick={() => onViewModeChange("grid")}
-                  className="rounded-r-none"
+                  className="rounded-r-none p-2"
                 >
-                  <Grid className="h-4 w-4" />
+                  <Grid className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
                 <Button
                   variant={viewMode === "list" ? "default" : "ghost"}
                   size="sm"
                   onClick={() => onViewModeChange("list")}
-                  className="rounded-l-none border-l"
+                  className="rounded-l-none border-l p-2"
                 >
-                  <List className="h-4 w-4" />
+                  <List className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
               </div>
 
-              {/* Sort By */}
+              {/* Sort By - Responsive width */}
               <Select value={sortBy} onValueChange={onSortChange}>
-                <SelectTrigger className="w-48">
+                <SelectTrigger className="w-32 sm:w-48 text-xs sm:text-sm">
                   <SelectValue placeholder={tFilters("sortBy")} />
                 </SelectTrigger>
                 <SelectContent>
@@ -205,12 +206,12 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
                 </SelectContent>
               </Select>
 
-              {/* Show Results Count */}
+              {/* Show Results Count - Hide on mobile */}
               <Select
                 value={showResults.toString()}
                 onValueChange={(value) => onShowResultsChange(Number(value))}
               >
-                <SelectTrigger className="w-32">
+                <SelectTrigger className="w-16 sm:w-20 text-xs sm:text-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -222,11 +223,11 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
             </div>
           </div>
 
-          {/* Filter Controls */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+          {/* Filter Controls - Mobile-First Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
             {/* Brand Filter */}
             <div>
-              <Label className="text-sm font-medium mb-2 block">
+              <Label className="text-xs sm:text-sm font-medium mb-2 block">
                 {tFilters("brand")}
               </Label>
               <Select
@@ -235,7 +236,7 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
                   updateFilter("brand", value === "all" ? [] : [value])
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="text-xs sm:text-sm">
                   <SelectValue placeholder={tFilters("allBrands")} />
                 </SelectTrigger>
                 <SelectContent>
@@ -249,36 +250,9 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
               </Select>
             </div>
 
-            {/* Category Filter */}
-            <div>
-              <Label className="text-sm font-medium mb-2 block">
-                {tFilters("category")}
-              </Label>
-              <Select
-                value={filters.category[0] || "all"}
-                onValueChange={(value) =>
-                  updateFilter("category", value === "all" ? [] : [value])
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={tFilters("allCategories")} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">
-                    {tFilters("allCategories")}
-                  </SelectItem>
-                  {CATEGORIES.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {tFilters(`categories.${category.toLowerCase()}`)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
             {/* Transmission Filter */}
             <div>
-              <Label className="text-sm font-medium mb-2 block">
+              <Label className="text-xs sm:text-sm font-medium mb-2 block">
                 {tFilters("transmission")}
               </Label>
               <Select
@@ -287,7 +261,7 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
                   updateFilter("transmission", value === "all" ? [] : [value])
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="text-xs sm:text-sm">
                   <SelectValue placeholder={tFilters("allTransmissions")} />
                 </SelectTrigger>
                 <SelectContent>
@@ -305,7 +279,7 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
 
             {/* Fuel Type Filter */}
             <div>
-              <Label className="text-sm font-medium mb-2 block">
+              <Label className="text-xs sm:text-sm font-medium mb-2 block">
                 {tFilters("fuelType")}
               </Label>
               <Select
@@ -314,7 +288,7 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
                   updateFilter("fuelType", value === "all" ? [] : [value])
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="text-xs sm:text-sm">
                   <SelectValue placeholder={tFilters("allFuelTypes")} />
                 </SelectTrigger>
                 <SelectContent>
@@ -332,7 +306,7 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
 
             {/* Seats Filter */}
             <div>
-              <Label className="text-sm font-medium mb-2 block">
+              <Label className="text-xs sm:text-sm font-medium mb-2 block">
                 {tFilters("seats")}
               </Label>
               <Select
@@ -341,7 +315,7 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
                   updateFilter("seats", value === "all" ? [] : [value])
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="text-xs sm:text-sm">
                   <SelectValue placeholder={tFilters("allSeats")} />
                 </SelectTrigger>
                 <SelectContent>
@@ -356,8 +330,8 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
             </div>
 
             {/* Price Range */}
-            <div>
-              <Label className="text-sm font-medium mb-2 block">
+            <div className="sm:col-span-2 lg:col-span-1">
+              <Label className="text-xs sm:text-sm font-medium mb-2 block">
                 {tFilters("priceRange")}
               </Label>
               <div className="flex items-center gap-2">
@@ -371,9 +345,9 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
                       filters.priceRange[1],
                     ])
                   }
-                  className="text-sm"
+                  className="text-xs sm:text-sm h-8 sm:h-9"
                 />
-                <span className="text-gray-400">-</span>
+                <span className="text-gray-400 text-xs sm:text-sm">-</span>
                 <Input
                   type="number"
                   placeholder="Max"
@@ -386,9 +360,10 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
                       Number(e.target.value) || 300,
                     ])
                   }
-                  className="text-sm"
+                  className="text-xs sm:text-sm h-8 sm:h-9"
                 />
               </div>
+              <p className="text-xs text-gray-500 mt-1">€ per day</p>
             </div>
           </div>
         </CardContent>
