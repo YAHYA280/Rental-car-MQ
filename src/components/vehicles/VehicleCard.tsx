@@ -1,8 +1,9 @@
-// src/components/vehicles/VehicleCard.tsx - Updated without category
+// src/components/vehicles/VehicleCard.tsx - Updated to redirect to detail page for WhatsApp booking
 "use client";
 
-import React from "react";
+import React, { useState, useMemo } from "react";
 import { useTranslations, useLocale } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +17,10 @@ import {
   Heart,
   Zap,
   Settings,
+  Calendar,
+  MessageCircle,
+  ToggleLeft,
+  ToggleRight,
 } from "lucide-react";
 import { Vehicle } from "@/components/types/vehicle";
 import Image from "next/image";
@@ -37,6 +42,68 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
   const t = useTranslations("vehicles");
   const tFilters = useTranslations("filters");
   const locale = useLocale();
+  const searchParams = useSearchParams();
+
+  // State for price display toggle
+  const [showTotalPrice, setShowTotalPrice] = useState(false);
+
+  // Calculate rental period and total price
+  const { rentalDays, totalPrice, hasValidDates } = useMemo(() => {
+    const pickupDate = searchParams.get("pickupDate");
+    const returnDate = searchParams.get("returnDate");
+
+    if (pickupDate && returnDate) {
+      const pickup = new Date(pickupDate);
+      const returnD = new Date(returnDate);
+      const timeDiff = returnD.getTime() - pickup.getTime();
+      const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+      if (daysDiff > 0) {
+        return {
+          rentalDays: daysDiff,
+          totalPrice: vehicle.price * daysDiff,
+          hasValidDates: true,
+        };
+      }
+    }
+
+    return {
+      rentalDays: 1,
+      totalPrice: vehicle.price,
+      hasValidDates: false,
+    };
+  }, [searchParams, vehicle.price]);
+
+  // Create the detail page URL with search parameters
+  const getDetailPageUrl = () => {
+    const params = new URLSearchParams();
+
+    // Preserve search parameters
+    if (searchParams.get("pickup"))
+      params.set("pickup", searchParams.get("pickup")!);
+    if (searchParams.get("dropoff"))
+      params.set("dropoff", searchParams.get("dropoff")!);
+    if (searchParams.get("pickupDate"))
+      params.set("pickupDate", searchParams.get("pickupDate")!);
+    if (searchParams.get("returnDate"))
+      params.set("returnDate", searchParams.get("returnDate")!);
+    if (searchParams.get("pickupTime"))
+      params.set("pickupTime", searchParams.get("pickupTime")!);
+    if (searchParams.get("returnTime"))
+      params.set("returnTime", searchParams.get("returnTime")!);
+    if (searchParams.get("differentDropoff"))
+      params.set("differentDropoff", searchParams.get("differentDropoff")!);
+    if (searchParams.get("driverAge"))
+      params.set("driverAge", searchParams.get("driverAge")!);
+
+    return {
+      pathname: "/vehicles/[id]" as const,
+      params: { id: vehicle.id },
+      query: params.toString()
+        ? Object.fromEntries(params.entries())
+        : undefined,
+    };
+  };
 
   const getFuelIcon = (fuelType: string) => {
     switch (fuelType) {
@@ -57,6 +124,46 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
       <Car className="h-4 w-4" />
     );
   };
+
+  // Price display component
+  const PriceDisplay = () => (
+    <div className="text-right">
+      <div className="flex items-center gap-2 mb-1">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setShowTotalPrice(!showTotalPrice)}
+          className="p-1 h-auto"
+          disabled={!hasValidDates}
+        >
+          {showTotalPrice && hasValidDates ? (
+            <ToggleRight className="h-4 w-4 text-carbookers-red-600" />
+          ) : (
+            <ToggleLeft className="h-4 w-4 text-gray-400" />
+          )}
+        </Button>
+        <div className="text-xl font-bold text-gray-900">
+          €{showTotalPrice && hasValidDates ? totalPrice : vehicle.price}
+        </div>
+      </div>
+      <div className="text-xs text-gray-600">
+        {showTotalPrice && hasValidDates ? (
+          <>
+            {rentalDays} day{rentalDays > 1 ? "s" : ""} total
+            <div className="text-xs text-gray-500">€{vehicle.price}/day</div>
+          </>
+        ) : (
+          t("perDay")
+        )}
+      </div>
+      {hasValidDates && (
+        <div className="text-xs text-carbookers-red-600 mt-1">
+          <Calendar className="h-3 w-3 inline mr-1" />
+          {rentalDays} day{rentalDays > 1 ? "s" : ""}
+        </div>
+      )}
+    </div>
+  );
 
   if (viewMode === "list") {
     return (
@@ -117,12 +224,7 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
                   {vehicle.location}
                 </div>
               </div>
-              <div className="text-right">
-                <div className="text-2xl font-bold text-gray-900">
-                  €{vehicle.price}
-                </div>
-                <div className="text-sm text-gray-600">{t("perDay")}</div>
-              </div>
+              <PriceDisplay />
             </div>
 
             {/* Vehicle Specs */}
@@ -171,21 +273,21 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
 
             {/* Action Buttons */}
             <div className="flex gap-3">
-              <Link
-                href={{
-                  pathname: "/vehicles/[id]",
-                  params: { id: vehicle.id },
-                }}
-                className="flex-1"
-              >
-                <Button className="w-full bg-black hover:bg-carbookers-red-600 text-white">
+              <Link href={getDetailPageUrl()} className="flex-1">
+                <Button
+                  variant="outline"
+                  className="w-full border-gray-300 hover:bg-gray-50"
+                >
                   <Eye className="h-4 w-4 mr-2" />
                   {t("viewDetails")}
                 </Button>
               </Link>
-              <Button className="bg-carbookers-red-600 hover:bg-carbookers-red-700 text-white">
-                {t("bookNow")}
-              </Button>
+              <Link href={getDetailPageUrl()}>
+                <Button className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2">
+                  <MessageCircle className="h-4 w-4" />
+                  WhatsApp
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -254,12 +356,7 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
               {vehicle.location}
             </div>
           </div>
-          <div className="text-right">
-            <div className="text-xl font-bold text-gray-900">
-              €{vehicle.price}
-            </div>
-            <div className="text-xs text-gray-600">{t("perDay")}</div>
-          </div>
+          <PriceDisplay />
         </div>
 
         {/* Vehicle Specs */}
@@ -308,9 +405,7 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
 
         {/* Action Buttons */}
         <div className="space-y-2">
-          <Link
-            href={{ pathname: "/vehicles/[id]", params: { id: vehicle.id } }}
-          >
+          <Link href={getDetailPageUrl()}>
             <Button
               variant="outline"
               className="w-full border-gray-300 hover:bg-gray-50"
@@ -319,9 +414,12 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
               {t("viewDetails")}
             </Button>
           </Link>
-          <Button className="w-full bg-carbookers-red-600 hover:bg-carbookers-red-700 text-white font-semibold">
-            {t("bookNow")}
-          </Button>
+          <Link href={getDetailPageUrl()}>
+            <Button className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold flex items-center gap-2">
+              <MessageCircle className="h-4 w-4" />
+              Book via WhatsApp
+            </Button>
+          </Link>
         </div>
       </CardContent>
     </Card>

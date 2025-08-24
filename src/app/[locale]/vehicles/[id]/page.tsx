@@ -1,16 +1,31 @@
-// src/app/[locale]/vehicles/[id]/page.tsx - Updated without category
+// src/app/[locale]/vehicles/[id]/page.tsx - Updated with rental details collection form
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { useTranslations } from "next-intl";
-import { useParams } from "next/navigation";
+import { useTranslations, useLocale } from "next-intl";
+import { useParams, useSearchParams } from "next/navigation";
+import { format } from "date-fns";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import AnimatedContainer from "@/components/ui/animated-container";
-import CarSearchComponent from "@/components/search/CarSearchComponent";
 import {
   Star,
   Users,
@@ -27,14 +42,19 @@ import {
   CheckCircle,
   Zap,
   Settings,
-  Calendar,
+  Calendar as CalendarIcon,
   Phone,
-  Mail,
   ArrowLeft,
+  MessageCircle,
+  ToggleLeft,
+  ToggleRight,
+  AlertTriangle,
 } from "lucide-react";
 import { vehiclesData } from "@/components/data/vehicles";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
+import { cn } from "@/lib/utils";
+import { DateRange } from "react-day-picker";
 
 interface VehicleDetailPageProps {
   params: { locale: string; id: string };
@@ -44,6 +64,9 @@ export default function VehicleDetailPage({ params }: VehicleDetailPageProps) {
   const t = useTranslations("vehicles");
   const tVehicle = useTranslations("vehicleDetail");
   const tFilters = useTranslations("filters");
+  const tSearch = useTranslations("search");
+  const locale = useLocale();
+  const searchParams = useSearchParams();
 
   const vehicleId = params.id;
 
@@ -53,9 +76,72 @@ export default function VehicleDetailPage({ params }: VehicleDetailPageProps) {
     [vehicleId]
   );
 
+  // State for rental details form
+  const [rentalDetails, setRentalDetails] = useState({
+    pickupLocation: searchParams.get("pickup") || "",
+    dropoffLocation: searchParams.get("dropoff") || "",
+    pickupDate: searchParams.get("pickupDate") || "",
+    pickupTime: searchParams.get("pickupTime") || "",
+    returnDate: searchParams.get("returnDate") || "",
+    returnTime: searchParams.get("returnTime") || "",
+    differentDropoff: searchParams.get("differentDropoff") === "true",
+  });
+
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
+    const pickup = rentalDetails.pickupDate;
+    const returnD = rentalDetails.returnDate;
+    if (pickup && returnD) {
+      return {
+        from: new Date(pickup),
+        to: new Date(returnD),
+      };
+    }
+    return undefined;
+  });
+
   // State
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [showTotalPrice, setShowTotalPrice] = useState(false);
+
+  // Calculate rental period and validation
+  const rentalInfo = useMemo(() => {
+    const pickup = rentalDetails.pickupDate;
+    const returnD = rentalDetails.returnDate;
+
+    let rentalDays = 0;
+    let isValidPeriod = false;
+
+    if (pickup && returnD) {
+      const pickupDateObj = new Date(pickup);
+      const returnDateObj = new Date(returnD);
+      const timeDiff = returnDateObj.getTime() - pickupDateObj.getTime();
+      rentalDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+      isValidPeriod = rentalDays >= 2;
+    }
+
+    const isComplete = Boolean(
+      rentalDetails.pickupLocation &&
+        pickup &&
+        returnD &&
+        rentalDetails.pickupTime &&
+        rentalDetails.returnTime &&
+        isValidPeriod &&
+        (!rentalDetails.differentDropoff || rentalDetails.dropoffLocation)
+    );
+
+    return {
+      rentalDays,
+      totalPrice: vehicle ? vehicle.price * Math.max(rentalDays, 1) : 0,
+      hasValidDates: isValidPeriod,
+      isComplete,
+    };
+  }, [rentalDetails, vehicle]);
+
+  const timeOptions = Array.from({ length: 24 }, (_, i) => {
+    const hour = i.toString().padStart(2, "0");
+    return { value: `${hour}:00`, label: `${hour}:00` };
+  });
 
   if (!vehicle) {
     return (
@@ -82,13 +168,101 @@ export default function VehicleDetailPage({ params }: VehicleDetailPageProps) {
     vehicle.image,
   ];
 
+  // Handle rental details form changes
+  const handleRentalDetailChange = (field: string, value: string | boolean) => {
+    setRentalDetails((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleDateRangeSelect = (range: DateRange | undefined) => {
+    setDateRange(range);
+    if (range?.from) {
+      handleRentalDetailChange("pickupDate", format(range.from, "yyyy-MM-dd"));
+    }
+    if (range?.to) {
+      handleRentalDetailChange("returnDate", format(range.to, "yyyy-MM-dd"));
+    }
+  };
+
+  const getDateRangeText = () => {
+    if (dateRange?.from && dateRange?.to) {
+      return `${format(dateRange.from, "MMM dd")} - ${format(
+        dateRange.to,
+        "MMM dd, yyyy"
+      )}`;
+    } else if (dateRange?.from) {
+      return format(dateRange.from, "MMM dd, yyyy");
+    }
+    return tSearch("selectPeriod");
+  };
+
+  // WhatsApp booking function
+  const handleWhatsAppBooking = () => {
+    const messageTemplates = {
+      en: `Hello! I would like to book the ${vehicle.brand} ${vehicle.name} (${
+        vehicle.model
+      } ${vehicle.year}).
+
+📅 Rental Details:
+• Pickup Date: ${rentalDetails.pickupDate} at ${rentalDetails.pickupTime}
+• Return Date: ${rentalDetails.returnDate} at ${rentalDetails.returnTime}
+• Pickup Location: ${rentalDetails.pickupLocation}
+• Return Location: ${
+        rentalDetails.dropoffLocation || rentalDetails.pickupLocation
+      }
+• Duration: ${rentalInfo.rentalDays} day${rentalInfo.rentalDays > 1 ? "s" : ""}
+
+💰 Estimated Cost: €${rentalInfo.totalPrice} (€${vehicle.price}/day)
+
+🚗 Vehicle Features:
+${vehicle.features
+  .slice(0, 5)
+  .map((feature) => `• ${feature}`)
+  .join("\n")}
+
+Please confirm availability and provide final pricing. Thank you!`,
+
+      fr: `Bonjour! Je souhaiterais réserver le ${vehicle.brand} ${
+        vehicle.name
+      } (${vehicle.model} ${vehicle.year}).
+
+📅 Détails de la Location:
+• Date de Prise: ${rentalDetails.pickupDate} à ${rentalDetails.pickupTime}
+• Date de Retour: ${rentalDetails.returnDate} à ${rentalDetails.returnTime}
+• Lieu de Prise: ${rentalDetails.pickupLocation}
+• Lieu de Retour: ${
+        rentalDetails.dropoffLocation || rentalDetails.pickupLocation
+      }
+• Durée: ${rentalInfo.rentalDays} jour${rentalInfo.rentalDays > 1 ? "s" : ""}
+
+💰 Coût Estimé: €${rentalInfo.totalPrice} (€${vehicle.price}/jour)
+
+🚗 Équipements du Véhicule:
+${vehicle.features
+  .slice(0, 5)
+  .map((feature) => `• ${feature}`)
+  .join("\n")}
+
+Veuillez confirmer la disponibilité et fournir le tarif final. Merci!`,
+    };
+
+    const message =
+      messageTemplates[locale as keyof typeof messageTemplates] ||
+      messageTemplates.en;
+    const phoneNumber = "+212612077309";
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
+      message
+    )}`;
+
+    window.open(whatsappUrl, "_blank");
+  };
+
   const getFuelIcon = (fuelType: string) => {
     switch (fuelType) {
       case "Electric":
         return <Zap className="h-5 w-5" />;
-      case "Petrol":
-      case "Diesel":
-      case "Hybrid":
       default:
         return <Fuel className="h-5 w-5" />;
     }
@@ -102,10 +276,6 @@ export default function VehicleDetailPage({ params }: VehicleDetailPageProps) {
     );
   };
 
-  const handleSearchSubmit = (searchData: any) => {
-    console.log("Search submitted from vehicle detail:", searchData);
-  };
-
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % images.length);
   };
@@ -114,7 +284,7 @@ export default function VehicleDetailPage({ params }: VehicleDetailPageProps) {
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
   };
 
-  // Find related vehicles by brand instead of category
+  // Related vehicles
   const relatedVehicles = vehiclesData
     .filter((v) => v.id !== vehicleId && v.brand === vehicle.brand)
     .slice(0, 3);
@@ -372,7 +542,7 @@ export default function VehicleDetailPage({ params }: VehicleDetailPageProps) {
               </Card>
             </AnimatedContainer>
 
-            {/* Related Vehicles - Now shows same brand instead of category */}
+            {/* Related Vehicles */}
             {relatedVehicles.length > 0 && (
               <AnimatedContainer direction="up" delay={0.4}>
                 <Card className="border-0 shadow-xl">
@@ -427,59 +597,352 @@ export default function VehicleDetailPage({ params }: VehicleDetailPageProps) {
             )}
           </div>
 
-          {/* Right Column - Booking */}
+          {/* Right Column - Rental Details & Booking */}
           <div className="lg:col-span-1 space-y-6">
-            {/* Price and Booking */}
             <AnimatedContainer direction="left" delay={0.3}>
               <Card className="border-0 shadow-xl sticky top-6">
                 <CardContent className="p-6">
-                  {/* Price */}
+                  {/* Price Display */}
                   <div className="text-center mb-6">
-                    <div className="text-4xl font-bold text-gray-900 mb-2">
-                      €{vehicle.price}
+                    <div className="flex items-center justify-center gap-3 mb-2">
+                      {rentalInfo.hasValidDates && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setShowTotalPrice(!showTotalPrice)}
+                          className="p-1 h-auto"
+                        >
+                          {showTotalPrice ? (
+                            <ToggleRight className="h-5 w-5 text-carbookers-red-600" />
+                          ) : (
+                            <ToggleLeft className="h-5 w-5 text-gray-400" />
+                          )}
+                        </Button>
+                      )}
+                      <div className="text-4xl font-bold text-gray-900">
+                        €
+                        {showTotalPrice && rentalInfo.hasValidDates
+                          ? rentalInfo.totalPrice
+                          : vehicle.price}
+                      </div>
                     </div>
-                    <div className="text-gray-600">{tVehicle("perDay")}</div>
+                    <div className="text-gray-600">
+                      {showTotalPrice && rentalInfo.hasValidDates ? (
+                        <>
+                          <div className="text-lg font-semibold">
+                            {rentalInfo.rentalDays} day
+                            {rentalInfo.rentalDays > 1 ? "s" : ""} total
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            €{vehicle.price}/day
+                          </div>
+                        </>
+                      ) : (
+                        tVehicle("perDay")
+                      )}
+                    </div>
                   </div>
 
-                  {/* Booking Form */}
-                  <div className="space-y-4 mb-6">
-                    <CarSearchComponent
-                      className="!p-4 !bg-gray-50"
-                      onSearch={handleSearchSubmit}
-                      compact={true}
-                    />
-                  </div>
+                  {/* Rental Details Form */}
+                  {!rentalInfo.isComplete ? (
+                    <div className="space-y-6">
+                      {/* Header */}
+                      <div className="flex items-center gap-3 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                        <AlertTriangle className="h-5 w-5 text-yellow-600" />
+                        <div>
+                          <h4 className="font-semibold text-yellow-800">
+                            {locale === "fr"
+                              ? "Détails de Location Requis"
+                              : "Rental Details Required"}
+                          </h4>
+                          <p className="text-sm text-yellow-700">
+                            {locale === "fr"
+                              ? "Complétez vos informations pour réserver"
+                              : "Complete your details to book this vehicle"}
+                          </p>
+                        </div>
+                      </div>
 
-                  {/* Action Buttons */}
-                  <div className="space-y-3">
-                    <Button className="w-full bg-carbookers-red-600 hover:bg-carbookers-red-700 text-white font-semibold py-3">
-                      <Calendar className="h-4 w-4 mr-2" />
-                      {tVehicle("bookNow")}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="w-full border-gray-300 hover:bg-gray-50"
-                    >
-                      <Phone className="h-4 w-4 mr-2" />
-                      {tVehicle("callNow")}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="w-full border-gray-300 hover:bg-gray-50"
-                    >
-                      <Mail className="h-4 w-4 mr-2" />
-                      {tVehicle("getQuote")}
-                    </Button>
-                  </div>
+                      {/* Pickup Location */}
+                      <div>
+                        <Label className="text-sm font-medium mb-2 block">
+                          {tSearch("pickupLocation")} *
+                        </Label>
+                        <div className="flex items-center gap-2 p-3 bg-white rounded-lg border">
+                          <MapPin className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                          <Input
+                            type="text"
+                            placeholder={tSearch("placeholders.pickupLocation")}
+                            value={rentalDetails.pickupLocation}
+                            onChange={(e) =>
+                              handleRentalDetailChange(
+                                "pickupLocation",
+                                e.target.value
+                              )
+                            }
+                            className="border-0 p-0 text-sm"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Date Range */}
+                      <div>
+                        <Label className="text-sm font-medium mb-2 block">
+                          {tSearch("rentalPeriod")} * (min. 2{" "}
+                          {locale === "fr" ? "jours" : "days"})
+                        </Label>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className="w-full justify-start text-left font-normal p-3 h-auto"
+                            >
+                              <CalendarIcon className="h-4 w-4 mr-2" />
+                              <span className="text-sm">
+                                {getDateRangeText()}
+                              </span>
+                              {rentalInfo.rentalDays > 0 && (
+                                <span className="ml-auto text-xs text-gray-500">
+                                  {rentalInfo.rentalDays}{" "}
+                                  {locale === "fr" ? "j" : "d"}
+                                </span>
+                              )}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              initialFocus
+                              mode="range"
+                              defaultMonth={dateRange?.from}
+                              selected={dateRange}
+                              onSelect={handleDateRangeSelect}
+                              numberOfMonths={1}
+                              disabled={(date) => date < new Date()}
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+
+                      {/* Times */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label className="text-sm font-medium mb-2 block">
+                            {tSearch("pickupTime")} *
+                          </Label>
+                          <Select
+                            value={rentalDetails.pickupTime}
+                            onValueChange={(value) =>
+                              handleRentalDetailChange("pickupTime", value)
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue
+                                placeholder={tSearch("placeholders.selectTime")}
+                              />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {timeOptions.map((time) => (
+                                <SelectItem key={time.value} value={time.value}>
+                                  {time.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label className="text-sm font-medium mb-2 block">
+                            {tSearch("returnTime")} *
+                          </Label>
+                          <Select
+                            value={rentalDetails.returnTime}
+                            onValueChange={(value) =>
+                              handleRentalDetailChange("returnTime", value)
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue
+                                placeholder={tSearch("placeholders.selectTime")}
+                              />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {timeOptions.map((time) => (
+                                <SelectItem key={time.value} value={time.value}>
+                                  {time.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+
+                      {/* Different dropoff location toggle */}
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="checkbox"
+                          id="different-dropoff"
+                          checked={rentalDetails.differentDropoff}
+                          onChange={(e) =>
+                            handleRentalDetailChange(
+                              "differentDropoff",
+                              e.target.checked
+                            )
+                          }
+                          className="w-4 h-4 text-carbookers-red-600 focus:ring-carbookers-red-600 rounded"
+                        />
+                        <label
+                          htmlFor="different-dropoff"
+                          className="text-sm cursor-pointer"
+                        >
+                          {tSearch("differentDropoff")}
+                        </label>
+                      </div>
+
+                      {/* Dropoff Location (conditional) */}
+                      {rentalDetails.differentDropoff && (
+                        <div>
+                          <Label className="text-sm font-medium mb-2 block">
+                            {tSearch("dropoffLocation")} *
+                          </Label>
+                          <div className="flex items-center gap-2 p-3 bg-white rounded-lg border">
+                            <MapPin className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                            <Input
+                              type="text"
+                              placeholder={tSearch(
+                                "placeholders.dropoffLocation"
+                              )}
+                              value={rentalDetails.dropoffLocation}
+                              onChange={(e) =>
+                                handleRentalDetailChange(
+                                  "dropoffLocation",
+                                  e.target.value
+                                )
+                              }
+                              className="border-0 p-0 text-sm"
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Apply Period Button */}
+                      <Button
+                        onClick={() => {
+                          // This will trigger the state change to show summary when all fields are complete
+                          // The button is automatically enabled/disabled based on validation
+                        }}
+                        disabled={!rentalInfo.isComplete}
+                        className={`w-full py-3 font-semibold flex items-center gap-2 ${
+                          rentalInfo.isComplete
+                            ? "bg-carbookers-red-600 hover:bg-carbookers-red-700 text-white"
+                            : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        }`}
+                      >
+                        <CalendarIcon className="h-4 w-4" />
+                        {locale === "fr"
+                          ? "Appliquer la Période"
+                          : "Apply Period"}
+                        {rentalInfo.rentalDays > 0 && rentalInfo.isComplete && (
+                          <span className="text-xs opacity-90">
+                            ({rentalInfo.rentalDays}{" "}
+                            {locale === "fr" ? "j" : "d"})
+                          </span>
+                        )}
+                      </Button>
+
+                      {/* Incomplete fields notice */}
+                      {!rentalInfo.isComplete && (
+                        <div className="text-center text-sm text-gray-600 p-3 bg-gray-50 rounded-lg">
+                          {locale === "fr"
+                            ? "Complétez tous les champs requis (*) pour continuer"
+                            : "Complete all required fields (*) to continue"}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    /* Complete booking summary and WhatsApp button */
+                    <div className="space-y-6">
+                      {/* Booking Summary */}
+                      <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                        <h4 className="font-semibold text-green-800 mb-3">
+                          {locale === "fr"
+                            ? "Résumé de la Réservation"
+                            : "Booking Summary"}
+                        </h4>
+                        <div className="text-sm text-green-700 space-y-2">
+                          <div className="flex items-center gap-2">
+                            <CalendarIcon className="h-4 w-4" />
+                            <span>
+                              {rentalDetails.pickupDate} to{" "}
+                              {rentalDetails.returnDate}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4" />
+                            <span>
+                              {rentalDetails.pickupTime} -{" "}
+                              {rentalDetails.returnTime}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <MapPin className="h-4 w-4" />
+                            <span>{rentalDetails.pickupLocation}</span>
+                          </div>
+                          {rentalDetails.differentDropoff &&
+                            rentalDetails.dropoffLocation && (
+                              <div className="flex items-center gap-2">
+                                <MapPin className="h-4 w-4" />
+                                <span>
+                                  {locale === "fr" ? "Retour:" : "Return:"}{" "}
+                                  {rentalDetails.dropoffLocation}
+                                </span>
+                              </div>
+                            )}
+                          <div className="font-semibold pt-2 border-t border-green-300 flex items-center justify-between">
+                            <span>Total: €{rentalInfo.totalPrice}</span>
+                            <span className="text-xs">
+                              ({rentalInfo.rentalDays}{" "}
+                              {locale === "fr" ? "jour" : "day"}
+                              {rentalInfo.rentalDays > 1 ? "s" : ""})
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* WhatsApp Booking Button */}
+                      <Button
+                        onClick={handleWhatsAppBooking}
+                        className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-4 flex items-center gap-3 text-lg"
+                      >
+                        <MessageCircle className="h-5 w-5" />
+                        {locale === "fr"
+                          ? "Réserver via WhatsApp"
+                          : "Book via WhatsApp"}
+                      </Button>
+
+                      {/* Call Button */}
+                      <Button
+                        variant="outline"
+                        className="w-full border-gray-300 hover:bg-gray-50 flex items-center gap-2 py-3"
+                        onClick={() => window.open("tel:+212612077309")}
+                      >
+                        <Phone className="h-4 w-4" />
+                        {locale === "fr" ? "Appeler Maintenant" : "Call Now"}
+                      </Button>
+                    </div>
+                  )}
 
                   {/* Contact Info */}
                   <div className="mt-6 pt-6 border-t border-gray-200">
                     <div className="text-center">
                       <p className="text-sm text-gray-600 mb-2">
-                        {tVehicle("needHelp")}
+                        {locale === "fr" ? "Besoin d'aide?" : "Need help?"}
                       </p>
                       <p className="font-semibold text-carbookers-red-600">
                         +212612077309
+                      </p>
+                      <p className="text-sm text-gray-500 mt-1">
+                        {locale === "fr"
+                          ? "WhatsApp disponible 24/7"
+                          : "WhatsApp available 24/7"}
                       </p>
                     </div>
                   </div>

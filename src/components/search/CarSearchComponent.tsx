@@ -1,7 +1,7 @@
-// src/components/search/CarSearchComponent.tsx - Fixed interface
+// src/components/search/CarSearchComponent.tsx - With search validation
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { format } from "date-fns";
@@ -27,6 +27,7 @@ import {
   Clock,
   Search,
   RotateCcw,
+  AlertCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DateRange } from "react-day-picker";
@@ -42,11 +43,10 @@ interface SearchFormData {
   driverAge: string;
 }
 
-// Fixed interface - added the missing compact prop
 interface CarSearchProps {
   className?: string;
   onSearch?: (data: SearchFormData) => void;
-  compact?: boolean; // This was missing - now added
+  compact?: boolean;
 }
 
 const CarSearchComponent: React.FC<CarSearchProps> = ({
@@ -70,22 +70,86 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
   });
 
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
+  const [showValidation, setShowValidation] = useState(false);
+
+  // Validation logic
+  const validation = useMemo(() => {
+    const errors: string[] = [];
+    let isValid = true;
+    let rentalDays = 0;
+
+    // Check pickup location
+    if (!searchData.pickupLocation.trim()) {
+      errors.push(
+        locale === "fr" ? "Lieu de prise requis" : "Pickup location required"
+      );
+      isValid = false;
+    }
+
+    // Check dates and calculate rental period
+    if (!searchData.pickupDate || !searchData.returnDate) {
+      errors.push(
+        locale === "fr"
+          ? "Période de location requise"
+          : "Rental period required"
+      );
+      isValid = false;
+    } else {
+      const pickupDateObj = new Date(searchData.pickupDate);
+      const returnDateObj = new Date(searchData.returnDate);
+      const timeDiff = returnDateObj.getTime() - pickupDateObj.getTime();
+      rentalDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+      if (rentalDays < 2) {
+        errors.push(
+          locale === "fr"
+            ? "Minimum 2 jours de location"
+            : "Minimum 2 days rental"
+        );
+        isValid = false;
+      }
+    }
+
+    // Check pickup time
+    if (!searchData.pickupTime) {
+      errors.push(
+        locale === "fr" ? "Heure de prise requise" : "Pickup time required"
+      );
+      isValid = false;
+    }
+
+    // Check return time
+    if (!searchData.returnTime) {
+      errors.push(
+        locale === "fr" ? "Heure de retour requise" : "Return time required"
+      );
+      isValid = false;
+    }
+
+    // Check dropoff location if different location is selected
+    if (searchData.differentDropoff && !searchData.dropoffLocation.trim()) {
+      errors.push(
+        locale === "fr" ? "Lieu de retour requis" : "Dropoff location required"
+      );
+      isValid = false;
+    }
+
+    return {
+      isValid,
+      errors,
+      rentalDays,
+    };
+  }, [searchData, locale]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Create URL parameters for the vehicles page
-    const params = new URLSearchParams();
-    if (searchData.pickupLocation)
-      params.set("pickup", searchData.pickupLocation);
-    if (searchData.dropoffLocation)
-      params.set("dropoff", searchData.dropoffLocation);
-    if (searchData.pickupDate) params.set("pickupDate", searchData.pickupDate);
-    if (searchData.pickupTime) params.set("pickupTime", searchData.pickupTime);
-    if (searchData.returnDate) params.set("returnDate", searchData.returnDate);
-    if (searchData.returnTime) params.set("returnTime", searchData.returnTime);
-    if (searchData.differentDropoff) params.set("differentDropoff", "true");
-    if (searchData.driverAge) params.set("driverAge", searchData.driverAge);
+    // Show validation if form is invalid
+    if (!validation.isValid) {
+      setShowValidation(true);
+      setTimeout(() => setShowValidation(false), 5000);
+      return;
+    }
 
     // Call the optional callback
     if (onSearch) {
@@ -94,8 +158,22 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
 
     // Navigate to vehicles page with search parameters (only if not compact)
     if (!compact) {
-      const queryString = params.toString();
-      router.push(`/vehicles${queryString ? `?${queryString}` : ""}`);
+      const query: Record<string, string> = {};
+
+      if (searchData.pickupLocation) query.pickup = searchData.pickupLocation;
+      if (searchData.dropoffLocation)
+        query.dropoff = searchData.dropoffLocation;
+      if (searchData.pickupDate) query.pickupDate = searchData.pickupDate;
+      if (searchData.pickupTime) query.pickupTime = searchData.pickupTime;
+      if (searchData.returnDate) query.returnDate = searchData.returnDate;
+      if (searchData.returnTime) query.returnTime = searchData.returnTime;
+      if (searchData.differentDropoff) query.differentDropoff = "true";
+      if (searchData.driverAge) query.driverAge = searchData.driverAge;
+
+      router.push({
+        pathname: "/vehicles",
+        query: Object.keys(query).length > 0 ? query : undefined,
+      });
     }
   };
 
@@ -107,6 +185,10 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
       ...prev,
       [field]: value,
     }));
+    // Hide validation when user starts fixing issues
+    if (showValidation) {
+      setShowValidation(false);
+    }
   };
 
   const handleDateRangeSelect = (range: DateRange | undefined) => {
@@ -116,6 +198,10 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
     }
     if (range?.to) {
       handleInputChange("returnDate", format(range.to, "yyyy-MM-dd"));
+    }
+    // Hide validation when user selects dates
+    if (showValidation) {
+      setShowValidation(false);
     }
   };
 
@@ -142,18 +228,75 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
     return t("selectPeriod");
   };
 
+  // Validation message component
+  const ValidationMessage = () => {
+    if (!showValidation || validation.errors.length === 0) return null;
+
+    return (
+      <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+        <div className="flex items-start gap-2">
+          <AlertCircle className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="text-sm font-medium text-red-800 mb-1">
+              {locale === "fr"
+                ? "Veuillez corriger les erreurs suivantes:"
+                : "Please fix the following errors:"}
+            </p>
+            <ul className="text-sm text-red-700 space-y-1">
+              {validation.errors.map((error, index) => (
+                <li key={index} className="flex items-center gap-1">
+                  <span className="w-1 h-1 bg-red-600 rounded-full"></span>
+                  {error}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Search Button Component
+  const SearchButton = () => (
+    <Button
+      type="submit"
+      disabled={!validation.isValid}
+      className={`w-full font-bold text-lg px-12 py-4 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 border-0 flex items-center gap-3 ${
+        validation.isValid
+          ? "bg-gradient-to-r from-carbookers-red-600 to-carbookers-red-500 hover:from-carbookers-red-700 hover:to-carbookers-red-600 text-white transform hover:scale-105"
+          : "bg-gray-300 text-gray-500 cursor-not-allowed"
+      }`}
+    >
+      <Search className="h-6 w-6" />
+      {t("searchButton")}
+      {validation.rentalDays > 0 && validation.isValid && (
+        <span className="text-sm opacity-90">
+          ({validation.rentalDays} {locale === "fr" ? "jours" : "days"})
+        </span>
+      )}
+    </Button>
+  );
+
   // Compact version for vehicle detail page
   if (compact) {
     return (
       <div className={`bg-gray-50 rounded-xl p-4 ${className}`}>
         <form onSubmit={handleSearchSubmit} className="space-y-4">
+          <ValidationMessage />
+
           <div className="grid grid-cols-1 gap-3">
             {/* Pickup Location */}
             <div>
               <Label className="text-xs font-medium mb-1 block">
-                {t("pickupLocation")}
+                {t("pickupLocation")} *
               </Label>
-              <div className="flex items-center gap-2 p-2 bg-white rounded-md border">
+              <div
+                className={`flex items-center gap-2 p-2 bg-white rounded-md border ${
+                  showValidation && !searchData.pickupLocation.trim()
+                    ? "border-red-300"
+                    : "border-gray-300"
+                }`}
+              >
                 <MapPin className="h-4 w-4 text-gray-400 flex-shrink-0" />
                 <Input
                   type="text"
@@ -171,16 +314,26 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
             {/* Date Range */}
             <div>
               <Label className="text-xs font-medium mb-1 block">
-                {t("rentalPeriod")}
+                {t("rentalPeriod")} * (min. 2{" "}
+                {locale === "fr" ? "jours" : "days"})
               </Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className="w-full justify-start text-left font-normal p-2 h-auto"
+                    className={`w-full justify-start text-left font-normal p-2 h-auto ${
+                      showValidation && validation.rentalDays < 2
+                        ? "border-red-300"
+                        : "border-gray-300"
+                    }`}
                   >
                     <CalendarIcon className="h-4 w-4 mr-2" />
                     <span className="text-sm">{getDateRangeText()}</span>
+                    {validation.rentalDays > 0 && (
+                      <span className="ml-auto text-xs text-gray-500">
+                        {validation.rentalDays} {locale === "fr" ? "j" : "d"}
+                      </span>
+                    )}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -201,7 +354,7 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <Label className="text-xs font-medium mb-1 block">
-                  {t("pickupTime")}
+                  {t("pickupTime")} *
                 </Label>
                 <Select
                   value={searchData.pickupTime}
@@ -209,7 +362,13 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
                     handleInputChange("pickupTime", value)
                   }
                 >
-                  <SelectTrigger className="h-8">
+                  <SelectTrigger
+                    className={`h-8 ${
+                      showValidation && !searchData.pickupTime
+                        ? "border-red-300"
+                        : ""
+                    }`}
+                  >
                     <SelectValue placeholder={t("placeholders.selectTime")} />
                   </SelectTrigger>
                   <SelectContent>
@@ -223,7 +382,7 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
               </div>
               <div>
                 <Label className="text-xs font-medium mb-1 block">
-                  {t("returnTime")}
+                  {t("returnTime")} *
                 </Label>
                 <Select
                   value={searchData.returnTime}
@@ -231,7 +390,13 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
                     handleInputChange("returnTime", value)
                   }
                 >
-                  <SelectTrigger className="h-8">
+                  <SelectTrigger
+                    className={`h-8 ${
+                      showValidation && !searchData.returnTime
+                        ? "border-red-300"
+                        : ""
+                    }`}
+                  >
                     <SelectValue placeholder={t("placeholders.selectTime")} />
                   </SelectTrigger>
                   <SelectContent>
@@ -247,13 +412,26 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
           </div>
 
           {/* Search Button */}
-          <Button
-            type="submit"
-            className="w-full bg-carbookers-red-600 hover:bg-carbookers-red-700 text-white"
-          >
-            <Search className="h-4 w-4 mr-2" />
-            {t("searchButton")}
-          </Button>
+          <div className="pt-2">
+            <Button
+              type="submit"
+              disabled={!validation.isValid}
+              className={`w-full flex items-center gap-2 ${
+                validation.isValid
+                  ? "bg-carbookers-red-600 hover:bg-carbookers-red-700 text-white"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              }`}
+            >
+              <Search className="h-4 w-4" />
+              {t("searchButton")}
+              {validation.rentalDays > 0 && validation.isValid && (
+                <span className="text-xs opacity-90">
+                  ({validation.rentalDays}
+                  {locale === "fr" ? "j" : "d"})
+                </span>
+              )}
+            </Button>
+          </div>
         </form>
       </div>
     );
@@ -275,6 +453,9 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
             <p className="text-gray-200 text-lg opacity-90">{t("subtitle")}</p>
           </div>
 
+          {/* Validation Message */}
+          <ValidationMessage />
+
           {/* Main Search Container */}
           <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl border border-white/20 overflow-hidden">
             {/* Desktop Layout */}
@@ -282,7 +463,7 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
               {/* Pickup Location */}
               <div className="p-6 flex flex-col justify-between h-24">
                 <Label className="text-xs text-carbookers-red-800 uppercase tracking-wide mb-2 block font-semibold">
-                  {t("pickupLocation")}
+                  {t("pickupLocation")} *
                 </Label>
                 <div className="flex items-center gap-3">
                   <MapPin className="h-5 w-5 text-carbookers-red-600 flex-shrink-0" />
@@ -293,7 +474,11 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
                     onChange={(e) =>
                       handleInputChange("pickupLocation", e.target.value)
                     }
-                    className="border-0 p-0 text-gray-900 placeholder:text-gray-500 focus:ring-0 font-medium bg-transparent text-sm w-full"
+                    className={`border-0 p-0 text-gray-900 placeholder:text-gray-500 focus:ring-0 font-medium bg-transparent text-sm w-full ${
+                      showValidation && !searchData.pickupLocation.trim()
+                        ? "text-red-600"
+                        : ""
+                    }`}
                     required
                   />
                 </div>
@@ -302,7 +487,8 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
               {/* Date Range Picker */}
               <div className="p-6 flex flex-col justify-between h-24">
                 <Label className="text-xs text-carbookers-red-800 uppercase tracking-wide mb-2 block font-semibold">
-                  {t("rentalPeriod")}
+                  {t("rentalPeriod")} * (min. 2{" "}
+                  {locale === "fr" ? "jours" : "days"})
                 </Label>
                 <Popover>
                   <PopoverTrigger asChild>
@@ -310,13 +496,22 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
                       variant="ghost"
                       className={cn(
                         "w-full justify-start text-left font-medium p-0 h-auto bg-transparent hover:bg-gray-50 text-sm",
-                        !dateRange && "text-gray-500"
+                        !dateRange && "text-gray-500",
+                        showValidation &&
+                          validation.rentalDays < 2 &&
+                          "text-red-600"
                       )}
                     >
                       <CalendarIcon className="h-5 w-5 text-carbookers-red-600 mr-3 flex-shrink-0" />
                       <span className="text-gray-900 font-medium truncate">
                         {getDateRangeText()}
                       </span>
+                      {validation.rentalDays > 0 && (
+                        <span className="ml-auto text-xs text-gray-500">
+                          {validation.rentalDays}{" "}
+                          {locale === "fr" ? "jours" : "days"}
+                        </span>
+                      )}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -336,7 +531,7 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
               {/* Pickup Time */}
               <div className="p-6 flex flex-col justify-between h-24">
                 <Label className="text-xs text-carbookers-red-800 uppercase tracking-wide mb-2 block font-semibold">
-                  {t("pickupTime")}
+                  {t("pickupTime")} *
                 </Label>
                 <div className="flex items-center gap-3">
                   <Clock className="h-5 w-5 text-carbookers-red-600 flex-shrink-0" />
@@ -363,7 +558,7 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
               {/* Return Time */}
               <div className="p-6 flex flex-col justify-between h-24">
                 <Label className="text-xs text-carbookers-red-800 uppercase tracking-wide mb-2 block font-semibold">
-                  {t("returnTime")}
+                  {t("returnTime")} *
                 </Label>
                 <div className="flex items-center gap-3">
                   <Clock className="h-5 w-5 text-carbookers-red-600 flex-shrink-0" />
@@ -393,9 +588,15 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
               {/* Pickup Location */}
               <div>
                 <Label className="text-xs text-carbookers-red-800 uppercase tracking-wide mb-3 block font-semibold">
-                  {t("pickupLocation")}
+                  {t("pickupLocation")} *
                 </Label>
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg min-h-[48px]">
+                <div
+                  className={`flex items-center gap-3 p-3 bg-gray-50 rounded-lg min-h-[48px] ${
+                    showValidation && !searchData.pickupLocation.trim()
+                      ? "border border-red-300"
+                      : ""
+                  }`}
+                >
                   <MapPin className="h-5 w-5 text-carbookers-red-600 flex-shrink-0" />
                   <Input
                     type="text"
@@ -413,7 +614,8 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
               {/* Date Range Picker - Mobile */}
               <div>
                 <Label className="text-xs text-carbookers-red-800 uppercase tracking-wide mb-3 block font-semibold">
-                  {t("rentalPeriod")}
+                  {t("rentalPeriod")} * (min. 2{" "}
+                  {locale === "fr" ? "jours" : "days"})
                 </Label>
                 <Popover>
                   <PopoverTrigger asChild>
@@ -421,13 +623,21 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
                       variant="ghost"
                       className={cn(
                         "w-full justify-start text-left font-medium p-3 bg-gray-50 rounded-lg min-h-[48px] hover:bg-gray-100 transition-colors",
-                        !dateRange && "text-gray-500"
+                        !dateRange && "text-gray-500",
+                        showValidation &&
+                          validation.rentalDays < 2 &&
+                          "border border-red-300"
                       )}
                     >
                       <CalendarIcon className="h-5 w-5 text-carbookers-red-600 mr-3 flex-shrink-0" />
                       <span className="text-gray-900 font-medium text-sm">
                         {getDateRangeText()}
                       </span>
+                      {validation.rentalDays > 0 && (
+                        <span className="ml-auto text-xs text-gray-500">
+                          {validation.rentalDays} {locale === "fr" ? "j" : "d"}
+                        </span>
+                      )}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="center">
@@ -449,9 +659,15 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
                 {/* Pickup Time */}
                 <div>
                   <Label className="text-xs text-carbookers-red-800 uppercase tracking-wide mb-3 block font-semibold">
-                    {t("pickupTime")}
+                    {t("pickupTime")} *
                   </Label>
-                  <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg min-h-[48px]">
+                  <div
+                    className={`flex items-center gap-2 p-3 bg-gray-50 rounded-lg min-h-[48px] ${
+                      showValidation && !searchData.pickupTime
+                        ? "border border-red-300"
+                        : ""
+                    }`}
+                  >
                     <Clock className="h-4 w-4 text-carbookers-red-600 flex-shrink-0" />
                     <Select
                       value={searchData.pickupTime}
@@ -478,9 +694,15 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
                 {/* Return Time */}
                 <div>
                   <Label className="text-xs text-carbookers-red-800 uppercase tracking-wide mb-3 block font-semibold">
-                    {t("returnTime")}
+                    {t("returnTime")} *
                   </Label>
-                  <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg min-h-[48px]">
+                  <div
+                    className={`flex items-center gap-2 p-3 bg-gray-50 rounded-lg min-h-[48px] ${
+                      showValidation && !searchData.returnTime
+                        ? "border border-red-300"
+                        : ""
+                    }`}
+                  >
                     <Clock className="h-4 w-4 text-carbookers-red-600 flex-shrink-0" />
                     <Select
                       value={searchData.returnTime}
@@ -509,13 +731,7 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
 
           {/* Search Button */}
           <div className="flex justify-center">
-            <Button
-              type="submit"
-              className="bg-gradient-to-r from-carbookers-red-600 to-carbookers-red-500 hover:from-carbookers-red-700 hover:to-carbookers-red-600 text-white font-bold text-lg px-12 py-4 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border-0 flex items-center gap-3"
-            >
-              <Search className="h-6 w-6" />
-              {t("searchButton")}
-            </Button>
+            <SearchButton />
           </div>
 
           {/* Secondary Options */}
@@ -567,7 +783,7 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
           {searchData.differentDropoff && (
             <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-lg">
               <Label className="text-xs text-carbookers-red-800 uppercase tracking-wide mb-3 block font-semibold">
-                {t("dropoffLocation")}
+                {t("dropoffLocation")} *
               </Label>
               <div className="flex items-center gap-3">
                 <RotateCcw className="h-5 w-5 text-carbookers-red-600" />
@@ -578,10 +794,25 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
                   onChange={(e) =>
                     handleInputChange("dropoffLocation", e.target.value)
                   }
-                  className="border-0 p-0 text-gray-900 placeholder:text-gray-500 focus:ring-0 font-medium bg-transparent"
+                  className={`border-0 p-0 text-gray-900 placeholder:text-gray-500 focus:ring-0 font-medium bg-transparent ${
+                    showValidation &&
+                    searchData.differentDropoff &&
+                    !searchData.dropoffLocation.trim()
+                      ? "text-red-600"
+                      : ""
+                  }`}
                   required={searchData.differentDropoff}
                 />
               </div>
+              {showValidation &&
+                searchData.differentDropoff &&
+                !searchData.dropoffLocation.trim() && (
+                  <p className="text-xs text-red-600 mt-1">
+                    {locale === "fr"
+                      ? "Lieu de retour requis"
+                      : "Dropoff location required"}
+                  </p>
+                )}
             </div>
           )}
         </form>
