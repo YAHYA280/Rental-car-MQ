@@ -42,7 +42,6 @@ const Navbar = () => {
     { label: t("home"), href: "/" as const },
     { label: t("vehicles"), href: "/vehicles" as const },
     { label: t("about"), href: "/about" as const },
-    { label: t("contact"), href: "/contact" as const },
   ];
 
   return (

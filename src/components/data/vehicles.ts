@@ -318,7 +318,7 @@ export const vehiclesData: Vehicle[] = [
       "/cars/Mercedes G63/photo4.jpg",
       "/cars/Mercedes G63/photo5.jpg",
     ],
-    price: 300,
+    price: 1250,
     transmission: "Automatic",
     fuelType: "Petrol",
     seats: 5,
