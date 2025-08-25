@@ -393,5 +393,123 @@
     "optional": "optionnel",
     "minimum": "minimum",
     "maximum": "maximum"
+  },
+  "aboutPage": {
+    "hero": {
+      "subtitle": "À Propos de MELHOR QUE NADA",
+      "title": "Excellence Marocaine en Location de Voitures",
+      "description": "Votre partenaire de confiance pour la location de voitures premium au Maroc. Depuis Tanger, nous redéfinissons l'expérience de mobilité avec notre flotte exceptionnelle."
+    },
+    "stats": {
+      "vehicles": "40+ Véhicules Premium",
+      "customers": "1,000+ Clients Satisfaits",
+      "rating": "4.8/5 Note Client",
+      "experience": "5+ Années d'Excellence",
+      "support": "Support Client 24/7",
+      "insurance": "100% Assurance Complète"
+    },
+    "overview": {
+      "title": "MELHOR QUE NADA : Plus Qu'une Location",
+      "subtitle": "Notre Histoire",
+      "description": "Fondée avec la vision de révolutionner l'industrie de la location de voitures au Maroc, MELHOR QUE NADA s'est imposée comme le leader incontesté du secteur premium à Tanger.",
+      "mission": "Notre Mission",
+      "missionText": "Offrir une expérience de mobilité exceptionnelle en combinant une flotte premium, un service personnalisé et une expertise locale inégalée pour chaque client au Maroc.",
+      "whyChoose": "Pourquoi Nous Choisir",
+      "location": "Notre Emplacement",
+      "locationDesc": "Stratégiquement situé au cœur de Tanger"
+    },
+    "values": {
+      "title": "Ce Qui Nous Définit",
+      "subtitle": "Chez MELHOR QUE NADA, nos valeurs fondamentales guident notre approche et façonnent l'expérience que nous offrons à chaque client.",
+      "passion": {
+        "title": "Passion",
+        "description": "Notre amour pour l'automobile et le service d'excellence guide chaque décision que nous prenons."
+      },
+      "reliability": {
+        "title": "Fiabilité",
+        "description": "Nous nous engageons à fournir des véhicules sûrs et un service constant sur lequel vous pouvez compter."
+      },
+      "excellence": {
+        "title": "Excellence",
+        "description": "Nous visons la perfection dans chaque aspect de notre service, de la réservation au retour."
+      },
+      "customerFocus": {
+        "title": "Relation Client",
+        "description": "Chaque client est unique et mérite une attention personnalisée adaptée à ses besoins spécifiques."
+      },
+      "innovation": {
+        "title": "Innovation",
+        "description": "Nous adoptons les dernières technologies pour améliorer continuellement l'expérience client."
+      },
+      "responsibility": {
+        "title": "Responsabilité",
+        "description": "Nous nous engageons envers notre communauté et l'environnement avec des pratiques durables."
+      },
+      "commitment": {
+        "title": "Notre Engagement",
+        "description": "MELHOR QUE NADA s'engage à maintenir ces valeurs dans chaque interaction, garantissant une expérience de location de voiture qui dépasse vos attentes à chaque voyage."
+      }
+    },
+    "team": {
+      "title": "L'Excellence Humaine",
+      "subtitle": "Derrière chaque expérience exceptionnelle chez MELHOR QUE NADA se trouve une équipe dévouée de professionnels passionnés.",
+      "expertTeam": {
+        "title": "Équipe Experte",
+        "description": "Notre équipe possède une connaissance approfondie du marché automobile marocain et international."
+      },
+      "personalizedService": {
+        "title": "Service Personnalisé",
+        "description": "Chaque membre de notre équipe est formé pour offrir un service sur mesure adapté à vos besoins."
+      },
+      "availability": {
+        "title": "Disponibilité Continue",
+        "description": "Notre équipe est disponible 24/7 pour vous assister à tout moment pendant votre location."
+      },
+      "departments": "Nos Départements",
+      "departmentsDesc": "Chaque département travaille en harmonie pour vous offrir une expérience complète et sans faille.",
+      "customerService": {
+        "name": "Service Client",
+        "description": "Votre premier contact avec MELHOR QUE NADA"
+      },
+      "fleetManagement": {
+        "name": "Gestion de Flotte",
+        "description": "Maintenance et qualité de nos véhicules"
+      },
+      "technicalSupport": {
+        "name": "Support Technique",
+        "description": "Assistance technique et dépannage"
+      },
+      "promise": {
+        "title": "Notre Promesse d'Équipe",
+        "description": "Nous nous engageons à vous accompagner à chaque étape de votre parcours avec MELHOR QUE NADA, en mettant notre expertise et notre passion au service de votre satisfaction."
+      }
+    },
+    "contact": {
+      "title": "Trouvez-Nous à Tanger",
+      "subtitle": "Visitez notre showroom à Tanger ou contactez-nous pour toute question. Notre équipe est là pour vous aider.",
+      "address": "Adresse",
+      "phone": "Téléphone",
+      "hours": "Horaires",
+      "form": {
+        "title": "Envoyez-nous un Message",
+        "subtitle": "Nous vous répondrons rapidement",
+        "name": "Nom Complet",
+        "email": "Email",
+        "phone": "Téléphone",
+        "subject": "Sujet",
+        "message": "Message",
+        "send": "Envoyer via WhatsApp",
+        "required": "Champs requis",
+        "placeholders": {
+          "name": "Votre nom",
+          "email": "votre@email.com",
+          "phone": "+212...",
+          "subject": "Sujet de votre message",
+          "message": "Votre message..."
+        },
+        "alternative": "Ou contactez-nous directement:",
+        "whatsappDirect": "WhatsApp Direct"
+      }
+    }
   }
 }
