@@ -14,6 +14,7 @@
     "homeTitle": "MELHOR QUE NADA - Car Rental Tangier | Luxury Cars Morocco",
     "aboutTitle": "About MELHOR QUE NADA - Premier Car Rental Tangier Morocco"
   },
+
   "search": {
     "title": "Find Your Perfect Rental Car",
     "subtitle": "Choose from our premium fleet",
@@ -28,6 +29,17 @@
     "differentDropoff": "Return to different location",
     "driverAge": "Driver Age",
     "searchButton": "Search Cars",
+    "applyPeriod": "Apply Period",
+    "validation": {
+      "pickupLocationRequired": "Pickup location is required",
+      "rentalPeriodRequired": "Rental period is required",
+      "pickupTimeRequired": "Pickup time is required",
+      "returnTimeRequired": "Return time is required",
+      "dropoffLocationRequired": "Return location is required",
+      "minimumRental": "Minimum 2 days rental period required",
+      "fixErrors": "Please fix the following errors:",
+      "completeAllFields": "Complete all required fields (*) to continue"
+    },
     "placeholders": {
       "pickupLocation": "Enter pickup location",
       "dropoffLocation": "Enter return location",
@@ -36,6 +48,7 @@
       "time": "Time"
     }
   },
+
   "hero": {
     "subtitle": "Find Your",
     "title": "Perfect Ride",
@@ -67,6 +80,7 @@
       "clientRatingLabel": "Client Rating"
     }
   },
+
   "about": {
     "title": "Why Choose Our Service",
     "subtitle": "Experience the best car rental service with our premium features and benefits",
@@ -98,18 +112,143 @@
     },
     "cta": "Browse Our Vehicles"
   },
+
   "vehicles": {
-    "title": "Popular Vehicles",
-    "subtitle": "Discover our most sought-after vehicles",
+    "title": "Our Premium Fleet",
+    "subtitle": "Discover the perfect vehicle for your journey from our carefully curated collection",
     "viewAll": "View All Vehicles",
+    "perDay": "per day",
     "day": "/day",
     "viewDetails": "View Details",
+    "bookNow": "Book Now",
+    "backToVehicles": "Back to Vehicles",
+    "notFound": "Vehicle not found",
+    "seats": "seats",
+    "doors": "doors",
+    "more": "more",
+    "totalPrice": "Total Price",
+    "dailyRate": "Daily Rate",
+    "rentalSummary": "Rental Summary",
+    "bookingDetails": "Booking Details",
+    "whatsappBooking": "Book via WhatsApp",
+    "callNow": "Call Now",
+    "needHelp": "Need help?",
+    "whatsappAvailable": "WhatsApp available 24/7",
     "features": {
       "electric": "Electric",
       "luxury": "Luxury",
       "suv": "SUV"
     }
   },
+
+  "vehicleDetail": {
+    "specifications": "Vehicle Specifications",
+    "features": "Features & Amenities",
+    "seats": "Seats",
+    "transmission": "Transmission",
+    "fuelType": "Fuel Type",
+    "doors": "Doors",
+    "bookings": "bookings",
+    "perDay": "per day",
+    "day": "day",
+    "days": "days",
+    "bookNow": "Book Now",
+    "callNow": "Call Now",
+    "getQuote": "Get Quote",
+    "needHelp": "Need help? Call us",
+    "vehicleStats": "Vehicle Information",
+    "mileage": "Mileage",
+    "availability": "Availability",
+    "totalBookings": "Total Bookings",
+    "airConditioning": "Air Conditioning",
+    "available": "Available",
+    "unavailable": "Unavailable",
+    "insured": "Fully Insured",
+    "fullyCovered": "Comprehensive coverage",
+    "certified": "Certified Quality",
+    "qualityGuarantee": "Quality guarantee",
+    "support": "24/7 Support",
+    "available247": "Always available",
+    "relatedVehicles": "Similar Vehicles",
+    "bookingForm": {
+      "title": "Complete Your Booking",
+      "rentalDetailsRequired": "Rental Details Required",
+      "completeDetails": "Complete your details to book this vehicle",
+      "bookingSummary": "Booking Summary",
+      "bookViaWhatsApp": "Book via WhatsApp",
+      "applyPeriod": "Apply Period",
+      "totalDays": "Total: {days} day(s)",
+      "estimatedTotal": "Estimated Total",
+      "finalPricing": "Please confirm availability and provide final pricing"
+    },
+    "whatsappMessage": {
+      "intro": "Hello! I would like to book the {brand} {name} ({model} {year}).",
+      "rentalDetails": "Rental Details:",
+      "pickupDate": "Pickup Date: {date} at {time}",
+      "returnDate": "Return Date: {date} at {time}",
+      "pickupLocation": "Pickup Location: {location}",
+      "returnLocation": "Return Location: {location}",
+      "duration": "Duration: {days} day(s)",
+      "estimatedCost": "Estimated Cost: €{total} (€{daily}/day)",
+      "vehicleFeatures": "Vehicle Features:",
+      "confirmRequest": "Please confirm availability and provide final pricing. Thank you!"
+    }
+  },
+
+  "filters": {
+    "searchCriteria": "Search Criteria",
+    "pickup": "Pickup",
+    "dropoff": "Drop-off",
+    "dates": "Dates",
+    "time": "Time",
+    "resultsFound": "vehicles found",
+    "clearFilters": "Clear Filters",
+    "sortBy": "Sort by",
+    "recommended": "Recommended",
+    "priceLowToHigh": "Price: Low to High",
+    "priceHighToLow": "Price: High to Low",
+    "rating": "Highest Rating",
+    "name": "Name A-Z",
+    "brand": "Brand",
+    "allBrands": "All Brands",
+    "category": "Category",
+    "allCategories": "All Categories",
+    "transmission": "Transmission",
+    "allTransmissions": "All Transmissions",
+    "fuelType": "Fuel Type",
+    "allFuelTypes": "All Fuel Types",
+    "seats": "Seats",
+    "allSeats": "All",
+    "seatsLabel": "seats",
+    "priceRange": "Price Range (€)",
+    "previous": "Previous",
+    "next": "Next",
+    "showingResults": "Showing {start}-{end} of {total} results",
+    "noResults": "No vehicles found",
+    "noResultsDescription": "Try adjusting your filters to see more results",
+    "viewMode": "View Mode",
+    "gridView": "Grid View",
+    "listView": "List View",
+    "categories": {
+      "economy": "Economy",
+      "premium": "Premium",
+      "luxury": "Luxury",
+      "suv": "SUV",
+      "electric": "Electric",
+      "family": "Family"
+    },
+    "transmissions": {
+      "manual": "Manual",
+      "automatic": "Automatic"
+    },
+    "fuelTypes": {
+      "petrol": "Petrol",
+      "diesel": "Diesel",
+      "electric": "Electric",
+      "hybrid": "Hybrid"
+    }
+  },
+
   "testimonials": {
     "title": "What Our Customers Say",
     "subtitle": "Read about experiences from our satisfied customers",
@@ -131,12 +270,14 @@
       }
     }
   },
+
   "map": {
     "title": "Find Us in Tangier",
     "subtitle": "Visit our location at RUE 8 ENNASR LOT 635 TANGER. We're here to help you with all your car rental needs.",
     "coordinates": "35°45'04.5\"N 5°49'50.2\"W",
     "locationName": "MELHOR QUE NADA - Tangier"
   },
+
   "navbar": {
     "topBar": {
       "address": "RUE 8 ENNASR LOT 635 TANGER",
@@ -149,6 +290,7 @@
       "label": "Language"
     }
   },
+
   "carSearch": {
     "title": "Find Your Perfect",
     "titleHighlight": "Rental Car",
@@ -177,6 +319,7 @@
       "searchCars": "Search Cars"
     }
   },
+
   "cta": {
     "title": "Ready to Start Your Journey?",
     "subtitle": "Experience the freedom of premium car rental services. Book your perfect ride today!",
@@ -185,12 +328,14 @@
     "phone": "+1 (555) 123-4566",
     "email": "support@rentacar.com"
   },
+
   "newsletter": {
     "title": "Subscribe to Our Newsletter",
     "subtitle": "Stay updated with our latest offers and updates",
     "placeholder": "Enter your email",
     "subscribe": "Subscribe"
   },
+
   "footer": {
     "company": "MELHOR QUE NADA",
     "description": "Your trusted partner for convenient and reliable car rental services across Morocco.",
@@ -222,7 +367,9 @@
       "cookies": "Cookie Policy"
     }
   },
+
   "common": {
+    "total": "total",
     "loading": "Loading...",
     "error": "Error",
     "success": "Success",
@@ -241,6 +388,128 @@
     "sort": "Sort",
     "clear": "Clear",
     "apply": "Apply",
-    "reset": "Reset"
+    "reset": "Reset",
+    "required": "required",
+    "optional": "optional",
+    "minimum": "minimum",
+    "maximum": "maximum"
+  },
+  "aboutPage": {
+    "hero": {
+      "subtitle": "About MELHOR QUE NADA",
+      "title": "Moroccan Excellence in Car Rental",
+      "description": "Your trusted partner for premium car rental in Morocco. From Tangier, we redefine mobility experience with our exceptional fleet."
+    },
+    "stats": {
+      "vehicles": "40+ Premium Vehicles",
+      "customers": "1,000+ Happy Customers",
+      "rating": "4.8/5 Customer Rating",
+      "experience": "5+ Years of Excellence",
+      "support": "24/7 Customer Support",
+      "insurance": "100% Full Insurance"
+    },
+    "overview": {
+      "title": "MELHOR QUE NADA: More Than Rental",
+      "subtitle": "Our Story",
+      "description": "Founded with the vision to revolutionize Morocco's car rental industry, MELHOR QUE NADA has established itself as the undisputed leader in Tangier's premium sector.",
+      "mission": "Our Mission",
+      "missionText": "To provide an exceptional mobility experience by combining a premium fleet, personalized service, and unmatched local expertise for every client in Morocco.",
+      "whyChoose": "Why Choose Us",
+      "location": "Our Location",
+      "locationDesc": "Strategically located in the heart of Tangier"
+    },
+    "values": {
+      "title": "What Defines Us",
+      "subtitle": "At MELHOR QUE NADA, our core values guide our approach and shape the experience we provide to every customer.",
+      "passion": {
+        "title": "Passion",
+        "description": "Our love for automobiles and service excellence guides every decision we make."
+      },
+      "reliability": {
+        "title": "Reliability",
+        "description": "We commit to providing safe vehicles and consistent service you can count on."
+      },
+      "excellence": {
+        "title": "Excellence",
+        "description": "We strive for perfection in every aspect of our service, from booking to return."
+      },
+      "customerFocus": {
+        "title": "Customer Focus",
+        "description": "Every customer is unique and deserves personalized attention tailored to their specific needs."
+      },
+      "innovation": {
+        "title": "Innovation",
+        "description": "We embrace the latest technologies to continuously improve the customer experience."
+      },
+      "responsibility": {
+        "title": "Responsibility",
+        "description": "We commit to our community and environment through sustainable practices."
+      },
+      "commitment": {
+        "title": "Our Commitment",
+        "description": "MELHOR QUE NADA commits to upholding these values in every interaction, ensuring a car rental experience that exceeds your expectations on every journey."
+      }
+    },
+    "team": {
+      "title": "Human Excellence",
+      "subtitle": "Behind every exceptional experience at MELHOR QUE NADA stands a dedicated team of passionate professionals.",
+      "expertTeam": {
+        "title": "Expert Team",
+        "description": "Our team has deep knowledge of both Moroccan and international automotive markets."
+      },
+      "personalizedService": {
+        "title": "Personalized Service",
+        "description": "Every team member is trained to provide tailored service adapted to your needs."
+      },
+      "availability": {
+        "title": "Continuous Availability",
+        "description": "Our team is available 24/7 to assist you at any time during your rental."
+      },
+      "departments": "Our Departments",
+      "departmentsDesc": "Each department works in harmony to provide you with a complete and seamless experience.",
+      "customerService": {
+        "name": "Customer Service",
+        "description": "Your first contact with MELHOR QUE NADA"
+      },
+      "fleetManagement": {
+        "name": "Fleet Management",
+        "description": "Maintenance and quality of our vehicles"
+      },
+      "technicalSupport": {
+        "name": "Technical Support",
+        "description": "Technical assistance and troubleshooting"
+      },
+      "promise": {
+        "title": "Our Team Promise",
+        "description": "We commit to accompanying you at every step of your journey with MELHOR QUE NADA, putting our expertise and passion at the service of your satisfaction."
+      }
+    },
+    "contact": {
+      "title": "Find Us in Tangier",
+      "subtitle": "Visit our showroom in Tangier or contact us for any questions. Our team is here to help you.",
+      "address": "Address",
+      "phone": "Phone",
+      "hours": "Hours",
+      "form": {
+        "title": "Send us a Message",
+        "subtitle": "We'll get back to you quickly",
+        "name": "Full Name",
+        "email": "Email",
+        "phone": "Phone",
+        "subject": "Subject",
+        "message": "Message",
+        "send": "Send via WhatsApp",
+        "required": "Required fields",
+        "placeholders": {
+          "name": "Your name",
+          "email": "your@email.com",
+          "phone": "+212...",
+          "subject": "Subject of your message",
+          "message": "Your message..."
+        },
+        "alternative": "Or contact us directly:",
+        "whatsappDirect": "WhatsApp Direct"
+      }
+    }
   }
 }

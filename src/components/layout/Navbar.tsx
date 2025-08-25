@@ -2,6 +2,7 @@
 
 import React, { useState, useTransition } from "react";
 import { useTranslations, useLocale } from "next-intl";
+import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -21,13 +22,19 @@ const Navbar = () => {
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
+  const params = useParams();
 
   const handleLanguageChange = (newLocale: "en" | "fr") => {
     if (newLocale === locale || isPending) return;
 
     startTransition(() => {
-      // Use next-intl's router for proper locale switching
-      router.replace(pathname, { locale: newLocale });
+      // Use window.location to handle all routes consistently
+      // This avoids TypeScript typing issues with dynamic routes
+      const currentPath = window.location.pathname;
+      const pathWithoutLocale = currentPath.replace(/^\/[a-z]{2}(?=\/|$)/, "");
+      const newPath = `/${newLocale}${pathWithoutLocale}`;
+
+      window.location.href = newPath;
     });
   };
 
@@ -35,7 +42,6 @@ const Navbar = () => {
     { label: t("home"), href: "/" as const },
     { label: t("vehicles"), href: "/vehicles" as const },
     { label: t("about"), href: "/about" as const },
-    { label: t("contact"), href: "/contact" as const },
   ];
 
   return (

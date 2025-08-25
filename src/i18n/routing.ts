@@ -1,4 +1,4 @@
-// src/i18n/routing.ts
+// src/i18n/routing.ts - Updated with dynamic routes
 import { defineRouting } from "next-intl/routing";
 
 // Define locales as const assertion for better type inference
@@ -14,6 +14,10 @@ export const routing = defineRouting({
     "/vehicles": {
       en: "/vehicles",
       fr: "/vehicules",
+    },
+    "/vehicles/[id]": {
+      en: "/vehicles/[id]",
+      fr: "/vehicules/[id]",
     },
     "/about": {
       en: "/about",
