@@ -39,15 +39,6 @@ const AboutHeroSection = () => {
           {/* Main Content */}
           <AnimatedContainer direction="down" delay={0.3}>
             <div className="space-y-6">
-              {/* Badge */}
-              <div className="inline-flex items-center px-4 py-2 bg-carbookers-red-600/20 border border-carbookers-red-500/30 rounded-full">
-                <span className="text-carbookers-red-400 text-sm font-medium">
-                  {locale === "fr"
-                    ? "Premium depuis 2020"
-                    : "Premium since 2020"}
-                </span>
-              </div>
-
               {/* Title */}
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight">
                 <span className="block text-white mb-2">MELHOR QUE NADA</span>
