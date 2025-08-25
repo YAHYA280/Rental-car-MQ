@@ -1,4 +1,4 @@
-// src/components/vehicles/VehicleFilters.tsx - Updated version
+// src/components/vehicles/VehicleFilters.tsx - Updated with full translation support
 "use client";
 
 import React from "react";
@@ -173,6 +173,7 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
                   size="sm"
                   onClick={() => onViewModeChange("grid")}
                   className="rounded-r-none p-2"
+                  title={tFilters("gridView")}
                 >
                   <Grid className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
@@ -181,6 +182,7 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
                   size="sm"
                   onClick={() => onViewModeChange("list")}
                   className="rounded-l-none border-l p-2"
+                  title={tFilters("listView")}
                 >
                   <List className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
@@ -337,7 +339,7 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
               <div className="flex items-center gap-2">
                 <Input
                   type="number"
-                  placeholder="Min"
+                  placeholder={tCommon("minimum")}
                   value={filters.priceRange[0] || ""}
                   onChange={(e) =>
                     updateFilter("priceRange", [
@@ -350,20 +352,20 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
                 <span className="text-gray-400 text-xs sm:text-sm">-</span>
                 <Input
                   type="number"
-                  placeholder="Max"
+                  placeholder={tCommon("maximum")}
                   value={
-                    filters.priceRange[1] === 300 ? "" : filters.priceRange[1]
+                    filters.priceRange[1] === 1500 ? "" : filters.priceRange[1]
                   }
                   onChange={(e) =>
                     updateFilter("priceRange", [
                       filters.priceRange[0],
-                      Number(e.target.value) || 300,
+                      Number(e.target.value) || 1500,
                     ])
                   }
                   className="text-xs sm:text-sm h-8 sm:h-9"
                 />
               </div>
-              <p className="text-xs text-gray-500 mt-1">€ per day</p>
+              <p className="text-xs text-gray-500 mt-1">€ {t("perDay")}</p>
             </div>
           </div>
         </CardContent>

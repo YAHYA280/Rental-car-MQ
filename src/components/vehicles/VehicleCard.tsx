@@ -1,4 +1,4 @@
-// src/components/vehicles/VehicleCard.tsx - Updated to redirect to detail page for WhatsApp booking
+// src/components/vehicles/VehicleCard.tsx - Updated with full translation support
 "use client";
 
 import React, { useState, useMemo } from "react";
@@ -40,7 +40,9 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
   isFavorite = false,
 }) => {
   const t = useTranslations("vehicles");
+  const tVehicleDetail = useTranslations("vehicleDetail");
   const tFilters = useTranslations("filters");
+  const tCommon = useTranslations("common");
   const locale = useLocale();
   const searchParams = useSearchParams();
 
@@ -149,8 +151,12 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
       <div className="text-xs text-gray-600">
         {showTotalPrice && hasValidDates ? (
           <>
-            {rentalDays} day{rentalDays > 1 ? "s" : ""} total
-            <div className="text-xs text-gray-500">€{vehicle.price}/day</div>
+            {rentalDays}{" "}
+            {rentalDays > 1 ? tVehicleDetail("days") : tVehicleDetail("day")}{" "}
+            {tCommon("total")}
+            <div className="text-xs text-gray-500">
+              €{vehicle.price}/{tVehicleDetail("day")}
+            </div>
           </>
         ) : (
           t("perDay")
@@ -159,7 +165,8 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
       {hasValidDates && (
         <div className="text-xs text-carbookers-red-600 mt-1">
           <Calendar className="h-3 w-3 inline mr-1" />
-          {rentalDays} day{rentalDays > 1 ? "s" : ""}
+          {rentalDays}{" "}
+          {rentalDays > 1 ? tVehicleDetail("days") : tVehicleDetail("day")}
         </div>
       )}
     </div>
@@ -285,7 +292,7 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
               <Link href={getDetailPageUrl()}>
                 <Button className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2">
                   <MessageCircle className="h-4 w-4" />
-                  WhatsApp
+                  {t("whatsappBooking")}
                 </Button>
               </Link>
             </div>
@@ -417,7 +424,7 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
           <Link href={getDetailPageUrl()}>
             <Button className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold flex items-center gap-2">
               <MessageCircle className="h-4 w-4" />
-              Book via WhatsApp
+              {t("whatsappBooking")}
             </Button>
           </Link>
         </div>

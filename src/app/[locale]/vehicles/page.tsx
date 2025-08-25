@@ -38,7 +38,7 @@ const VehiclesPage = () => {
     brand: [],
     transmission: [],
     fuelType: [],
-    priceRange: [0, 300],
+    priceRange: [0, 1500],
     seats: [],
     minRating: 0,
   });
@@ -147,7 +147,7 @@ const VehiclesPage = () => {
       brand: [],
       transmission: [],
       fuelType: [],
-      priceRange: [0, 300],
+      priceRange: [0, 1500],
       seats: [],
       minRating: 0,
     });
