@@ -8,15 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import AnimatedContainer from "@/components/ui/animated-container";
-import {
-  MapPin,
-  Phone,
-  Clock,
-  MessageCircle,
-  Send,
-  Mail,
-  User,
-} from "lucide-react";
+import { MapPin, Phone, Clock, MessageCircle, Mail, User } from "lucide-react";
 
 const ContactMapSection = () => {
   const t = useTranslations("aboutPage");
@@ -336,7 +328,7 @@ ${locale === "fr" ? "Merci de me contacter!" : "Thank you for contacting me!"}`;
                         MELHOR QUE NADA
                       </p>
                       <p className="text-xs text-gray-600">
-                        35°45'04.5"N 5°49'50.2"W
+                        35°45&apos;04.5&apos;N 5°49&apos;50.2&apos;W
                       </p>
                     </div>
                   </div>

@@ -43,7 +43,6 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
   const tVehicleDetail = useTranslations("vehicleDetail");
   const tFilters = useTranslations("filters");
   const tCommon = useTranslations("common");
-  const locale = useLocale();
   const searchParams = useSearchParams();
 
   // State for price display toggle

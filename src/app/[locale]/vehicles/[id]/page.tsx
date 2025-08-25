@@ -53,7 +53,6 @@ import {
 import { vehiclesData } from "@/components/data/vehicles";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
-import { cn } from "@/lib/utils";
 import { DateRange } from "react-day-picker";
 
 interface VehicleDetailPageProps {
@@ -62,7 +61,7 @@ interface VehicleDetailPageProps {
 
 export default function VehicleDetailPage({ params }: VehicleDetailPageProps) {
   // Fix: Unwrap params with React.use()
-  const { locale, id: vehicleId } = use(params);
+  const { id: vehicleId } = use(params);
 
   const t = useTranslations("vehicles");
   const tVehicle = useTranslations("vehicleDetail");

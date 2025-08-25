@@ -3,14 +3,12 @@
 
 import React from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import AnimatedContainer from "@/components/ui/animated-container";
 import Image from "next/image";
-import { Award, Shield, Clock, Users, MapPin, Car } from "lucide-react";
+import { Award, Shield, Clock, Users, Car } from "lucide-react";
 
 const CompanyOverview = () => {
-  const t = useTranslations("aboutPage");
   const locale = useLocale();
 
   const achievements = [

@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { SlidersHorizontal, Grid, List, X, Search } from "lucide-react";
+import { Grid, List, X, Search } from "lucide-react";
 import {
   VehicleFilters as Filters,
   SearchParams,
@@ -57,16 +57,12 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
   const tFilters = useTranslations("filters");
   const tCommon = useTranslations("common");
 
-  const updateFilter = (key: keyof Filters, value: any) => {
+  const updateFilter = (
+    key: keyof Filters,
+    value: string | string[] | number | number[]
+  ) => {
     onFiltersChange({
       ...filters,
-      [key]: value,
-    });
-  };
-
-  const updateSearchParam = (key: keyof SearchParams, value: string) => {
-    onSearchParamsChange({
-      ...searchParams,
       [key]: value,
     });
   };

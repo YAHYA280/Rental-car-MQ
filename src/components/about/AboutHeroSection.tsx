@@ -1,4 +1,3 @@
-// src/components/about/AboutHeroSection.tsx
 "use client";
 
 import React from "react";
@@ -7,7 +6,6 @@ import AnimatedContainer from "@/components/ui/animated-container";
 import Image from "next/image";
 
 const AboutHeroSection = () => {
-  const t = useTranslations("aboutPage");
   const locale = useLocale();
 
   return (

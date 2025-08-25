@@ -53,7 +53,7 @@ const VehiclesPage = () => {
 
   // Filter and sort vehicles - Updated without category filtering
   const filteredVehicles = useMemo(() => {
-    let filtered = vehiclesData.filter((vehicle) => {
+    const filtered = vehiclesData.filter((vehicle) => {
       // Brand filter
       if (filters.brand.length > 0 && !filters.brand.includes(vehicle.brand)) {
         return false;
