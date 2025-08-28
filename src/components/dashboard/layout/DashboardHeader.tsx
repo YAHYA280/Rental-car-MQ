@@ -67,51 +67,48 @@ const DashboardHeader = ({ onMobileMenuOpen }: DashboardHeaderProps) => {
   };
 
   return (
-    <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
       {/* Mobile menu button - Only visible on mobile */}
-      {onMobileMenuOpen && (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="-m-2.5 p-2.5 text-gray-700 lg:hidden"
-          onClick={onMobileMenuOpen}
-        >
-          <span className="sr-only">Open sidebar</span>
-          <Menu className="h-6 w-6" aria-hidden="true" />
-        </Button>
-      )}
+      <Button
+        variant="ghost"
+        size="sm"
+        className="-m-2.5 p-2.5 text-gray-700 lg:hidden"
+        onClick={onMobileMenuOpen}
+      >
+        <span className="sr-only">Open sidebar</span>
+        <Menu className="h-6 w-6" aria-hidden="true" />
+      </Button>
 
       {/* Separator - Only visible on mobile when menu button is present */}
-      {onMobileMenuOpen && (
-        <div className="h-6 w-px bg-gray-200 lg:hidden" aria-hidden="true" />
-      )}
+      <div className="h-6 w-px bg-gray-200 lg:hidden" aria-hidden="true" />
 
-      <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-        {/* Search Bar */}
-        <div className="relative flex flex-1 max-w-md">
+      <div className="flex flex-1 items-center justify-between">
+        {/* Left Section - Search Bar */}
+        <form className="relative flex max-w-md" action="#" method="GET">
           <label htmlFor="search-field" className="sr-only">
             Search
           </label>
           <Search
-            className="pointer-events-none absolute inset-y-0 left-0 h-full w-5 text-gray-400 ml-3"
+            className="pointer-events-none absolute inset-y-0 left-0 h-full w-5 text-gray-400"
+            style={{ left: "12px", top: "50%", transform: "translateY(-50%)" }}
             aria-hidden="true"
           />
           <Input
             id="search-field"
-            className="block h-full w-full border border-gray-300 rounded-md py-0 pl-10 pr-4 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-carbookers-red-500 focus:border-carbookers-red-500 sm:text-sm"
+            className="block h-9 w-80 border border-gray-300 rounded-md py-0 pl-10 pr-4 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-carbookers-red-500 focus:border-carbookers-red-500 sm:text-sm"
             placeholder="Search cars, users, bookings..."
             type="search"
             name="search"
           />
-        </div>
+        </form>
 
-        {/* Right section */}
-        <div className="flex items-center gap-x-4 lg:gap-x-6">
+        {/* Right section - pushed far to the right */}
+        <div className="flex items-center gap-x-6">
           {/* Language selector - Hidden on small screens */}
           <div className="hidden sm:flex items-center gap-2">
             <Globe className="h-4 w-4 text-gray-500" />
             <Select value={locale} onValueChange={handleLanguageChange}>
-              <SelectTrigger className="w-16 h-8 text-sm border-gray-300">
+              <SelectTrigger className="w-20 h-8 text-sm border-gray-300">
                 <SelectValue>{locale.toUpperCase()}</SelectValue>
               </SelectTrigger>
               <SelectContent>
@@ -127,17 +124,16 @@ const DashboardHeader = ({ onMobileMenuOpen }: DashboardHeaderProps) => {
               <Button
                 variant="ghost"
                 size="sm"
-                className="relative p-2 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-carbookers-red-500"
+                className="relative -m-2.5 p-2.5 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-carbookers-red-500 focus:ring-offset-2"
               >
                 <span className="sr-only">View notifications</span>
                 <Bell className="h-6 w-6" aria-hidden="true" />
                 {unreadCount > 0 && (
-                  <Badge
-                    variant="destructive"
-                    className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center text-xs p-0 min-w-0 bg-carbookers-red-600"
-                  >
-                    {unreadCount}
-                  </Badge>
+                  <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-carbookers-red-600 flex items-center justify-center">
+                    <span className="text-xs font-medium text-white">
+                      {unreadCount}
+                    </span>
+                  </span>
                 )}
               </Button>
             </DropdownMenuTrigger>
@@ -176,7 +172,7 @@ const DashboardHeader = ({ onMobileMenuOpen }: DashboardHeaderProps) => {
                 ))}
               </div>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-center text-sm text-carbookers-red-600 py-3 font-medium">
+              <DropdownMenuItem className="text-center text-sm text-carbookers-red-600 py-3 font-medium justify-center">
                 View all notifications
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -193,13 +189,20 @@ const DashboardHeader = ({ onMobileMenuOpen }: DashboardHeaderProps) => {
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                size="sm"
-                className="relative p-1 rounded-full focus:outline-none focus:ring-2 focus:ring-carbookers-red-500 focus:ring-offset-2"
+                className="relative -m-1.5 flex items-center p-1.5 focus:outline-none focus:ring-2 focus:ring-carbookers-red-500 focus:ring-offset-2"
               >
                 <span className="sr-only">Open user menu</span>
-                <div className="h-8 w-8 rounded-full bg-carbookers-red-600 flex items-center justify-center shadow-sm">
-                  <span className="text-white font-semibold text-sm">A</span>
+                <div className="h-8 w-8 rounded-full bg-carbookers-red-600 flex items-center justify-center">
+                  <span className="text-sm font-semibold text-white">A</span>
                 </div>
+                <span className="hidden lg:flex lg:items-center lg:ml-4">
+                  <span
+                    className="text-sm font-semibold leading-6 text-gray-900"
+                    aria-hidden="true"
+                  >
+                    Admin User
+                  </span>
+                </span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
@@ -231,7 +234,7 @@ const DashboardHeader = ({ onMobileMenuOpen }: DashboardHeaderProps) => {
           </DropdownMenu>
         </div>
       </div>
-    </div>
+    </header>
   );
 };
 
