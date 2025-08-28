@@ -19,15 +19,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Menu,
-  Bell,
-  Search,
-  Globe,
-  User,
-  Settings,
-  LogOut,
-} from "lucide-react";
+import { Menu, Bell, Globe, User, Settings, LogOut } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 
@@ -64,13 +56,17 @@ const DashboardHeader = ({ onMobileMenuOpen }: DashboardHeaderProps) => {
 
   const handleLanguageChange = (newLocale: "en" | "fr") => {
     if (newLocale === locale) return;
-    // This will be implemented with proper locale switching later
-    console.log("Switch to locale:", newLocale);
+
+    const currentPath = window.location.pathname;
+    const pathWithoutLocale = currentPath.replace(/^\/[a-z]{2}(?=\/|$)/, "");
+    const newPath = `/${newLocale}${pathWithoutLocale}`;
+
+    window.location.href = newPath;
   };
 
   return (
     <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
-      {/* Mobile menu button - Only visible on mobile */}
+      {/* Mobile menu button */}
       <Button
         variant="ghost"
         size="sm"
@@ -81,31 +77,15 @@ const DashboardHeader = ({ onMobileMenuOpen }: DashboardHeaderProps) => {
         <Menu className="h-6 w-6" aria-hidden="true" />
       </Button>
 
-      {/* Separator - Only visible on mobile when menu button is present */}
+      {/* Separator - Only visible on mobile */}
       <div className="h-6 w-px bg-gray-200 lg:hidden" aria-hidden="true" />
 
       <div className="flex flex-1 items-center justify-between">
-        {/* Left Section - Search Bar */}
-        <form className="relative flex max-w-md" action="#" method="GET">
-          <label htmlFor="search-field" className="sr-only">
-            {t("common.search")}
-          </label>
-          <Search
-            className="pointer-events-none absolute inset-y-0 left-0 h-full w-5 text-gray-400"
-            style={{ left: "12px", top: "50%", transform: "translateY(-50%)" }}
-            aria-hidden="true"
-          />
-          <Input
-            id="search-field"
-            className="block h-9 w-80 border border-gray-300 rounded-md py-0 pl-10 pr-4 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-carbookers-red-500 focus:border-carbookers-red-500 sm:text-sm"
-            placeholder={t("header.searchPlaceholder")}
-            type="search"
-            name="search"
-          />
-        </form>
+        {/* Left Section - Empty on mobile, keeps layout balanced */}
+        <div className="flex-1"></div>
 
-        {/* Right section */}
-        <div className="flex items-center gap-x-6">
+        {/* Right section - Clean and minimal */}
+        <div className="flex items-center gap-x-4">
           {/* Language selector - Hidden on small screens */}
           <div className="hidden sm:flex items-center gap-2">
             <Globe className="h-4 w-4 text-gray-500" />
