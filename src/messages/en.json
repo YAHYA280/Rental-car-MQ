@@ -511,5 +511,99 @@
         "whatsappDirect": "WhatsApp Direct"
       }
     }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back! Here's what's happening with your rental business.",
+    "navigation": {
+      "overview": "Overview",
+      "cars": "Cars",
+      "users": "Users",
+      "bookings": "Bookings",
+      "settings": "Settings"
+    },
+    "stats": {
+      "totalCars": "Total Cars",
+      "activeCars": "Active Cars",
+      "rentedCars": "Currently Rented",
+      "maintenanceDue": "Maintenance Due",
+      "totalUsers": "Total Users",
+      "activeUsers": "Active Users",
+      "newUsers": "New This Month",
+      "blockedUsers": "Blocked Users",
+      "totalBookings": "Total Bookings",
+      "activeBookings": "Active Bookings",
+      "pendingApproval": "Pending Approval",
+      "monthlyRevenue": "Revenue (Month)"
+    },
+    "cars": {
+      "title": "Cars Management",
+      "subtitle": "Manage your rental fleet and vehicle information",
+      "addNew": "Add New Car",
+      "viewAll": "View All",
+      "available": "Available",
+      "rented": "Rented",
+      "actions": {
+        "view": "View Details",
+        "edit": "Edit Car",
+        "delete": "Delete Car"
+      },
+      "form": {
+        "basicInfo": "Basic Information",
+        "specifications": "Technical Specifications",
+        "pricing": "Pricing & Location",
+        "features": "Features",
+        "description": "Description",
+        "images": "Images"
+      }
+    },
+    "users": {
+      "title": "Users Management",
+      "subtitle": "Manage customer accounts and user information",
+      "directory": "Customer Directory",
+      "actions": {
+        "viewProfile": "View Profile",
+        "sendMessage": "Send Message",
+        "blockUser": "Block User",
+        "unblockUser": "Unblock User"
+      }
+    },
+    "bookings": {
+      "title": "Bookings Management",
+      "subtitle": "Manage reservations and rental schedules",
+      "recent": "Recent Bookings",
+      "actions": {
+        "viewDetails": "View Details",
+        "confirmBooking": "Confirm Booking",
+        "cancelBooking": "Cancel Booking"
+      },
+      "status": {
+        "pending": "Pending",
+        "confirmed": "Confirmed",
+        "active": "Active",
+        "completed": "Completed",
+        "cancelled": "Cancelled"
+      }
+    },
+    "settings": {
+      "title": "Settings",
+      "subtitle": "Manage your account and system preferences",
+      "tabs": {
+        "company": "Company",
+        "profile": "Profile",
+        "notifications": "Notifications",
+        "system": "System"
+      }
+    },
+    "common": {
+      "search": "Search...",
+      "filter": "Filter",
+      "actions": "Actions",
+      "save": "Save Changes",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "confirm": "Confirm",
+      "viewAll": "View All"
+    }
   }
 }

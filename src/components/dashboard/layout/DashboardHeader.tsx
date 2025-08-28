@@ -1,0 +1,238 @@
+// src/components/dashboard/layout/DashboardHeader.tsx
+"use client";
+
+import React, { useState } from "react";
+import { useTranslations, useLocale } from "next-intl";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Menu,
+  Bell,
+  Search,
+  Globe,
+  User,
+  Settings,
+  LogOut,
+} from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+
+interface DashboardHeaderProps {
+  onMobileMenuOpen?: () => void;
+}
+
+const DashboardHeader = ({ onMobileMenuOpen }: DashboardHeaderProps) => {
+  const locale = useLocale();
+
+  const [notifications] = useState([
+    {
+      id: 1,
+      message: "New booking received",
+      time: "2 min ago",
+      unread: true,
+    },
+    {
+      id: 2,
+      message: "Car maintenance due",
+      time: "1 hour ago",
+      unread: true,
+    },
+    {
+      id: 3,
+      message: "Payment confirmed",
+      time: "3 hours ago",
+      unread: false,
+    },
+  ]);
+
+  const unreadCount = notifications.filter((n) => n.unread).length;
+
+  const handleLanguageChange = (newLocale: "en" | "fr") => {
+    // This will be implemented with proper locale switching later
+    console.log("Switch to locale:", newLocale);
+  };
+
+  return (
+    <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+      {/* Mobile menu button - Only visible on mobile */}
+      {onMobileMenuOpen && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="-m-2.5 p-2.5 text-gray-700 lg:hidden"
+          onClick={onMobileMenuOpen}
+        >
+          <span className="sr-only">Open sidebar</span>
+          <Menu className="h-6 w-6" aria-hidden="true" />
+        </Button>
+      )}
+
+      {/* Separator - Only visible on mobile when menu button is present */}
+      {onMobileMenuOpen && (
+        <div className="h-6 w-px bg-gray-200 lg:hidden" aria-hidden="true" />
+      )}
+
+      <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
+        {/* Search Bar */}
+        <div className="relative flex flex-1 max-w-md">
+          <label htmlFor="search-field" className="sr-only">
+            Search
+          </label>
+          <Search
+            className="pointer-events-none absolute inset-y-0 left-0 h-full w-5 text-gray-400 ml-3"
+            aria-hidden="true"
+          />
+          <Input
+            id="search-field"
+            className="block h-full w-full border border-gray-300 rounded-md py-0 pl-10 pr-4 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-carbookers-red-500 focus:border-carbookers-red-500 sm:text-sm"
+            placeholder="Search cars, users, bookings..."
+            type="search"
+            name="search"
+          />
+        </div>
+
+        {/* Right section */}
+        <div className="flex items-center gap-x-4 lg:gap-x-6">
+          {/* Language selector - Hidden on small screens */}
+          <div className="hidden sm:flex items-center gap-2">
+            <Globe className="h-4 w-4 text-gray-500" />
+            <Select value={locale} onValueChange={handleLanguageChange}>
+              <SelectTrigger className="w-16 h-8 text-sm border-gray-300">
+                <SelectValue>{locale.toUpperCase()}</SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="en">EN</SelectItem>
+                <SelectItem value="fr">FR</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Notifications */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="relative p-2 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-carbookers-red-500"
+              >
+                <span className="sr-only">View notifications</span>
+                <Bell className="h-6 w-6" aria-hidden="true" />
+                {unreadCount > 0 && (
+                  <Badge
+                    variant="destructive"
+                    className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center text-xs p-0 min-w-0 bg-carbookers-red-600"
+                  >
+                    {unreadCount}
+                  </Badge>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-80">
+              <DropdownMenuLabel className="flex items-center justify-between">
+                <span>Notifications</span>
+                {unreadCount > 0 && (
+                  <Badge variant="secondary" className="text-xs">
+                    {unreadCount} new
+                  </Badge>
+                )}
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <div className="max-h-64 overflow-y-auto">
+                {notifications.map((notification) => (
+                  <DropdownMenuItem
+                    key={notification.id}
+                    className="flex items-start gap-3 p-4 cursor-pointer hover:bg-gray-50"
+                  >
+                    <div
+                      className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
+                        notification.unread
+                          ? "bg-carbookers-red-600"
+                          : "bg-gray-300"
+                      }`}
+                    />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-900">
+                        {notification.message}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {notification.time}
+                      </p>
+                    </div>
+                  </DropdownMenuItem>
+                ))}
+              </div>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-center text-sm text-carbookers-red-600 py-3 font-medium">
+                View all notifications
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Separator - Hidden on mobile */}
+          <div
+            className="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-200"
+            aria-hidden="true"
+          />
+
+          {/* Profile dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="relative p-1 rounded-full focus:outline-none focus:ring-2 focus:ring-carbookers-red-500 focus:ring-offset-2"
+              >
+                <span className="sr-only">Open user menu</span>
+                <div className="h-8 w-8 rounded-full bg-carbookers-red-600 flex items-center justify-center shadow-sm">
+                  <span className="text-white font-semibold text-sm">A</span>
+                </div>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium leading-none text-gray-900">
+                    Admin User
+                  </p>
+                  <p className="text-xs leading-none text-gray-500">
+                    admin@melhorquenada.com
+                  </p>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="cursor-pointer">
+                <User className="mr-2 h-4 w-4" />
+                <span>Profile</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer">
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Settings</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-red-600 cursor-pointer focus:text-red-700 focus:bg-red-50">
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Log out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default DashboardHeader;
