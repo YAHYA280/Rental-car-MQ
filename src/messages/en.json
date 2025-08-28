@@ -394,6 +394,7 @@
     "minimum": "minimum",
     "maximum": "maximum"
   },
+
   "aboutPage": {
     "hero": {
       "subtitle": "About MELHOR QUE NADA",
@@ -512,9 +513,21 @@
       }
     }
   },
+
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Welcome back! Here's what's happening with your rental business.",
+    "overview": {
+      "title": "Dashboard Overview",
+      "subtitle": "Welcome back! Here's what's happening with your rental business.",
+      "quickActions": "Quick Actions",
+      "recentBookings": "Recent Bookings",
+      "topPerformingCars": "Top Performing Cars",
+      "addNewCar": "Add New Car",
+      "viewBookings": "View Bookings",
+      "manageUsers": "Manage Users",
+      "viewReports": "View Reports"
+    },
     "navigation": {
       "overview": "Overview",
       "cars": "Cars",
@@ -524,65 +537,167 @@
     },
     "stats": {
       "totalCars": "Total Cars",
+      "totalCarsDescription": "Active vehicles in fleet",
       "activeCars": "Active Cars",
+      "activeCarsDescription": "Available for rental",
       "rentedCars": "Currently Rented",
+      "rentedCarsDescription": "Cars on rental",
       "maintenanceDue": "Maintenance Due",
+      "maintenanceDueDescription": "Need attention",
       "totalUsers": "Total Users",
+      "totalUsersDescription": "Registered customers",
       "activeUsers": "Active Users",
+      "activeUsersDescription": "Active customers",
       "newUsers": "New This Month",
+      "newUsersDescription": "New registrations",
       "blockedUsers": "Blocked Users",
+      "blockedUsersDescription": "Blocked accounts",
       "totalBookings": "Total Bookings",
+      "totalBookingsDescription": "All bookings",
       "activeBookings": "Active Bookings",
+      "activeBookingsDescription": "Current reservations",
       "pendingApproval": "Pending Approval",
-      "monthlyRevenue": "Revenue (Month)"
+      "pendingApprovalDescription": "Awaiting confirmation",
+      "monthlyRevenue": "Monthly Revenue",
+      "monthlyRevenueDescription": "This month's earnings"
     },
     "cars": {
       "title": "Cars Management",
       "subtitle": "Manage your rental fleet and vehicle information",
+      "fleetOverview": "Fleet Overview",
       "addNew": "Add New Car",
-      "viewAll": "View All",
+      "addNewCar": "Add New Car to Fleet",
+      "viewAll": "View All Cars",
       "available": "Available",
       "rented": "Rented",
+      "allCars": "All Cars",
+      "currentlyRented": "Currently Rented",
       "actions": {
         "view": "View Details",
         "edit": "Edit Car",
         "delete": "Delete Car"
       },
       "form": {
+        "title": "Add New Car",
+        "description": "Add a new vehicle to your rental fleet. Fill in all the required information.",
         "basicInfo": "Basic Information",
         "specifications": "Technical Specifications",
         "pricing": "Pricing & Location",
         "features": "Features",
-        "description": "Description",
-        "images": "Images"
+        "images": "Images",
+        "cancel": "Cancel",
+        "save": "Add Car to Fleet"
+      },
+      "table": {
+        "car": "Car",
+        "details": "Details",
+        "price": "Price",
+        "status": "Status",
+        "bookings": "Bookings",
+        "rating": "Rating",
+        "actions": "Actions",
+        "perDay": "per day",
+        "total": "total"
       }
     },
     "users": {
       "title": "Users Management",
       "subtitle": "Manage customer accounts and user information",
       "directory": "Customer Directory",
+      "allUsers": "All Users",
+      "active": "Active",
+      "inactive": "Inactive",
+      "blocked": "Blocked",
       "actions": {
         "viewProfile": "View Profile",
         "sendMessage": "Send Message",
         "blockUser": "Block User",
         "unblockUser": "Unblock User"
+      },
+      "table": {
+        "user": "User",
+        "contact": "Contact",
+        "status": "Status",
+        "joinDate": "Join Date",
+        "bookings": "Bookings",
+        "totalSpent": "Total Spent",
+        "lastBooking": "Last Booking",
+        "actions": "Actions",
+        "lifetime": "lifetime"
+      },
+      "details": {
+        "title": "User Details",
+        "description": "Detailed information about the customer account",
+        "contactInformation": "Contact Information",
+        "bookingStatistics": "Booking Statistics",
+        "email": "Email",
+        "phone": "Phone",
+        "joined": "Joined",
+        "totalBookings": "Total Bookings",
+        "totalSpent": "Total Spent",
+        "lastBooking": "Last Booking",
+        "close": "Close",
+        "sendMessage": "Send Message"
+      },
+      "blockConfirmation": {
+        "title": "Block User",
+        "description": "Are you sure you want to block this user? They will not be able to make new bookings.",
+        "cancel": "Cancel",
+        "confirm": "Block User"
       }
     },
     "bookings": {
       "title": "Bookings Management",
       "subtitle": "Manage reservations and rental schedules",
       "recent": "Recent Bookings",
+      "all": "All",
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "active": "Active",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
       "actions": {
         "viewDetails": "View Details",
         "confirmBooking": "Confirm Booking",
         "cancelBooking": "Cancel Booking"
       },
-      "status": {
-        "pending": "Pending",
-        "confirmed": "Confirmed",
-        "active": "Active",
-        "completed": "Completed",
-        "cancelled": "Cancelled"
+      "table": {
+        "booking": "Booking",
+        "customer": "Customer",
+        "car": "Car",
+        "dates": "Dates",
+        "locations": "Locations",
+        "amount": "Amount",
+        "status": "Status",
+        "actions": "Actions",
+        "days": "days"
+      },
+      "details": {
+        "title": "Booking Details",
+        "description": "Complete information about this rental booking",
+        "customerInformation": "Customer Information",
+        "vehicleInformation": "Vehicle Information",
+        "rentalPeriod": "Rental Period",
+        "locations": "Locations",
+        "name": "Name",
+        "email": "Email",
+        "phone": "Phone",
+        "car": "Car",
+        "dailyRate": "Daily Rate",
+        "totalDays": "Total Days",
+        "pickup": "Pickup",
+        "return": "Return",
+        "duration": "Duration",
+        "totalAmount": "Total Amount",
+        "close": "Close",
+        "confirmBooking": "Confirm Booking",
+        "createdOn": "Created on"
+      },
+      "cancelConfirmation": {
+        "title": "Cancel Booking",
+        "description": "Are you sure you want to cancel this booking? This action cannot be undone.",
+        "keepBooking": "Keep Booking",
+        "cancelBooking": "Cancel Booking"
       }
     },
     "settings": {
@@ -593,17 +708,88 @@
         "profile": "Profile",
         "notifications": "Notifications",
         "system": "System"
-      }
+      },
+      "company": {
+        "title": "Company Information",
+        "companyName": "Company Name",
+        "companyEmail": "Company Email",
+        "phoneNumber": "Phone Number",
+        "website": "Website",
+        "address": "Address",
+        "taxId": "Tax ID"
+      },
+      "profile": {
+        "title": "Profile Settings",
+        "changeAvatar": "Change Avatar",
+        "avatarNote": "JPG, GIF or PNG. Max size 1MB.",
+        "fullName": "Full Name",
+        "emailAddress": "Email Address",
+        "phoneNumber": "Phone Number",
+        "role": "Role",
+        "securitySettings": "Security Settings",
+        "changePassword": "Change Password",
+        "enableTwoFactor": "Enable Two-Factor Authentication"
+      },
+      "notifications": {
+        "title": "Notification Preferences",
+        "emailNotifications": "Email Notifications",
+        "smsNotifications": "SMS Notifications",
+        "newBookings": "New Bookings",
+        "newBookingsDesc": "Get notified when new bookings are made",
+        "paymentUpdates": "Payment Updates",
+        "paymentUpdatesDesc": "Receive payment confirmations and issues",
+        "newUserRegistrations": "New User Registrations",
+        "newUserRegistrationsDesc": "Know when new users sign up",
+        "urgentBookings": "Urgent Bookings",
+        "urgentBookingsDesc": "SMS for urgent booking matters",
+        "paymentAlerts": "Payment Alerts",
+        "paymentAlertsDesc": "Important payment notifications",
+        "savePreferences": "Save Preferences"
+      },
+      "system": {
+        "title": "System Configuration",
+        "defaultLanguage": "Default Language",
+        "timezone": "Timezone",
+        "currency": "Currency",
+        "dateFormat": "Date Format",
+        "bookingSettings": "Booking Settings",
+        "autoConfirmBookings": "Auto-confirm Bookings",
+        "autoConfirmBookingsDesc": "Automatically confirm new bookings without manual review",
+        "requireAdminApproval": "Require Admin Approval",
+        "requireAdminApprovalDesc": "New bookings need administrator approval",
+        "saveConfiguration": "Save Configuration"
+      },
+      "saveChanges": "Save Changes"
     },
     "common": {
-      "search": "Search...",
+      "search": "Search cars, users, bookings...",
+      "searchCars": "Search cars by name, brand, or model...",
+      "searchUsers": "Search users by name, email, or phone...",
+      "searchBookings": "Search bookings by customer, car, or booking ID...",
       "filter": "Filter",
       "actions": "Actions",
       "save": "Save Changes",
       "cancel": "Cancel",
       "delete": "Delete",
       "confirm": "Confirm",
-      "viewAll": "View All"
+      "viewAll": "View All",
+      "loading": "Loading...",
+      "noResults": "No results found",
+      "error": "An error occurred",
+      "success": "Operation successful"
+    },
+    "header": {
+      "searchPlaceholder": "Search cars, users, bookings...",
+      "notifications": "Notifications",
+      "viewAllNotifications": "View all notifications",
+      "profile": "Profile",
+      "settings": "Settings",
+      "logout": "Log out",
+      "newNotifications": "new"
+    },
+    "sidebar": {
+      "dashboard": "Dashboard",
+      "administrator": "Administrator"
     }
   }
 }

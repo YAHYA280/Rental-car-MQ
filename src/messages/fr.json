@@ -394,6 +394,7 @@
     "minimum": "minimum",
     "maximum": "maximum"
   },
+
   "aboutPage": {
     "hero": {
       "subtitle": "À Propos de MELHOR QUE NADA",
@@ -510,6 +511,285 @@
         "alternative": "Ou contactez-nous directement:",
         "whatsappDirect": "WhatsApp Direct"
       }
+    }
+  },
+
+  "dashboard": {
+    "title": "Tableau de Bord",
+    "welcome": "Bon retour ! Voici ce qui se passe avec votre activité de location.",
+    "overview": {
+      "title": "Aperçu du Tableau de Bord",
+      "subtitle": "Bon retour ! Voici ce qui se passe avec votre activité de location.",
+      "quickActions": "Actions Rapides",
+      "recentBookings": "Réservations Récentes",
+      "topPerformingCars": "Voitures les Plus Performantes",
+      "addNewCar": "Ajouter Nouvelle Voiture",
+      "viewBookings": "Voir Réservations",
+      "manageUsers": "Gérer Utilisateurs",
+      "viewReports": "Voir Rapports"
+    },
+    "navigation": {
+      "overview": "Aperçu",
+      "cars": "Voitures",
+      "users": "Utilisateurs",
+      "bookings": "Réservations",
+      "settings": "Paramètres"
+    },
+    "stats": {
+      "totalCars": "Total Voitures",
+      "totalCarsDescription": "Véhicules actifs dans la flotte",
+      "activeCars": "Voitures Actives",
+      "activeCarsDescription": "Disponibles pour location",
+      "rentedCars": "Actuellement Louées",
+      "rentedCarsDescription": "Voitures en location",
+      "maintenanceDue": "Maintenance Due",
+      "maintenanceDueDescription": "Nécessitent attention",
+      "totalUsers": "Total Utilisateurs",
+      "totalUsersDescription": "Clients enregistrés",
+      "activeUsers": "Utilisateurs Actifs",
+      "activeUsersDescription": "Clients actifs",
+      "newUsers": "Nouveaux Ce Mois",
+      "newUsersDescription": "Nouvelles inscriptions",
+      "blockedUsers": "Utilisateurs Bloqués",
+      "blockedUsersDescription": "Comptes bloqués",
+      "totalBookings": "Total Réservations",
+      "totalBookingsDescription": "Toutes les réservations",
+      "activeBookings": "Réservations Actives",
+      "activeBookingsDescription": "Réservations actuelles",
+      "pendingApproval": "En Attente d'Approbation",
+      "pendingApprovalDescription": "En attente de confirmation",
+      "monthlyRevenue": "Revenus Mensuels",
+      "monthlyRevenueDescription": "Gains de ce mois"
+    },
+    "cars": {
+      "title": "Gestion des Voitures",
+      "subtitle": "Gérez votre flotte de location et les informations des véhicules",
+      "fleetOverview": "Aperçu de la Flotte",
+      "addNew": "Ajouter Nouvelle Voiture",
+      "addNewCar": "Ajouter une Nouvelle Voiture à la Flotte",
+      "viewAll": "Voir Toutes les Voitures",
+      "available": "Disponible",
+      "rented": "Louée",
+      "allCars": "Toutes les Voitures",
+      "currentlyRented": "Actuellement Louées",
+      "actions": {
+        "view": "Voir Détails",
+        "edit": "Modifier Voiture",
+        "delete": "Supprimer Voiture"
+      },
+      "form": {
+        "title": "Ajouter Nouvelle Voiture",
+        "description": "Ajoutez un nouveau véhicule à votre flotte de location. Remplissez toutes les informations requises.",
+        "basicInfo": "Informations de Base",
+        "specifications": "Spécifications Techniques",
+        "pricing": "Tarifs et Emplacement",
+        "features": "Équipements",
+        "images": "Images",
+        "cancel": "Annuler",
+        "save": "Ajouter à la Flotte"
+      },
+      "table": {
+        "car": "Voiture",
+        "details": "Détails",
+        "price": "Prix",
+        "status": "Statut",
+        "bookings": "Réservations",
+        "rating": "Note",
+        "actions": "Actions",
+        "perDay": "par jour",
+        "total": "total"
+      }
+    },
+    "users": {
+      "title": "Gestion des Utilisateurs",
+      "subtitle": "Gérez les comptes clients et les informations utilisateur",
+      "directory": "Annuaire Clients",
+      "allUsers": "Tous les Utilisateurs",
+      "active": "Actif",
+      "inactive": "Inactif",
+      "blocked": "Bloqué",
+      "actions": {
+        "viewProfile": "Voir Profil",
+        "sendMessage": "Envoyer Message",
+        "blockUser": "Bloquer Utilisateur",
+        "unblockUser": "Débloquer Utilisateur"
+      },
+      "table": {
+        "user": "Utilisateur",
+        "contact": "Contact",
+        "status": "Statut",
+        "joinDate": "Date d'Inscription",
+        "bookings": "Réservations",
+        "totalSpent": "Total Dépensé",
+        "lastBooking": "Dernière Réservation",
+        "actions": "Actions",
+        "lifetime": "à vie"
+      },
+      "details": {
+        "title": "Détails Utilisateur",
+        "description": "Informations détaillées sur le compte client",
+        "contactInformation": "Informations de Contact",
+        "bookingStatistics": "Statistiques de Réservation",
+        "email": "Email",
+        "phone": "Téléphone",
+        "joined": "Inscrit",
+        "totalBookings": "Total Réservations",
+        "totalSpent": "Total Dépensé",
+        "lastBooking": "Dernière Réservation",
+        "close": "Fermer",
+        "sendMessage": "Envoyer Message"
+      },
+      "blockConfirmation": {
+        "title": "Bloquer Utilisateur",
+        "description": "Êtes-vous sûr de vouloir bloquer cet utilisateur ? Il ne pourra plus faire de nouvelles réservations.",
+        "cancel": "Annuler",
+        "confirm": "Bloquer Utilisateur"
+      }
+    },
+    "bookings": {
+      "title": "Gestion des Réservations",
+      "subtitle": "Gérez les réservations et les plannings de location",
+      "recent": "Réservations Récentes",
+      "all": "Toutes",
+      "pending": "En Attente",
+      "confirmed": "Confirmée",
+      "active": "Active",
+      "completed": "Terminée",
+      "cancelled": "Annulée",
+      "actions": {
+        "viewDetails": "Voir Détails",
+        "confirmBooking": "Confirmer Réservation",
+        "cancelBooking": "Annuler Réservation"
+      },
+      "table": {
+        "booking": "Réservation",
+        "customer": "Client",
+        "car": "Voiture",
+        "dates": "Dates",
+        "locations": "Emplacements",
+        "amount": "Montant",
+        "status": "Statut",
+        "actions": "Actions",
+        "days": "jours"
+      },
+      "details": {
+        "title": "Détails de la Réservation",
+        "description": "Informations complètes sur cette location",
+        "customerInformation": "Informations Client",
+        "vehicleInformation": "Informations Véhicule",
+        "rentalPeriod": "Période de Location",
+        "locations": "Emplacements",
+        "name": "Nom",
+        "email": "Email",
+        "phone": "Téléphone",
+        "car": "Voiture",
+        "dailyRate": "Tarif Journalier",
+        "totalDays": "Total Jours",
+        "pickup": "Prise",
+        "return": "Retour",
+        "duration": "Durée",
+        "totalAmount": "Montant Total",
+        "close": "Fermer",
+        "confirmBooking": "Confirmer Réservation",
+        "createdOn": "Créée le"
+      },
+      "cancelConfirmation": {
+        "title": "Annuler Réservation",
+        "description": "Êtes-vous sûr de vouloir annuler cette réservation ? Cette action ne peut pas être annulée.",
+        "keepBooking": "Garder Réservation",
+        "cancelBooking": "Annuler Réservation"
+      }
+    },
+    "settings": {
+      "title": "Paramètres",
+      "subtitle": "Gérez votre compte et préférences système",
+      "tabs": {
+        "company": "Entreprise",
+        "profile": "Profil",
+        "notifications": "Notifications",
+        "system": "Système"
+      },
+      "company": {
+        "title": "Informations de l'Entreprise",
+        "companyName": "Nom de l'Entreprise",
+        "companyEmail": "Email Entreprise",
+        "phoneNumber": "Numéro de Téléphone",
+        "website": "Site Web",
+        "address": "Adresse",
+        "taxId": "ID Fiscal"
+      },
+      "profile": {
+        "title": "Paramètres du Profil",
+        "changeAvatar": "Changer Avatar",
+        "avatarNote": "JPG, GIF ou PNG. Taille max 1MB.",
+        "fullName": "Nom Complet",
+        "emailAddress": "Adresse Email",
+        "phoneNumber": "Numéro de Téléphone",
+        "role": "Rôle",
+        "securitySettings": "Paramètres de Sécurité",
+        "changePassword": "Changer Mot de Passe",
+        "enableTwoFactor": "Activer l'Authentification à Deux Facteurs"
+      },
+      "notifications": {
+        "title": "Préférences de Notification",
+        "emailNotifications": "Notifications Email",
+        "smsNotifications": "Notifications SMS",
+        "newBookings": "Nouvelles Réservations",
+        "newBookingsDesc": "Être notifié des nouvelles réservations",
+        "paymentUpdates": "Mises à Jour Paiements",
+        "paymentUpdatesDesc": "Recevoir confirmations et problèmes de paiement",
+        "newUserRegistrations": "Nouvelles Inscriptions",
+        "newUserRegistrationsDesc": "Savoir quand de nouveaux utilisateurs s'inscrivent",
+        "urgentBookings": "Réservations Urgentes",
+        "urgentBookingsDesc": "SMS pour affaires urgentes de réservation",
+        "paymentAlerts": "Alertes Paiements",
+        "paymentAlertsDesc": "Notifications importantes de paiement",
+        "savePreferences": "Enregistrer Préférences"
+      },
+      "system": {
+        "title": "Configuration Système",
+        "defaultLanguage": "Langue par Défaut",
+        "timezone": "Fuseau Horaire",
+        "currency": "Devise",
+        "dateFormat": "Format de Date",
+        "bookingSettings": "Paramètres de Réservation",
+        "autoConfirmBookings": "Auto-confirmer Réservations",
+        "autoConfirmBookingsDesc": "Confirmer automatiquement les nouvelles réservations sans révision manuelle",
+        "requireAdminApproval": "Nécessiter Approbation Admin",
+        "requireAdminApprovalDesc": "Les nouvelles réservations nécessitent l'approbation de l'administrateur",
+        "saveConfiguration": "Enregistrer Configuration"
+      },
+      "saveChanges": "Enregistrer Modifications"
+    },
+    "common": {
+      "search": "Rechercher voitures, utilisateurs, réservations...",
+      "searchCars": "Rechercher voitures par nom, marque ou modèle...",
+      "searchUsers": "Rechercher utilisateurs par nom, email ou téléphone...",
+      "searchBookings": "Rechercher réservations par client, voiture ou ID réservation...",
+      "filter": "Filtrer",
+      "actions": "Actions",
+      "save": "Enregistrer Modifications",
+      "cancel": "Annuler",
+      "delete": "Supprimer",
+      "confirm": "Confirmer",
+      "viewAll": "Voir Tout",
+      "loading": "Chargement...",
+      "noResults": "Aucun résultat trouvé",
+      "error": "Une erreur s'est produite",
+      "success": "Opération réussie"
+    },
+    "header": {
+      "searchPlaceholder": "Rechercher voitures, utilisateurs, réservations...",
+      "notifications": "Notifications",
+      "viewAllNotifications": "Voir toutes les notifications",
+      "profile": "Profil",
+      "settings": "Paramètres",
+      "logout": "Se Déconnecter",
+      "newNotifications": "nouvelles"
+    },
+    "sidebar": {
+      "dashboard": "Tableau de Bord",
+      "administrator": "Administrateur"
     }
   }
 }

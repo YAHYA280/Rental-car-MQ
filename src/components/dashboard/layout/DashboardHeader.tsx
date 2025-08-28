@@ -36,6 +36,7 @@ interface DashboardHeaderProps {
 }
 
 const DashboardHeader = ({ onMobileMenuOpen }: DashboardHeaderProps) => {
+  const t = useTranslations("dashboard");
   const locale = useLocale();
 
   const [notifications] = useState([
@@ -62,6 +63,7 @@ const DashboardHeader = ({ onMobileMenuOpen }: DashboardHeaderProps) => {
   const unreadCount = notifications.filter((n) => n.unread).length;
 
   const handleLanguageChange = (newLocale: "en" | "fr") => {
+    if (newLocale === locale) return;
     // This will be implemented with proper locale switching later
     console.log("Switch to locale:", newLocale);
   };
@@ -86,7 +88,7 @@ const DashboardHeader = ({ onMobileMenuOpen }: DashboardHeaderProps) => {
         {/* Left Section - Search Bar */}
         <form className="relative flex max-w-md" action="#" method="GET">
           <label htmlFor="search-field" className="sr-only">
-            Search
+            {t("common.search")}
           </label>
           <Search
             className="pointer-events-none absolute inset-y-0 left-0 h-full w-5 text-gray-400"
@@ -96,19 +98,19 @@ const DashboardHeader = ({ onMobileMenuOpen }: DashboardHeaderProps) => {
           <Input
             id="search-field"
             className="block h-9 w-80 border border-gray-300 rounded-md py-0 pl-10 pr-4 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-carbookers-red-500 focus:border-carbookers-red-500 sm:text-sm"
-            placeholder="Search cars, users, bookings..."
+            placeholder={t("header.searchPlaceholder")}
             type="search"
             name="search"
           />
         </form>
 
-        {/* Right section - pushed far to the right */}
+        {/* Right section */}
         <div className="flex items-center gap-x-6">
           {/* Language selector - Hidden on small screens */}
           <div className="hidden sm:flex items-center gap-2">
             <Globe className="h-4 w-4 text-gray-500" />
             <Select value={locale} onValueChange={handleLanguageChange}>
-              <SelectTrigger className="w-20 h-8 text-sm border-gray-300">
+              <SelectTrigger className="w-20 h-8 text-sm border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">
                 <SelectValue>{locale.toUpperCase()}</SelectValue>
               </SelectTrigger>
               <SelectContent>
@@ -126,7 +128,7 @@ const DashboardHeader = ({ onMobileMenuOpen }: DashboardHeaderProps) => {
                 size="sm"
                 className="relative -m-2.5 p-2.5 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-carbookers-red-500 focus:ring-offset-2"
               >
-                <span className="sr-only">View notifications</span>
+                <span className="sr-only">{t("header.notifications")}</span>
                 <Bell className="h-6 w-6" aria-hidden="true" />
                 {unreadCount > 0 && (
                   <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-carbookers-red-600 flex items-center justify-center">
@@ -139,10 +141,10 @@ const DashboardHeader = ({ onMobileMenuOpen }: DashboardHeaderProps) => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-80">
               <DropdownMenuLabel className="flex items-center justify-between">
-                <span>Notifications</span>
+                <span>{t("header.notifications")}</span>
                 {unreadCount > 0 && (
                   <Badge variant="secondary" className="text-xs">
-                    {unreadCount} new
+                    {unreadCount} {t("header.newNotifications")}
                   </Badge>
                 )}
               </DropdownMenuLabel>
@@ -173,10 +175,26 @@ const DashboardHeader = ({ onMobileMenuOpen }: DashboardHeaderProps) => {
               </div>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="text-center text-sm text-carbookers-red-600 py-3 font-medium justify-center">
-                View all notifications
+                {t("header.viewAllNotifications")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+
+          {/* Mobile Language Switcher - Only visible on mobile */}
+          <div className="sm:hidden flex items-center">
+            <div className="flex items-center space-x-2">
+              <Globe className="h-4 w-4 text-gray-500" />
+              <Select value={locale} onValueChange={handleLanguageChange}>
+                <SelectTrigger className="w-20 h-8 text-sm border border-gray-300 bg-white text-gray-700">
+                  <SelectValue>{locale.toUpperCase()}</SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="en">EN</SelectItem>
+                  <SelectItem value="fr">FR</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
 
           {/* Separator - Hidden on mobile */}
           <div
@@ -219,16 +237,16 @@ const DashboardHeader = ({ onMobileMenuOpen }: DashboardHeaderProps) => {
               <DropdownMenuSeparator />
               <DropdownMenuItem className="cursor-pointer">
                 <User className="mr-2 h-4 w-4" />
-                <span>Profile</span>
+                <span>{t("header.profile")}</span>
               </DropdownMenuItem>
               <DropdownMenuItem className="cursor-pointer">
                 <Settings className="mr-2 h-4 w-4" />
-                <span>Settings</span>
+                <span>{t("header.settings")}</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="text-red-600 cursor-pointer focus:text-red-700 focus:bg-red-50">
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>Log out</span>
+                <span>{t("header.logout")}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

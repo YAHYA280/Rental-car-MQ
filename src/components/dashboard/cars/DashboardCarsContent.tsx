@@ -1,6 +1,8 @@
+// src/components/dashboard/cars/DashboardCarsContent.tsx
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,6 +50,7 @@ import { vehiclesData } from "@/components/data/vehicles";
 import AddCarForm from "./AddCarForm";
 
 const DashboardCarsContent = () => {
+  const t = useTranslations("dashboard");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [isAddCarDialogOpen, setIsAddCarDialogOpen] = useState(false);
@@ -74,9 +77,11 @@ const DashboardCarsContent = () => {
 
   const getStatusBadge = (available: boolean) => {
     return available ? (
-      <Badge className="bg-green-100 text-green-800">Available</Badge>
+      <Badge className="bg-green-100 text-green-800">
+        {t("cars.available")}
+      </Badge>
     ) : (
-      <Badge className="bg-red-100 text-red-800">Rented</Badge>
+      <Badge className="bg-red-100 text-red-800">{t("cars.rented")}</Badge>
     );
   };
 
@@ -98,25 +103,25 @@ const DashboardCarsContent = () => {
 
   const stats = [
     {
-      title: "Total Cars",
+      title: t("stats.totalCars"),
       value: cars.length.toString(),
       icon: Car,
       color: "blue",
     },
     {
-      title: "Available",
+      title: t("stats.activeCars"),
       value: cars.filter((car) => car.available).length.toString(),
       icon: Car,
       color: "green",
     },
     {
-      title: "Currently Rented",
+      title: t("stats.rentedCars"),
       value: cars.filter((car) => !car.available).length.toString(),
       icon: Users,
       color: "red",
     },
     {
-      title: "Maintenance Due",
+      title: t("stats.maintenanceDue"),
       value: "3",
       icon: Settings,
       color: "yellow",
@@ -128,24 +133,23 @@ const DashboardCarsContent = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Cars Management</h1>
-          <p className="text-gray-600">
-            Manage your rental fleet and vehicle information
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            {t("cars.title")}
+          </h1>
+          <p className="text-gray-600">{t("cars.subtitle")}</p>
         </div>
         <Dialog open={isAddCarDialogOpen} onOpenChange={setIsAddCarDialogOpen}>
           <DialogTrigger asChild>
             <Button className="bg-carbookers-red-600 hover:bg-carbookers-red-700 flex items-center gap-2">
               <Plus className="h-4 w-4" />
-              Add New Car
+              {t("cars.addNew")}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Add New Car</DialogTitle>
+              <DialogTitle>{t("cars.form.title")}</DialogTitle>
               <DialogDescription>
-                Add a new vehicle to your rental fleet. Fill in all the required
-                information.
+                {t("cars.form.description")}
               </DialogDescription>
             </DialogHeader>
             <AddCarForm onClose={() => setIsAddCarDialogOpen(false)} />
@@ -187,7 +191,7 @@ const DashboardCarsContent = () => {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="Search cars by name, brand, or model..."
+                placeholder={t("common.searchCars")}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -199,21 +203,21 @@ const DashboardCarsContent = () => {
                 size="sm"
                 onClick={() => setSelectedFilter("all")}
               >
-                All Cars
+                {t("cars.allCars")}
               </Button>
               <Button
                 variant={selectedFilter === "available" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSelectedFilter("available")}
               >
-                Available
+                {t("cars.available")}
               </Button>
               <Button
                 variant={selectedFilter === "rented" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSelectedFilter("rented")}
               >
-                Rented
+                {t("cars.rented")}
               </Button>
             </div>
           </div>
@@ -223,19 +227,21 @@ const DashboardCarsContent = () => {
       {/* Cars Table */}
       <Card className="border-0 shadow-md">
         <CardHeader>
-          <CardTitle>Fleet Overview ({filteredCars.length} cars)</CardTitle>
+          <CardTitle>
+            {t("cars.fleetOverview")} ({filteredCars.length} cars)
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Car</TableHead>
-                <TableHead>Details</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Bookings</TableHead>
-                <TableHead>Rating</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>{t("cars.table.car")}</TableHead>
+                <TableHead>{t("cars.table.details")}</TableHead>
+                <TableHead>{t("cars.table.price")}</TableHead>
+                <TableHead>{t("cars.table.status")}</TableHead>
+                <TableHead>{t("cars.table.bookings")}</TableHead>
+                <TableHead>{t("cars.table.rating")}</TableHead>
+                <TableHead>{t("cars.table.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -279,12 +285,16 @@ const DashboardCarsContent = () => {
                   </TableCell>
                   <TableCell>
                     <p className="font-semibold text-gray-900">€{car.price}</p>
-                    <p className="text-sm text-gray-600">per day</p>
+                    <p className="text-sm text-gray-600">
+                      {t("cars.table.perDay")}
+                    </p>
                   </TableCell>
                   <TableCell>{getStatusBadge(car.available)}</TableCell>
                   <TableCell>
                     <p className="font-medium">{car.bookings || 0}</p>
-                    <p className="text-sm text-gray-600">total</p>
+                    <p className="text-sm text-gray-600">
+                      {t("cars.table.total")}
+                    </p>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
@@ -300,15 +310,17 @@ const DashboardCarsContent = () => {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuLabel>
+                          {t("common.actions")}
+                        </DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem>
                           <Eye className="mr-2 h-4 w-4" />
-                          View Details
+                          {t("cars.actions.view")}
                         </DropdownMenuItem>
                         <DropdownMenuItem>
                           <Edit className="mr-2 h-4 w-4" />
-                          Edit Car
+                          {t("cars.actions.edit")}
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
@@ -316,7 +328,7 @@ const DashboardCarsContent = () => {
                           onClick={() => setCarToDelete(car.id)}
                         >
                           <Trash2 className="mr-2 h-4 w-4" />
-                          Delete Car
+                          {t("cars.actions.delete")}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -343,13 +355,13 @@ const DashboardCarsContent = () => {
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCarToDelete(null)}>
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button
               variant="destructive"
               onClick={() => carToDelete && handleDeleteCar(carToDelete)}
             >
-              Delete Car
+              {t("common.delete")} Car
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -4,6 +4,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import {
   BarChart3,
@@ -24,34 +25,35 @@ interface MobileSidebarProps {
 
 const MobileSidebar: React.FC<MobileSidebarProps> = ({ isOpen, onClose }) => {
   const pathname = usePathname();
+  const t = useTranslations("dashboard");
 
   const navigation = [
     {
-      name: "Overview",
+      name: t("navigation.overview"),
       href: "/dashboard",
       icon: BarChart3,
       current: pathname === "/dashboard" || pathname.endsWith("/dashboard"),
     },
     {
-      name: "Cars",
+      name: t("navigation.cars"),
       href: "/dashboard/cars",
       icon: Car,
       current: pathname.includes("/dashboard/cars"),
     },
     {
-      name: "Users",
+      name: t("navigation.users"),
       href: "/dashboard/users",
       icon: Users,
       current: pathname.includes("/dashboard/users"),
     },
     {
-      name: "Bookings",
+      name: t("navigation.bookings"),
       href: "/dashboard/bookings",
       icon: Calendar,
       current: pathname.includes("/dashboard/bookings"),
     },
     {
-      name: "Settings",
+      name: t("navigation.settings"),
       href: "/dashboard/settings",
       icon: Settings,
       current: pathname.includes("/dashboard/settings"),
@@ -89,7 +91,9 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({ isOpen, onClose }) => {
                 <span className="text-lg font-bold text-white">
                   MELHOR QUE NADA
                 </span>
-                <p className="text-xs text-gray-400">Dashboard</p>
+                <p className="text-xs text-gray-400">
+                  {t("sidebar.dashboard")}
+                </p>
               </div>
             </Link>
             <Button
@@ -131,14 +135,16 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({ isOpen, onClose }) => {
               </div>
               <div>
                 <p className="font-semibold text-white">Admin User</p>
-                <p className="text-xs text-gray-400">Administrator</p>
+                <p className="text-xs text-gray-400">
+                  {t("sidebar.administrator")}
+                </p>
               </div>
             </div>
 
             {/* Logout */}
             <button className="group flex w-full gap-x-3 rounded-md p-3 text-sm font-semibold text-gray-300 hover:text-white hover:bg-gray-800 transition-colors duration-200">
               <LogOut className="h-6 w-6 shrink-0" aria-hidden="true" />
-              Logout
+              {t("header.logout")}
             </button>
           </div>
         </div>

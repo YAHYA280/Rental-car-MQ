@@ -1,6 +1,8 @@
+// src/components/dashboard/bookings/DashboardBookingsContent.tsx
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,6 +46,7 @@ import {
 } from "lucide-react";
 
 const DashboardBookingsContent = () => {
+  const t = useTranslations("dashboard");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
@@ -181,15 +184,35 @@ const DashboardBookingsContent = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "confirmed":
-        return <Badge className="bg-blue-100 text-blue-800">Confirmed</Badge>;
+        return (
+          <Badge className="bg-blue-100 text-blue-800">
+            {t("bookings.confirmed")}
+          </Badge>
+        );
       case "pending":
-        return <Badge className="bg-yellow-100 text-yellow-800">Pending</Badge>;
+        return (
+          <Badge className="bg-yellow-100 text-yellow-800">
+            {t("bookings.pending")}
+          </Badge>
+        );
       case "active":
-        return <Badge className="bg-green-100 text-green-800">Active</Badge>;
+        return (
+          <Badge className="bg-green-100 text-green-800">
+            {t("bookings.active")}
+          </Badge>
+        );
       case "completed":
-        return <Badge className="bg-gray-100 text-gray-800">Completed</Badge>;
+        return (
+          <Badge className="bg-gray-100 text-gray-800">
+            {t("bookings.completed")}
+          </Badge>
+        );
       case "cancelled":
-        return <Badge className="bg-red-100 text-red-800">Cancelled</Badge>;
+        return (
+          <Badge className="bg-red-100 text-red-800">
+            {t("bookings.cancelled")}
+          </Badge>
+        );
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
@@ -197,25 +220,25 @@ const DashboardBookingsContent = () => {
 
   const stats = [
     {
-      title: "Total Bookings",
+      title: t("stats.totalBookings"),
       value: bookings.length.toString(),
       icon: Calendar,
       color: "blue",
     },
     {
-      title: "Active Bookings",
+      title: t("stats.activeBookings"),
       value: bookings.filter((b) => b.status === "active").length.toString(),
       icon: Car,
       color: "green",
     },
     {
-      title: "Pending Approval",
+      title: t("stats.pendingApproval"),
       value: bookings.filter((b) => b.status === "pending").length.toString(),
       icon: Clock,
       color: "yellow",
     },
     {
-      title: "Revenue (Month)",
+      title: t("stats.monthlyRevenue"),
       value: `€${bookings.reduce((sum, b) => sum + b.totalAmount, 0)}`,
       icon: DollarSign,
       color: "purple",
@@ -245,11 +268,9 @@ const DashboardBookingsContent = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
-            Bookings Management
+            {t("bookings.title")}
           </h1>
-          <p className="text-gray-600">
-            Manage reservations and rental schedules
-          </p>
+          <p className="text-gray-600">{t("bookings.subtitle")}</p>
         </div>
       </div>
 
@@ -287,7 +308,7 @@ const DashboardBookingsContent = () => {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="Search bookings by customer, car, or booking ID..."
+                placeholder={t("common.searchBookings")}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -299,28 +320,28 @@ const DashboardBookingsContent = () => {
                 size="sm"
                 onClick={() => setSelectedFilter("all")}
               >
-                All
+                {t("bookings.all")}
               </Button>
               <Button
                 variant={selectedFilter === "pending" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSelectedFilter("pending")}
               >
-                Pending
+                {t("bookings.pending")}
               </Button>
               <Button
                 variant={selectedFilter === "confirmed" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSelectedFilter("confirmed")}
               >
-                Confirmed
+                {t("bookings.confirmed")}
               </Button>
               <Button
                 variant={selectedFilter === "active" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSelectedFilter("active")}
               >
-                Active
+                {t("bookings.active")}
               </Button>
             </div>
           </div>
@@ -330,20 +351,22 @@ const DashboardBookingsContent = () => {
       {/* Bookings Table */}
       <Card className="border-0 shadow-md">
         <CardHeader>
-          <CardTitle>Recent Bookings ({filteredBookings.length})</CardTitle>
+          <CardTitle>
+            {t("overview.recentBookings")} ({filteredBookings.length})
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Booking</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead>Car</TableHead>
-                <TableHead>Dates</TableHead>
-                <TableHead>Locations</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>{t("bookings.table.booking")}</TableHead>
+                <TableHead>{t("bookings.table.customer")}</TableHead>
+                <TableHead>{t("bookings.table.car")}</TableHead>
+                <TableHead>{t("bookings.table.dates")}</TableHead>
+                <TableHead>{t("bookings.table.locations")}</TableHead>
+                <TableHead>{t("bookings.table.amount")}</TableHead>
+                <TableHead>{t("bookings.table.status")}</TableHead>
+                <TableHead>{t("bookings.table.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -399,7 +422,9 @@ const DashboardBookingsContent = () => {
                       <p className="text-gray-600">
                         {booking.dates.pickupTime} - {booking.dates.returnTime}
                       </p>
-                      <p className="text-gray-500">{booking.days} days</p>
+                      <p className="text-gray-500">
+                        {booking.days} {t("bookings.table.days")}
+                      </p>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -431,13 +456,15 @@ const DashboardBookingsContent = () => {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuLabel>
+                          {t("common.actions")}
+                        </DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           onClick={() => setSelectedBooking(booking)}
                         >
                           <Eye className="mr-2 h-4 w-4" />
-                          View Details
+                          {t("bookings.actions.viewDetails")}
                         </DropdownMenuItem>
                         {booking.status === "pending" && (
                           <DropdownMenuItem
@@ -445,7 +472,7 @@ const DashboardBookingsContent = () => {
                             onClick={() => handleConfirmBooking(booking.id)}
                           >
                             <Check className="mr-2 h-4 w-4" />
-                            Confirm Booking
+                            {t("bookings.actions.confirmBooking")}
                           </DropdownMenuItem>
                         )}
                         {booking.status !== "cancelled" &&
@@ -455,7 +482,7 @@ const DashboardBookingsContent = () => {
                               onClick={() => setBookingToCancel(booking.id)}
                             >
                               <X className="mr-2 h-4 w-4" />
-                              Cancel Booking
+                              {t("bookings.actions.cancelBooking")}
                             </DropdownMenuItem>
                           )}
                       </DropdownMenuContent>
@@ -475,9 +502,9 @@ const DashboardBookingsContent = () => {
       >
         <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>Booking Details</DialogTitle>
+            <DialogTitle>{t("bookings.details.title")}</DialogTitle>
             <DialogDescription>
-              Complete information about this rental booking
+              {t("bookings.details.description")}
             </DialogDescription>
           </DialogHeader>
           {selectedBooking && (
@@ -488,7 +515,7 @@ const DashboardBookingsContent = () => {
                     Booking {selectedBooking.id}
                   </h3>
                   <p className="text-gray-600">
-                    Created on{" "}
+                    {t("bookings.details.createdOn")}{" "}
                     {new Date(selectedBooking.createdAt).toLocaleDateString()}
                   </p>
                 </div>
@@ -498,19 +525,25 @@ const DashboardBookingsContent = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h4 className="font-semibold text-gray-900 mb-3">
-                    Customer Information
+                    {t("bookings.details.customerInformation")}
                   </h4>
                   <div className="space-y-2">
                     <p>
-                      <span className="text-gray-600">Name:</span>{" "}
+                      <span className="text-gray-600">
+                        {t("bookings.details.name")}:
+                      </span>{" "}
                       {selectedBooking.customer.name}
                     </p>
                     <p>
-                      <span className="text-gray-600">Email:</span>{" "}
+                      <span className="text-gray-600">
+                        {t("bookings.details.email")}:
+                      </span>{" "}
                       {selectedBooking.customer.email}
                     </p>
                     <p>
-                      <span className="text-gray-600">Phone:</span>{" "}
+                      <span className="text-gray-600">
+                        {t("bookings.details.phone")}:
+                      </span>{" "}
                       {selectedBooking.customer.phone}
                     </p>
                   </div>
@@ -518,19 +551,25 @@ const DashboardBookingsContent = () => {
 
                 <div>
                   <h4 className="font-semibold text-gray-900 mb-3">
-                    Vehicle Information
+                    {t("bookings.details.vehicleInformation")}
                   </h4>
                   <div className="space-y-2">
                     <p>
-                      <span className="text-gray-600">Car:</span>{" "}
+                      <span className="text-gray-600">
+                        {t("bookings.details.car")}:
+                      </span>{" "}
                       {selectedBooking.car.name}
                     </p>
                     <p>
-                      <span className="text-gray-600">Daily Rate:</span> €
-                      {selectedBooking.dailyRate}
+                      <span className="text-gray-600">
+                        {t("bookings.details.dailyRate")}:
+                      </span>{" "}
+                      €{selectedBooking.dailyRate}
                     </p>
                     <p>
-                      <span className="text-gray-600">Total Days:</span>{" "}
+                      <span className="text-gray-600">
+                        {t("bookings.details.totalDays")}:
+                      </span>{" "}
                       {selectedBooking.days}
                     </p>
                   </div>
@@ -538,25 +577,31 @@ const DashboardBookingsContent = () => {
 
                 <div>
                   <h4 className="font-semibold text-gray-900 mb-3">
-                    Rental Period
+                    {t("bookings.details.rentalPeriod")}
                   </h4>
                   <div className="space-y-2">
                     <p>
-                      <span className="text-gray-600">Pickup:</span>{" "}
+                      <span className="text-gray-600">
+                        {t("bookings.details.pickup")}:
+                      </span>{" "}
                       {new Date(
                         selectedBooking.dates.pickup
                       ).toLocaleDateString()}{" "}
                       at {selectedBooking.dates.pickupTime}
                     </p>
                     <p>
-                      <span className="text-gray-600">Return:</span>{" "}
+                      <span className="text-gray-600">
+                        {t("bookings.details.return")}:
+                      </span>{" "}
                       {new Date(
                         selectedBooking.dates.return
                       ).toLocaleDateString()}{" "}
                       at {selectedBooking.dates.returnTime}
                     </p>
                     <p>
-                      <span className="text-gray-600">Duration:</span>{" "}
+                      <span className="text-gray-600">
+                        {t("bookings.details.duration")}:
+                      </span>{" "}
                       {selectedBooking.days} days
                     </p>
                   </div>
@@ -564,15 +609,19 @@ const DashboardBookingsContent = () => {
 
                 <div>
                   <h4 className="font-semibold text-gray-900 mb-3">
-                    Locations
+                    {t("bookings.details.locations")}
                   </h4>
                   <div className="space-y-2">
                     <p>
-                      <span className="text-gray-600">Pickup:</span>{" "}
+                      <span className="text-gray-600">
+                        {t("bookings.details.pickup")}:
+                      </span>{" "}
                       {selectedBooking.locations.pickup}
                     </p>
                     <p>
-                      <span className="text-gray-600">Return:</span>{" "}
+                      <span className="text-gray-600">
+                        {t("bookings.details.return")}:
+                      </span>{" "}
                       {selectedBooking.locations.return}
                     </p>
                   </div>
@@ -581,7 +630,9 @@ const DashboardBookingsContent = () => {
 
               <div className="border-t pt-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-lg font-semibold">Total Amount:</span>
+                  <span className="text-lg font-semibold">
+                    {t("bookings.details.totalAmount")}:
+                  </span>
                   <span className="text-2xl font-bold text-carbookers-red-600">
                     €{selectedBooking.totalAmount}
                   </span>
@@ -591,7 +642,7 @@ const DashboardBookingsContent = () => {
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setSelectedBooking(null)}>
-              Close
+              {t("bookings.details.close")}
             </Button>
             {selectedBooking?.status === "pending" && (
               <Button
@@ -601,7 +652,7 @@ const DashboardBookingsContent = () => {
                   setSelectedBooking(null);
                 }}
               >
-                Confirm Booking
+                {t("bookings.details.confirmBooking")}
               </Button>
             )}
           </DialogFooter>
@@ -615,15 +666,14 @@ const DashboardBookingsContent = () => {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Cancel Booking</DialogTitle>
+            <DialogTitle>{t("bookings.cancelConfirmation.title")}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to cancel this booking? This action cannot
-              be undone.
+              {t("bookings.cancelConfirmation.description")}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setBookingToCancel(null)}>
-              Keep Booking
+              {t("bookings.cancelConfirmation.keepBooking")}
             </Button>
             <Button
               variant="destructive"
@@ -631,7 +681,7 @@ const DashboardBookingsContent = () => {
                 bookingToCancel && handleCancelBooking(bookingToCancel)
               }
             >
-              Cancel Booking
+              {t("bookings.cancelConfirmation.cancelBooking")}
             </Button>
           </DialogFooter>
         </DialogContent>

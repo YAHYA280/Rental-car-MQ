@@ -2,6 +2,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,50 +14,60 @@ import {
   ArrowDownRight,
   Plus,
   Eye,
+  Settings,
+  DollarSign,
+  Clock,
+  UserCheck,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 
 const DashboardOverview = () => {
+  const t = useTranslations("dashboard");
+
   // Mock data - will be replaced with real data later
   const stats = [
     {
-      title: "Total Cars",
+      title: t("stats.totalCars"),
       value: "42",
       change: "+12%",
       changeType: "positive" as const,
       icon: Car,
-      description: "Active vehicles in fleet",
+      description: t("stats.totalCarsDescription"),
+      color: "blue",
     },
     {
-      title: "Active Bookings",
+      title: t("stats.activeBookings"),
       value: "28",
       change: "+8%",
       changeType: "positive" as const,
       icon: Calendar,
-      description: "Current reservations",
+      description: t("stats.activeBookingsDescription"),
+      color: "green",
     },
     {
-      title: "Total Users",
+      title: t("stats.totalUsers"),
       value: "1,247",
       change: "+23%",
       changeType: "positive" as const,
       icon: Users,
-      description: "Registered customers",
+      description: t("stats.totalUsersDescription"),
+      color: "purple",
     },
     {
-      title: "Monthly Revenue",
+      title: t("stats.monthlyRevenue"),
       value: "€12,460",
       change: "-3%",
       changeType: "negative" as const,
-      icon: TrendingUp,
-      description: "This month's earnings",
+      icon: DollarSign,
+      description: t("stats.monthlyRevenueDescription"),
+      color: "yellow",
     },
   ];
 
   const recentBookings = [
     {
-      id: "1",
+      id: "BK001",
       customer: "Sarah Johnson",
       car: "Mercedes G63 AMG",
       period: "Dec 15 - Dec 20",
@@ -64,7 +75,7 @@ const DashboardOverview = () => {
       amount: "€6,250",
     },
     {
-      id: "2",
+      id: "BK002",
       customer: "Michael Chen",
       car: "Porsche Macan",
       period: "Dec 18 - Dec 22",
@@ -72,7 +83,7 @@ const DashboardOverview = () => {
       amount: "€720",
     },
     {
-      id: "3",
+      id: "BK003",
       customer: "Emma Davis",
       car: "BMW Series 7",
       period: "Dec 20 - Dec 25",
@@ -80,7 +91,7 @@ const DashboardOverview = () => {
       amount: "€1,495",
     },
     {
-      id: "4",
+      id: "BK004",
       customer: "John Smith",
       car: "Volkswagen Golf 8",
       period: "Dec 22 - Dec 28",
@@ -132,23 +143,21 @@ const DashboardOverview = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
-            Dashboard Overview
+            {t("overview.title")}
           </h1>
-          <p className="text-gray-600">
-            Welcome back! Here's what's happening with your rental business.
-          </p>
+          <p className="text-gray-600">{t("overview.subtitle")}</p>
         </div>
         <div className="flex gap-3">
           <Link href="/dashboard/cars">
             <Button variant="outline" className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
-              Add New Car
+              {t("overview.addNewCar")}
             </Button>
           </Link>
           <Link href="/dashboard/bookings">
             <Button className="bg-carbookers-red-600 hover:bg-carbookers-red-700 flex items-center gap-2">
               <Eye className="h-4 w-4" />
-              View All Bookings
+              {t("overview.viewBookings")}
             </Button>
           </Link>
         </div>
@@ -164,7 +173,7 @@ const DashboardOverview = () => {
                   <p className="text-sm font-medium text-gray-600">
                     {stat.title}
                   </p>
-                  <p className="text-3xl font-bold text-gray-900">
+                  <p className="text-3xl font-bold text-gray-900 mt-1">
                     {stat.value}
                   </p>
                   <div className="flex items-center mt-2">
@@ -188,8 +197,10 @@ const DashboardOverview = () => {
                   </div>
                 </div>
                 <div className="ml-4">
-                  <div className="w-12 h-12 bg-carbookers-red-100 rounded-lg flex items-center justify-center">
-                    <stat.icon className="h-6 w-6 text-carbookers-red-600" />
+                  <div
+                    className={`w-12 h-12 bg-${stat.color}-100 rounded-lg flex items-center justify-center`}
+                  >
+                    <stat.icon className={`h-6 w-6 text-${stat.color}-600`} />
                   </div>
                 </div>
               </div>
@@ -202,14 +213,16 @@ const DashboardOverview = () => {
         {/* Recent Bookings */}
         <Card className="border-0 shadow-md">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-xl font-bold">Recent Bookings</CardTitle>
+            <CardTitle className="text-xl font-bold">
+              {t("overview.recentBookings")}
+            </CardTitle>
             <Link href="/dashboard/bookings">
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-carbookers-red-600"
+                className="text-carbookers-red-600 hover:text-carbookers-red-700"
               >
-                View All
+                {t("common.viewAll")}
                 <ArrowUpRight className="h-4 w-4 ml-1" />
               </Button>
             </Link>
@@ -219,14 +232,26 @@ const DashboardOverview = () => {
               {recentBookings.map((booking) => (
                 <div
                   key={booking.id}
-                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                 >
                   <div className="flex-1">
-                    <p className="font-semibold text-gray-900">
-                      {booking.customer}
-                    </p>
-                    <p className="text-sm text-gray-600">{booking.car}</p>
-                    <p className="text-xs text-gray-500">{booking.period}</p>
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-carbookers-red-600 flex items-center justify-center text-white font-semibold text-sm">
+                        {booking.customer
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-900">
+                          {booking.customer}
+                        </p>
+                        <p className="text-sm text-gray-600">{booking.car}</p>
+                        <p className="text-xs text-gray-500">
+                          {booking.period}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                   <div className="flex items-center gap-3">
                     {getStatusBadge(booking.status)}
@@ -244,13 +269,13 @@ const DashboardOverview = () => {
         <Card className="border-0 shadow-md">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-xl font-bold">
-              Top Performing Cars
+              {t("overview.topPerformingCars")}
             </CardTitle>
             <Link href="/dashboard/cars">
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-carbookers-red-600"
+                className="text-carbookers-red-600 hover:text-carbookers-red-700"
               >
                 Manage Fleet
                 <ArrowUpRight className="h-4 w-4 ml-1" />
@@ -262,7 +287,7 @@ const DashboardOverview = () => {
               {topCars.map((car, index) => (
                 <div
                   key={car.id}
-                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 bg-carbookers-red-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
@@ -297,44 +322,46 @@ const DashboardOverview = () => {
       {/* Quick Actions */}
       <Card className="border-0 shadow-md">
         <CardHeader>
-          <CardTitle className="text-xl font-bold">Quick Actions</CardTitle>
+          <CardTitle className="text-xl font-bold">
+            {t("overview.quickActions")}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <Link href="/dashboard/cars/new">
               <Button
                 variant="outline"
-                className="w-full h-24 flex flex-col gap-2"
+                className="w-full h-24 flex flex-col gap-2 hover:bg-gray-50 transition-colors"
               >
                 <Car className="h-6 w-6" />
-                <span>Add New Car</span>
+                <span>{t("overview.addNewCar")}</span>
               </Button>
             </Link>
             <Link href="/dashboard/bookings">
               <Button
                 variant="outline"
-                className="w-full h-24 flex flex-col gap-2"
+                className="w-full h-24 flex flex-col gap-2 hover:bg-gray-50 transition-colors"
               >
                 <Calendar className="h-6 w-6" />
-                <span>View Bookings</span>
+                <span>{t("overview.viewBookings")}</span>
               </Button>
             </Link>
             <Link href="/dashboard/users">
               <Button
                 variant="outline"
-                className="w-full h-24 flex flex-col gap-2"
+                className="w-full h-24 flex flex-col gap-2 hover:bg-gray-50 transition-colors"
               >
                 <Users className="h-6 w-6" />
-                <span>Manage Users</span>
+                <span>{t("overview.manageUsers")}</span>
               </Button>
             </Link>
             <Link href="/dashboard/settings">
               <Button
                 variant="outline"
-                className="w-full h-24 flex flex-col gap-2"
+                className="w-full h-24 flex flex-col gap-2 hover:bg-gray-50 transition-colors"
               >
-                <TrendingUp className="h-6 w-6" />
-                <span>View Reports</span>
+                <Settings className="h-6 w-6" />
+                <span>{t("overview.viewReports")}</span>
               </Button>
             </Link>
           </div>

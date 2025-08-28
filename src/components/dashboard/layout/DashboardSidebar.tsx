@@ -1,7 +1,7 @@
 // src/components/dashboard/layout/DashboardSidebar.tsx
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -32,31 +32,31 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
 
   const navigation = [
     {
-      name: "Overview",
+      name: t("navigation.overview"),
       href: "/dashboard",
       icon: BarChart3,
       current: pathname === "/dashboard" || pathname.endsWith("/dashboard"),
     },
     {
-      name: "Cars",
+      name: t("navigation.cars"),
       href: "/dashboard/cars",
       icon: Car,
       current: pathname.includes("/dashboard/cars"),
     },
     {
-      name: "Users",
+      name: t("navigation.users"),
       href: "/dashboard/users",
       icon: Users,
       current: pathname.includes("/dashboard/users"),
     },
     {
-      name: "Bookings",
+      name: t("navigation.bookings"),
       href: "/dashboard/bookings",
       icon: Calendar,
       current: pathname.includes("/dashboard/bookings"),
     },
     {
-      name: "Settings",
+      name: t("navigation.settings"),
       href: "/dashboard/settings",
       icon: Settings,
       current: pathname.includes("/dashboard/settings"),
@@ -82,7 +82,9 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                 <span className="text-xl font-bold text-white">
                   MELHOR QUE NADA
                 </span>
-                <p className="text-xs text-gray-400">Dashboard</p>
+                <p className="text-xs text-gray-400">
+                  {t("sidebar.dashboard")}
+                </p>
               </div>
             </Link>
           </div>
@@ -127,14 +129,16 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                     </div>
                     <div>
                       <p className="font-semibold text-white">Admin User</p>
-                      <p className="text-xs text-gray-400">Administrator</p>
+                      <p className="text-xs text-gray-400">
+                        {t("sidebar.administrator")}
+                      </p>
                     </div>
                   </div>
 
                   {/* Logout */}
                   <button className="mt-4 group flex w-full gap-x-3 rounded-md p-2 text-sm font-semibold text-gray-300 hover:text-white hover:bg-gray-800 transition-colors duration-200">
                     <LogOut className="h-6 w-6 shrink-0" aria-hidden="true" />
-                    Logout
+                    {t("header.logout")}
                   </button>
                 </div>
               </li>
