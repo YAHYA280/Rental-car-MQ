@@ -49,6 +49,63 @@ import Image from "next/image";
 import { vehiclesData } from "@/components/data/vehicles";
 import AddCarForm from "./AddCarForm";
 
+// Define proper types
+interface CarData {
+  id: string;
+  name: string;
+  brand: string;
+  model: string;
+  year: number;
+  price: number;
+  image: string;
+  seats: number;
+  doors: number;
+  transmission: string;
+  fuelType: string;
+  available: boolean;
+  rating: number;
+  bookings?: number;
+  mileage?: number;
+  features?: string[];
+  description?: string;
+  licensePlate?: string;
+  caution?: number;
+  lastTechnicalVisit?: string;
+  lastOilChange?: string;
+}
+
+export interface CarFormData {
+  // Basic Info
+  brand: string;
+  name: string;
+  model: string;
+  year: string;
+  licensePlate: string;
+
+  // Technical Specs
+  transmission: string;
+  fuelType: string;
+  seats: string;
+  doors: string;
+  mileage: string;
+
+  // Pricing
+  dailyPrice: string;
+  caution: string;
+
+  // Maintenance
+  lastTechnicalVisit: string;
+  lastOilChange: string;
+
+  // Features and Images
+  features: string[];
+  mainImage?: File;
+  additionalImages: File[];
+
+  // Optional fields
+  description?: string;
+}
+
 const DashboardCarsContent = () => {
   const t = useTranslations("dashboard");
   const [searchTerm, setSearchTerm] = useState("");
@@ -57,14 +114,33 @@ const DashboardCarsContent = () => {
   const [carToDelete, setCarToDelete] = useState<string | null>(null);
 
   // Mock data - using existing vehicles data
-  const [cars, setCars] = useState(vehiclesData);
+  const [cars, setCars] = useState<CarData[]>(
+    vehiclesData.map((car) => ({
+      ...car,
+      licensePlate: `${
+        Math.floor(Math.random() * 90000) + 10000
+      }${String.fromCharCode(65 + Math.floor(Math.random() * 26))}`,
+      caution: Math.floor(car.price * 2), // 2x daily rate as caution
+      lastTechnicalVisit: new Date(
+        Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000
+      )
+        .toISOString()
+        .split("T")[0],
+      lastOilChange: new Date(
+        Date.now() - Math.random() * 180 * 24 * 60 * 60 * 1000
+      )
+        .toISOString()
+        .split("T")[0],
+    }))
+  );
 
   // Filter cars based on search and filter criteria
   const filteredCars = cars.filter((car) => {
     const matchesSearch =
       car.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       car.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      car.model.toLowerCase().includes(searchTerm.toLowerCase());
+      car.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      car.licensePlate?.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesFilter =
       selectedFilter === "all" ||
@@ -78,10 +154,12 @@ const DashboardCarsContent = () => {
   const getStatusBadge = (available: boolean) => {
     return available ? (
       <Badge className="bg-green-100 text-green-800">
-        {t("cars.available")}
+        {t("cars.statusBadges.available")}
       </Badge>
     ) : (
-      <Badge className="bg-red-100 text-red-800">{t("cars.rented")}</Badge>
+      <Badge className="bg-red-100 text-red-800">
+        {t("cars.statusBadges.rented")}
+      </Badge>
     );
   };
 
@@ -99,6 +177,54 @@ const DashboardCarsContent = () => {
   const handleDeleteCar = (carId: string) => {
     setCars(cars.filter((car) => car.id !== carId));
     setCarToDelete(null);
+  };
+
+  // Fixed function to handle form submission
+  const handleAddCar = async (formData: CarFormData): Promise<void> => {
+    try {
+      // Convert FormData to CarData
+      const newCarData: CarData = {
+        id: `car-${Date.now()}`,
+        name: formData.name,
+        brand: formData.brand,
+        model: formData.model,
+        year: parseInt(formData.year),
+        price: parseFloat(formData.dailyPrice),
+        seats: parseInt(formData.seats),
+        doors: parseInt(formData.doors),
+        transmission: formData.transmission,
+        fuelType: formData.fuelType,
+        available: true,
+        rating: 4.5, // Default rating
+        bookings: 0,
+        mileage: formData.mileage ? parseInt(formData.mileage) : undefined,
+        features: formData.features,
+        description: formData.description,
+        licensePlate: formData.licensePlate,
+        caution: parseFloat(formData.caution),
+        lastTechnicalVisit: formData.lastTechnicalVisit,
+        lastOilChange: formData.lastOilChange,
+        // For now, use a placeholder image. In real implementation,
+        // you would upload the file and get back a URL
+        image: "/cars/placeholder/photo1.jpg",
+      };
+
+      // In a real application, you would:
+      // 1. Upload the images to your storage service
+      // 2. Get back the URLs
+      // 3. Send the car data to your backend API
+      // 4. Update the state with the response
+
+      // For now, just add to local state
+      setCars((prevCars) => [...prevCars, newCarData]);
+      setIsAddCarDialogOpen(false);
+
+      // Show success message (you might want to use a toast library)
+      console.log("Car added successfully:", newCarData);
+    } catch (error) {
+      console.error("Error adding car:", error);
+      // Handle error (show error message to user)
+    }
   };
 
   const stats = [
@@ -145,14 +271,17 @@ const DashboardCarsContent = () => {
               {t("cars.addNew")}
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{t("cars.form.title")}</DialogTitle>
               <DialogDescription>
                 {t("cars.form.description")}
               </DialogDescription>
             </DialogHeader>
-            <AddCarForm onClose={() => setIsAddCarDialogOpen(false)} />
+            <AddCarForm
+              onSubmit={handleAddCar}
+              onClose={() => setIsAddCarDialogOpen(false)}
+            />
           </DialogContent>
         </Dialog>
       </div>
@@ -237,10 +366,10 @@ const DashboardCarsContent = () => {
               <TableRow>
                 <TableHead>{t("cars.table.car")}</TableHead>
                 <TableHead>{t("cars.table.details")}</TableHead>
-                <TableHead>{t("cars.table.price")}</TableHead>
+                <TableHead>{t("cars.table.pricing")}</TableHead>
+                <TableHead>{t("cars.table.caution")}</TableHead>
                 <TableHead>{t("cars.table.status")}</TableHead>
-                <TableHead>{t("cars.table.bookings")}</TableHead>
-                <TableHead>{t("cars.table.rating")}</TableHead>
+                <TableHead>{t("cars.table.lastTechnicalVisit")}</TableHead>
                 <TableHead>{t("cars.table.actions")}</TableHead>
               </TableRow>
             </TableHeader>
@@ -264,6 +393,9 @@ const DashboardCarsContent = () => {
                         <p className="text-sm text-gray-600">
                           {car.model} {car.year}
                         </p>
+                        <p className="text-xs text-gray-500">
+                          {car.licensePlate}
+                        </p>
                       </div>
                     </div>
                   </TableCell>
@@ -271,7 +403,7 @@ const DashboardCarsContent = () => {
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-2 text-sm text-gray-600">
                         <Users className="h-4 w-4" />
-                        {car.seats} seats
+                        {car.seats} {t("cars.table.seats")}
                       </div>
                       <div className="flex items-center gap-2 text-sm text-gray-600">
                         <span>{getFuelIcon(car.fuelType)}</span>
@@ -289,18 +421,21 @@ const DashboardCarsContent = () => {
                       {t("cars.table.perDay")}
                     </p>
                   </TableCell>
-                  <TableCell>{getStatusBadge(car.available)}</TableCell>
                   <TableCell>
-                    <p className="font-medium">{car.bookings || 0}</p>
+                    <p className="font-semibold text-gray-900">
+                      €{car.caution}
+                    </p>
                     <p className="text-sm text-gray-600">
-                      {t("cars.table.total")}
+                      {t("cars.table.deposit")}
                     </p>
                   </TableCell>
+                  <TableCell>{getStatusBadge(car.available)}</TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-1">
-                      <span className="text-yellow-400">★</span>
-                      <span className="font-medium">{car.rating}</span>
-                    </div>
+                    <p className="text-sm text-gray-600">
+                      {car.lastTechnicalVisit
+                        ? new Date(car.lastTechnicalVisit).toLocaleDateString()
+                        : "N/A"}
+                    </p>
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>
@@ -316,7 +451,7 @@ const DashboardCarsContent = () => {
                         <DropdownMenuSeparator />
                         <DropdownMenuItem>
                           <Eye className="mr-2 h-4 w-4" />
-                          {t("cars.actions.view")}
+                          {t("cars.actions.viewDetails")}
                         </DropdownMenuItem>
                         <DropdownMenuItem>
                           <Edit className="mr-2 h-4 w-4" />
@@ -347,21 +482,20 @@ const DashboardCarsContent = () => {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Are you sure?</DialogTitle>
+            <DialogTitle>{t("cars.deleteConfirmation.title")}</DialogTitle>
             <DialogDescription>
-              This action cannot be undone. This will permanently delete the car
-              from your fleet.
+              {t("cars.deleteConfirmation.description")}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCarToDelete(null)}>
-              {t("common.cancel")}
+              {t("cars.deleteConfirmation.cancel")}
             </Button>
             <Button
               variant="destructive"
               onClick={() => carToDelete && handleDeleteCar(carToDelete)}
             >
-              {t("common.delete")} Car
+              {t("cars.deleteConfirmation.confirm")}
             </Button>
           </DialogFooter>
         </DialogContent>

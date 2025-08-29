@@ -74,19 +74,18 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
               <Image
                 src="/Logo.png"
                 alt="MELHOR QUE NADA"
-                width={40}
-                height={40}
+                width={160}
+                height={80}
                 className="rounded"
               />
+            </Link>
+            <span>
               <div>
-                <span className="text-xl font-bold text-white">
-                  MELHOR QUE NADA
-                </span>
                 <p className="text-xs text-gray-400">
                   {t("sidebar.dashboard")}
                 </p>
               </div>
-            </Link>
+            </span>
           </div>
 
           {/* Navigation */}

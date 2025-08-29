@@ -566,40 +566,133 @@
       "subtitle": "Manage your rental fleet and vehicle information",
       "fleetOverview": "Fleet Overview",
       "addNew": "Add New Car",
-      "addNewCar": "Add New Car to Fleet",
-      "viewAll": "View All Cars",
       "available": "Available",
       "rented": "Rented",
+      "maintenance": "Maintenance",
+      "inspection": "Inspection",
       "allCars": "All Cars",
-      "currentlyRented": "Currently Rented",
       "actions": {
-        "view": "View Details",
+        "viewDetails": "View Details",
         "edit": "Edit Car",
         "delete": "Delete Car"
-      },
-      "form": {
-        "title": "Add New Car",
-        "description": "Add a new vehicle to your rental fleet. Fill in all the required information.",
-        "basicInfo": "Basic Information",
-        "specifications": "Technical Specifications",
-        "pricing": "Pricing & Location",
-        "features": "Features",
-        "images": "Images",
-        "cancel": "Cancel",
-        "save": "Add Car to Fleet"
       },
       "table": {
         "car": "Car",
         "details": "Details",
-        "price": "Price",
+        "pricing": "Daily Price",
+        "caution": "Deposit",
         "status": "Status",
-        "bookings": "Bookings",
-        "rating": "Rating",
+        "lastTechnicalVisit": "Last Technical Visit",
+        "lastOilChange": "Last Oil Change",
         "actions": "Actions",
         "perDay": "per day",
-        "total": "total"
+        "deposit": "deposit",
+        "seats": "seats",
+        "doors": "doors",
+        "licensePlate": "License Plate"
+      },
+      "form": {
+        "title": "Add New Car",
+        "description": "Add a new vehicle to your rental fleet. Fill in all the required information.",
+        "submit": "Add Car to Fleet",
+        "sections": {
+          "basicInfo": "Basic Information",
+          "technicalSpecs": "Technical Specifications",
+          "pricing": "Pricing & Deposit",
+          "maintenance": "Technical Maintenance",
+          "features": "Features & Equipment",
+          "images": "Vehicle Images"
+        },
+        "brand": "Brand",
+        "name": "Car Name",
+        "model": "Model",
+        "year": "Year",
+        "licensePlate": "License Plate",
+        "transmission": "Transmission",
+        "fuelType": "Fuel Type",
+        "seats": "Number of Seats",
+        "doors": "Number of Doors",
+        "mileage": "Mileage",
+        "dailyPrice": "Daily Price",
+        "caution": "Security Deposit",
+        "cautionDescription": "Amount required as security deposit",
+        "lastTechnicalVisit": "Last Technical Visit",
+        "lastOilChange": "Last Oil Change",
+        "seatsLabel": "seats",
+        "doorsLabel": "doors",
+        "selectedFeatures": "Selected Features",
+        "mainImage": "Main Image",
+        "additionalImages": "Additional Images",
+        "additionalImagesDescription": "Upload additional photos of the vehicle",
+        "uploadMainImage": "Upload the main vehicle image",
+        "imageFormats": "JPG, PNG or WEBP. Max size 5MB.",
+        "chooseImage": "Choose Image",
+        "addMoreImages": "Add More Images",
+        "placeholders": {
+          "selectBrand": "Select brand",
+          "name": "e.g., G63 AMG",
+          "model": "e.g., G-Class Sport",
+          "selectTransmission": "Select transmission",
+          "selectFuelType": "Select fuel type",
+          "selectSeats": "Select seats",
+          "selectDoors": "Select doors",
+          "selectDate": "Select date",
+          "licensePlateFormat": "Format: 5 numbers + 1 letter (e.g., 12345A)"
+        },
+        "transmissions": {
+          "manual": "Manual",
+          "automatic": "Automatic"
+        },
+        "fuelTypes": {
+          "petrol": "Petrol",
+          "diesel": "Diesel",
+          "electric": "Electric",
+          "hybrid": "Hybrid"
+        },
+        "features": {
+          "gps": "GPS Navigation",
+          "reverseCamera": "Reverse Camera",
+          "parkingSensors": "Parking Sensors",
+          "climateControl": "Climate Control",
+          "bluetooth": "Bluetooth",
+          "cruiseControl": "Cruise Control",
+          "leatherSeats": "Leather Seats",
+          "sunroof": "Sunroof",
+          "keylessEntry": "Keyless Entry",
+          "adaptiveLights": "Adaptive Headlights"
+        },
+        "validation": {
+          "requiredFields": "Please fill in all required fields",
+          "invalidLicensePlate": "License plate must be in format: 5 numbers + 1 letter (e.g., 12345A)",
+          "datesRequired": "Technical visit and oil change dates are required"
+        }
+      },
+      "details": {
+        "title": "Car Details",
+        "description": "Detailed information about this vehicle",
+        "basicInfo": "Basic Information",
+        "pricing": "Pricing Information",
+        "maintenance": "Maintenance History",
+        "features": "Features",
+        "seats": "Seats",
+        "doors": "Doors",
+        "transmission": "Transmission",
+        "fuelType": "Fuel Type",
+        "mileage": "Mileage",
+        "dailyPrice": "Daily Price",
+        "caution": "Security Deposit",
+        "lastTechnicalVisit": "Last Technical Visit",
+        "lastOilChange": "Last Oil Change",
+        "close": "Close",
+        "edit": "Edit Car"
+      },
+      "deleteConfirmation": {
+        "title": "Delete Car",
+        "description": "Are you sure you want to delete this car? This action cannot be undone.",
+        "confirm": "Delete Car"
       }
     },
+
     "users": {
       "title": "Users Management",
       "subtitle": "Manage customer accounts and user information",
@@ -790,6 +883,55 @@
     "sidebar": {
       "dashboard": "Dashboard",
       "administrator": "Administrator"
+    },
+    "form": {
+      "title": "Add New Car",
+      "description": "Add a new vehicle to your rental fleet. Fill in all the required information.",
+      "submit": "Add Car to Fleet",
+      "sections": {
+        "basicInfo": "Basic Information",
+        "technicalSpecs": "Technical Specifications",
+        "pricing": "Pricing & Deposit",
+        "maintenance": "Technical Maintenance",
+        "features": "Features & Equipment",
+        "images": "Vehicle Images"
+      },
+      "brand": "Brand",
+      "name": "Car Name",
+      "model": "Model",
+      "year": "Year",
+      "licensePlate": "License Plate",
+      "transmission": "Transmission",
+      "fuelType": "Fuel Type",
+      "seats": "Number of Seats",
+      "doors": "Number of Doors",
+      "mileage": "Mileage",
+      "dailyPrice": "Daily Price",
+      "caution": "Security Deposit",
+      "cautionDescription": "Amount required as security deposit",
+      "lastTechnicalVisit": "Last Technical Visit",
+      "lastOilChange": "Last Oil Change",
+      "seatsLabel": "seats",
+      "doorsLabel": "doors",
+      "selectedFeatures": "Selected Features",
+      "mainImage": "Main Image",
+      "additionalImages": "Additional Images",
+      "additionalImagesDescription": "Upload additional photos of the vehicle",
+      "uploadMainImage": "Upload the main vehicle image",
+      "imageFormats": "JPG, PNG or WEBP. Max size 5MB.",
+      "chooseImage": "Choose Image",
+      "addMoreImages": "Add More Images",
+      "placeholders": {
+        "selectBrand": "Select brand",
+        "name": "e.g., G63 AMG",
+        "model": "e.g., G-Class Sport",
+        "selectTransmission": "Select transmission",
+        "selectFuelType": "Select fuel type",
+        "selectSeats": "Select seats",
+        "selectDoors": "Select doors",
+        "selectDate": "Select date",
+        "licensePlateFormat": "Format: 5 numbers + 1 letter (e.g., 12345A)"
+      }
     }
   }
 }
