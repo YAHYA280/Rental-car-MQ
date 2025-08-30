@@ -516,50 +516,52 @@
 
   "dashboard": {
     "title": "Dashboard",
-    "welcome": "Welcome back! Here's what's happening with your rental business.",
+    "welcome": "Welcome back! Here’s what’s happening with your rental activity.",
     "overview": {
       "title": "Dashboard Overview",
-      "subtitle": "Welcome back! Here's what's happening with your rental business.",
+      "subtitle": "Welcome back! Here’s what’s happening with your rental activity.",
       "quickActions": "Quick Actions",
       "recentBookings": "Recent Bookings",
-      "topPerformingCars": "Top Performing Cars",
-      "addNewCar": "Add New Car",
+      "topPerformingCars": "Top Performing Vehicles",
+      "addNewCar": "Add Vehicle",
       "viewBookings": "View Bookings",
-      "manageUsers": "Manage Users",
+      "manageUsers": "Manage Customers",
       "viewReports": "View Reports"
     },
     "navigation": {
       "overview": "Overview",
       "cars": "Fleet",
       "users": "Customers",
-      "bookings": "Reservations",
+      "bookings": "Bookings",
       "settings": "Settings"
     },
     "stats": {
       "totalCars": "Total Vehicles",
       "totalCarsDescription": "Active vehicles in fleet",
-      "activeCars": "Available Now",
+      "activeCars": "Available",
       "activeCarsDescription": "Ready for rental",
-      "rentedCars": "Currently Rented",
-      "rentedCarsDescription": "Vehicles on road",
+      "rentedCars": "Rented",
+      "rentedCarsDescription": "Vehicles on the road",
       "maintenanceDue": "Maintenance Due",
-      "maintenanceDueDescription": "Need attention",
+      "maintenanceDueDescription": "Require attention",
       "totalUsers": "Total Customers",
-      "totalUsersDescription": "Registered clients",
+      "totalUsersDescription": "Registered customers",
       "activeUsers": "Active Customers",
       "activeUsersDescription": "Recent activity",
       "newUsers": "New This Month",
-      "newUsersDescription": "Fresh registrations",
+      "newUsersDescription": "Recent registrations",
+      "newThisMonth": "New This Month",
       "blockedUsers": "Blocked Accounts",
       "blockedUsersDescription": "Restricted access",
-      "totalBookings": "Total Reservations",
-      "totalBookingsDescription": "All time bookings",
+      "totalBookings": "Total Bookings",
+      "totalBookingsDescription": "All bookings",
       "activeBookings": "Active Rentals",
-      "activeBookingsDescription": "Current reservations",
-      "pendingApproval": "Pending Review",
+      "activeBookingsDescription": "Current bookings",
+      "pendingApproval": "Pending",
       "pendingApprovalDescription": "Awaiting confirmation",
       "monthlyRevenue": "Monthly Revenue",
-      "monthlyRevenueDescription": "This month's earnings"
+      "monthlyRevenueDescription": "Earnings this month",
+      "totalRevenue": "Total Revenue"
     },
     "cars": {
       "title": "Fleet Management",
@@ -567,7 +569,7 @@
       "fleetOverview": "Fleet Overview",
       "addNew": "Add Vehicle",
       "available": "Available",
-      "rented": "On Rent",
+      "rented": "Rented",
       "maintenance": "Maintenance",
       "inspection": "Inspection",
       "allCars": "All Vehicles",
@@ -589,7 +591,8 @@
         "deposit": "deposit",
         "seats": "seats",
         "doors": "doors",
-        "licensePlate": "License Plate"
+        "licensePlate": "License Plate",
+        "bookingsCount": "bookings"
       },
       "form": {
         "title": "Add New Vehicle",
@@ -598,9 +601,9 @@
         "sections": {
           "basicInfo": "Vehicle Information",
           "technicalSpecs": "Technical Details",
-          "pricing": "Pricing & Deposit",
+          "pricing": "Rates and Deposit",
           "maintenance": "Service History",
-          "features": "Equipment & Features",
+          "features": "Equipment and Options",
           "images": "Vehicle Photos"
         },
         "brand": "Brand",
@@ -609,7 +612,7 @@
         "year": "Year",
         "licensePlate": "License Plate",
         "whatsappNumber": "WhatsApp Contact",
-        "whatsappDescription": "WhatsApp number for booking inquiries",
+        "whatsappDescription": "WhatsApp number for booking requests",
         "transmission": "Transmission",
         "fuelType": "Fuel Type",
         "seats": "Number of Seats",
@@ -622,24 +625,24 @@
         "lastOilChange": "Last Oil Change",
         "seatsLabel": "seats",
         "doorsLabel": "doors",
-        "selectedFeatures": "Selected Features",
+        "selectedFeatures": "Selected Equipment",
         "mainImage": "Main Photo",
         "additionalImages": "Additional Photos",
-        "additionalImagesDescription": "Upload additional vehicle photos",
-        "uploadMainImage": "Upload the main vehicle photo",
+        "additionalImagesDescription": "Upload additional photos of the vehicle",
+        "uploadMainImage": "Upload the vehicle’s main photo",
         "imageFormats": "JPG, PNG or WEBP. Max size 5MB.",
         "chooseImage": "Choose Photo",
         "addMoreImages": "Add More Photos",
         "placeholders": {
           "selectBrand": "Select brand",
-          "name": "e.g., G63 AMG",
-          "model": "e.g., G-Class Sport",
+          "name": "ex: G63 AMG",
+          "model": "ex: G-Class Sport",
           "selectTransmission": "Select transmission",
           "selectFuelType": "Select fuel type",
           "selectSeats": "Select seats",
           "selectDoors": "Select doors",
           "selectDate": "Select date",
-          "licensePlateFormat": "Format: 5 numbers + 1 letter (e.g., 12345A)",
+          "licensePlateFormat": "Format: 5 digits + 1 letter (ex: 12345A)",
           "whatsappNumber": "+212612345678"
         },
         "transmissions": {
@@ -658,7 +661,7 @@
           "gps": "GPS Navigation",
           "cruiseControl": "Cruise Control",
           "parkingSensors": "Parking Sensors",
-          "backupCamera": "Backup Camera",
+          "backupCamera": "Rear Camera",
           "leatherSeats": "Leather Seats",
           "keylessEntry": "Keyless Entry",
           "electricWindows": "Electric Windows",
@@ -670,25 +673,25 @@
           "modelRequired": "Model is required",
           "yearRequired": "Year is required",
           "licensePlateRequired": "License plate is required",
-          "licensePlateFormat": "Invalid format (e.g., 12345A)",
+          "licensePlateFormat": "Invalid format (ex: 12345A)",
           "transmissionRequired": "Transmission is required",
           "fuelTypeRequired": "Fuel type is required",
           "seatsRequired": "Number of seats is required",
           "doorsRequired": "Number of doors is required",
           "dailyPriceRequired": "Daily rate is required",
-          "cautionRequired": "Security deposit is required",
+          "cautionRequired": "Deposit is required",
           "mainImageRequired": "Main photo is required"
         },
-        "success": "Vehicle successfully added to fleet!",
-        "error": "Error adding vehicle"
+        "success": "Vehicle successfully added to the fleet!",
+        "error": "Error adding the vehicle"
       },
       "details": {
         "title": "Vehicle Details",
-        "description": "Complete vehicle information and specifications",
+        "description": "Complete information and specifications of the vehicle",
         "basicInfo": "Basic Information",
         "pricing": "Pricing Information",
         "maintenance": "Service History",
-        "features": "Features",
+        "features": "Equipment",
         "seats": "Seats",
         "doors": "Doors",
         "transmission": "Transmission",
@@ -709,7 +712,7 @@
       },
       "statusBadges": {
         "available": "Available",
-        "rented": "On Rent",
+        "rented": "Rented",
         "maintenance": "Maintenance",
         "inspection": "Inspection"
       }
@@ -717,53 +720,111 @@
     "users": {
       "title": "Customer Management",
       "subtitle": "Manage customer accounts and client information",
-      "directory": "Customer Directory",
+      "customerDirectory": "Customer Directory",
+      "addNew": "Add Customer",
       "allUsers": "All Customers",
       "active": "Active",
       "inactive": "Inactive",
       "blocked": "Blocked",
       "actions": {
+        "viewDetails": "View Details",
         "viewProfile": "View Profile",
+        "edit": "Edit Customer",
         "sendMessage": "Send Message",
         "blockUser": "Block Customer",
-        "unblockUser": "Unblock Customer"
+        "unblockUser": "Unblock Customer",
+        "delete": "Delete Customer"
       },
       "table": {
         "user": "Customer",
         "contact": "Contact Info",
         "status": "Status",
-        "joinDate": "Join Date",
+        "joinDate": "Registration Date",
         "bookings": "Rentals",
         "totalSpent": "Total Spent",
         "lastBooking": "Last Rental",
         "actions": "Actions",
-        "lifetime": "lifetime"
+        "lifetime": "lifetime",
+        "bookingsCount": "bookings"
       },
       "details": {
         "title": "Customer Details",
-        "description": "Complete customer account information",
+        "description": "Complete account information",
+        "contactInfo": "Contact Information",
         "contactInformation": "Contact Information",
+        "bookingStats": "Rental Statistics",
         "bookingStatistics": "Rental Statistics",
+        "recentActivity": "Recent Activity",
+        "driverLicense": "Driver’s License",
         "email": "Email",
         "phone": "Phone",
-        "joined": "Member Since",
+        "joinDate": "Registration Date",
+        "joined": "Member since",
         "totalBookings": "Total Rentals",
         "totalSpent": "Total Spent",
         "lastBooking": "Last Rental",
+        "avgBookingValue": "Average Booking Value",
         "close": "Close",
+        "edit": "Edit Customer",
         "sendMessage": "Send Message"
+      },
+      "form": {
+        "title": "Add New Customer",
+        "description": "Add a new customer to your system. Complete all required information.",
+        "submit": "Add Customer",
+        "sections": {
+          "basicInfo": "Basic Information",
+          "driverLicense": "Driver’s License"
+        },
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "email": "Email Address",
+        "phone": "Phone Number",
+        "driverLicense": "Driver’s License",
+        "driverLicenseDescription": "Upload a clear photo of the driver’s license",
+        "uploadDriverLicense": "Click to upload or drag & drop",
+        "imageFormats": "JPG, PNG or WebP (Max 10MB)",
+        "chooseImage": "Choose Image",
+        "changeImage": "Change Image",
+        "newDriverLicense": "New Driver’s License",
+        "placeholders": {
+          "firstName": "Enter first name",
+          "lastName": "Enter last name",
+          "email": "Enter email address",
+          "phone": "Enter phone number"
+        },
+        "validation": {
+          "firstNameRequired": "First name is required",
+          "lastNameRequired": "Last name is required",
+          "emailRequired": "Email address is required",
+          "emailFormat": "Please enter a valid email address",
+          "phoneRequired": "Phone number is required",
+          "phoneFormat": "Please enter a valid Moroccan phone number",
+          "driverLicenseRequired": "Driver’s license image is required"
+        }
+      },
+      "statusBadges": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "blocked": "Blocked"
+      },
+      "deleteConfirmation": {
+        "title": "Delete Customer",
+        "description": "Are you sure you want to delete this customer? This action cannot be undone and will remove all their rental history.",
+        "cancel": "Cancel",
+        "confirm": "Delete Customer"
       },
       "blockConfirmation": {
         "title": "Block Customer",
-        "description": "Are you sure you want to block this customer? They will not be able to make new reservations.",
+        "description": "Are you sure you want to block this customer? They will no longer be able to make new bookings.",
         "cancel": "Cancel",
         "confirm": "Block Customer"
       }
     },
     "bookings": {
-      "title": "Reservation Management",
+      "title": "Booking Management",
       "subtitle": "Manage bookings and rental schedules",
-      "recent": "Recent Reservations",
+      "recent": "Recent Bookings",
       "all": "All",
       "pending": "Pending",
       "confirmed": "Confirmed",
@@ -772,11 +833,11 @@
       "cancelled": "Cancelled",
       "actions": {
         "viewDetails": "View Details",
-        "confirmBooking": "Confirm Reservation",
-        "cancelBooking": "Cancel Reservation"
+        "confirmBooking": "Confirm Booking",
+        "cancelBooking": "Cancel Booking"
       },
       "table": {
-        "booking": "Reservation",
+        "booking": "Booking",
         "customer": "Customer",
         "car": "Vehicle",
         "dates": "Dates",
@@ -787,8 +848,8 @@
         "days": "days"
       },
       "details": {
-        "title": "Reservation Details",
-        "description": "Complete rental reservation information",
+        "title": "Booking Details",
+        "description": "Complete information about the rental booking",
         "customerInformation": "Customer Information",
         "vehicleInformation": "Vehicle Information",
         "rentalPeriod": "Rental Period",
@@ -804,14 +865,14 @@
         "duration": "Duration",
         "totalAmount": "Total Amount",
         "close": "Close",
-        "confirmBooking": "Confirm Reservation",
+        "confirmBooking": "Confirm Booking",
         "createdOn": "Created on"
       },
       "cancelConfirmation": {
-        "title": "Cancel Reservation",
-        "description": "Are you sure you want to cancel this reservation? This action cannot be undone.",
-        "keepBooking": "Keep Reservation",
-        "cancelBooking": "Cancel Reservation"
+        "title": "Cancel Booking",
+        "description": "Are you sure you want to cancel this booking? This action cannot be undone.",
+        "keepBooking": "Keep Booking",
+        "cancelBooking": "Cancel Booking"
       }
     },
     "settings": {
@@ -848,13 +909,13 @@
         "title": "Notification Preferences",
         "emailNotifications": "Email Notifications",
         "smsNotifications": "SMS Notifications",
-        "newBookings": "New Reservations",
-        "newBookingsDesc": "Get notified when new reservations are made",
+        "newBookings": "New Bookings",
+        "newBookingsDesc": "Be notified of new bookings",
         "paymentUpdates": "Payment Updates",
-        "paymentUpdatesDesc": "Receive payment confirmations and issues",
+        "paymentUpdatesDesc": "Receive confirmations and payment issues",
         "newUserRegistrations": "New Customer Registrations",
-        "newUserRegistrationsDesc": "Know when new customers sign up",
-        "urgentBookings": "Urgent Reservations",
+        "newUserRegistrationsDesc": "Know when new customers register",
+        "urgentBookings": "Urgent Bookings",
         "urgentBookingsDesc": "SMS for urgent booking matters",
         "paymentAlerts": "Payment Alerts",
         "paymentAlertsDesc": "Important payment notifications",
@@ -863,23 +924,23 @@
       "system": {
         "title": "System Configuration",
         "defaultLanguage": "Default Language",
-        "timezone": "Timezone",
+        "timezone": "Time Zone",
         "currency": "Currency",
         "dateFormat": "Date Format",
-        "bookingSettings": "Reservation Settings",
-        "autoConfirmBookings": "Auto-confirm Reservations",
-        "autoConfirmBookingsDesc": "Automatically confirm new reservations without manual review",
+        "bookingSettings": "Booking Settings",
+        "autoConfirmBookings": "Auto-confirm Bookings",
+        "autoConfirmBookingsDesc": "Automatically confirm new bookings without manual review",
         "requireAdminApproval": "Require Admin Approval",
-        "requireAdminApprovalDesc": "New reservations need administrator approval",
+        "requireAdminApprovalDesc": "New bookings require admin approval",
         "saveConfiguration": "Save Configuration"
       },
       "saveChanges": "Save Changes"
     },
     "common": {
-      "search": "Search vehicles, customers, reservations...",
-      "searchCars": "Search vehicles by name, brand, or model...",
-      "searchUsers": "Search customers by name, email, or phone...",
-      "searchBookings": "Search reservations by customer, vehicle, or booking ID...",
+      "search": "Search vehicles, customers, bookings...",
+      "searchCars": "Search vehicles by name, brand or model...",
+      "searchUsers": "Search customers by name, email or phone...",
+      "searchBookings": "Search bookings by customer, vehicle or booking ID...",
       "filter": "Filter",
       "actions": "Actions",
       "save": "Save Changes",
@@ -893,12 +954,12 @@
       "success": "Operation successful"
     },
     "header": {
-      "searchPlaceholder": "Search vehicles, customers, reservations...",
+      "searchPlaceholder": "Search vehicles, customers, bookings...",
       "notifications": "Notifications",
       "viewAllNotifications": "View all notifications",
       "profile": "Profile",
       "settings": "Settings",
-      "logout": "Sign Out",
+      "logout": "Logout",
       "newNotifications": "new"
     },
     "sidebar": {

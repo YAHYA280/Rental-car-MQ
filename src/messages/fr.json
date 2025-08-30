@@ -550,6 +550,7 @@
       "activeUsersDescription": "Activité récente",
       "newUsers": "Nouveaux ce Mois",
       "newUsersDescription": "Inscriptions récentes",
+      "newThisMonth": "Nouveaux ce Mois",
       "blockedUsers": "Comptes Bloqués",
       "blockedUsersDescription": "Accès restreint",
       "totalBookings": "Total Réservations",
@@ -559,7 +560,8 @@
       "pendingApproval": "En Attente",
       "pendingApprovalDescription": "En attente de confirmation",
       "monthlyRevenue": "Revenus Mensuels",
-      "monthlyRevenueDescription": "Gains de ce mois"
+      "monthlyRevenueDescription": "Gains de ce mois",
+      "totalRevenue": "Revenus Totaux"
     },
     "cars": {
       "title": "Gestion de Flotte",
@@ -589,7 +591,8 @@
         "deposit": "caution",
         "seats": "places",
         "doors": "portes",
-        "licensePlate": "Plaque d'Immatriculation"
+        "licensePlate": "Plaque d'Immatriculation",
+        "bookingsCount": "réservations"
       },
       "form": {
         "title": "Ajouter Nouveau Véhicule",
@@ -717,16 +720,20 @@
     "users": {
       "title": "Gestion Clients",
       "subtitle": "Gérez les comptes clients et les informations clientèle",
-      "directory": "Répertoire Clients",
+      "customerDirectory": "Répertoire Clients",
+      "addNew": "Ajouter Client",
       "allUsers": "Tous les Clients",
       "active": "Actifs",
       "inactive": "Inactifs",
       "blocked": "Bloqués",
       "actions": {
+        "viewDetails": "Voir Détails",
         "viewProfile": "Voir Profil",
+        "edit": "Modifier Client",
         "sendMessage": "Envoyer Message",
         "blockUser": "Bloquer Client",
-        "unblockUser": "Débloquer Client"
+        "unblockUser": "Débloquer Client",
+        "delete": "Supprimer Client"
       },
       "table": {
         "user": "Client",
@@ -737,21 +744,75 @@
         "totalSpent": "Total Dépensé",
         "lastBooking": "Dernière Location",
         "actions": "Actions",
-        "lifetime": "à vie"
+        "lifetime": "à vie",
+        "bookingsCount": "réservations"
       },
       "details": {
         "title": "Détails Client",
         "description": "Informations complètes du compte client",
+        "contactInfo": "Informations de Contact",
         "contactInformation": "Informations de Contact",
+        "bookingStats": "Statistiques de Location",
         "bookingStatistics": "Statistiques de Location",
+        "recentActivity": "Activité Récente",
+        "driverLicense": "Permis de Conduire",
         "email": "Email",
         "phone": "Téléphone",
+        "joinDate": "Date d'Inscription",
         "joined": "Membre depuis",
         "totalBookings": "Total Locations",
         "totalSpent": "Total Dépensé",
         "lastBooking": "Dernière Location",
+        "avgBookingValue": "Valeur Moyenne des Réservations",
         "close": "Fermer",
+        "edit": "Modifier Client",
         "sendMessage": "Envoyer Message"
+      },
+      "form": {
+        "title": "Ajouter Nouveau Client",
+        "description": "Ajoutez un nouveau client à votre système. Complétez toutes les informations requises.",
+        "submit": "Ajouter Client",
+        "sections": {
+          "basicInfo": "Informations de Base",
+          "driverLicense": "Permis de Conduire"
+        },
+        "firstName": "Prénom",
+        "lastName": "Nom de famille",
+        "email": "Adresse Email",
+        "phone": "Numéro de Téléphone",
+        "driverLicense": "Permis de Conduire",
+        "driverLicenseDescription": "Téléchargez une photo claire du permis de conduire",
+        "uploadDriverLicense": "Cliquez pour télécharger ou glissez-déposez",
+        "imageFormats": "JPG, PNG ou WebP (Max 10MB)",
+        "chooseImage": "Choisir Image",
+        "changeImage": "Changer Image",
+        "newDriverLicense": "Nouveau Permis de Conduire",
+        "placeholders": {
+          "firstName": "Entrez le prénom",
+          "lastName": "Entrez le nom de famille",
+          "email": "Entrez l'adresse email",
+          "phone": "Entrez le numéro de téléphone"
+        },
+        "validation": {
+          "firstNameRequired": "Le prénom est requis",
+          "lastNameRequired": "Le nom de famille est requis",
+          "emailRequired": "L'adresse email est requise",
+          "emailFormat": "Veuillez entrer une adresse email valide",
+          "phoneRequired": "Le numéro de téléphone est requis",
+          "phoneFormat": "Veuillez entrer un numéro de téléphone marocain valide",
+          "driverLicenseRequired": "L'image du permis de conduire est requise"
+        }
+      },
+      "statusBadges": {
+        "active": "Actif",
+        "inactive": "Inactif",
+        "blocked": "Bloqué"
+      },
+      "deleteConfirmation": {
+        "title": "Supprimer Client",
+        "description": "Êtes-vous sûr de vouloir supprimer ce client ? Cette action ne peut pas être annulée et supprimera tout l'historique de ses réservations.",
+        "cancel": "Annuler",
+        "confirm": "Supprimer Client"
       },
       "blockConfirmation": {
         "title": "Bloquer Client",
