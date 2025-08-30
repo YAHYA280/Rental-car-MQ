@@ -30,7 +30,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Plus,
@@ -70,6 +69,7 @@ interface CarData {
   description?: string;
   licensePlate?: string;
   caution?: number;
+  whatsappNumber?: string;
   lastTechnicalVisit?: string;
   lastOilChange?: string;
 }
@@ -93,6 +93,9 @@ export interface CarFormData {
   dailyPrice: string;
   caution: string;
 
+  // Contact Information
+  whatsappNumber: string;
+
   // Maintenance
   lastTechnicalVisit: string;
   lastOilChange: string;
@@ -112,6 +115,7 @@ const DashboardCarsContent = () => {
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [isAddCarDialogOpen, setIsAddCarDialogOpen] = useState(false);
   const [carToDelete, setCarToDelete] = useState<string | null>(null);
+  const [selectedCar, setSelectedCar] = useState<CarData | null>(null);
 
   // Mock data - using existing vehicles data
   const [cars, setCars] = useState<CarData[]>(
@@ -131,6 +135,7 @@ const DashboardCarsContent = () => {
       )
         .toISOString()
         .split("T")[0],
+      features: ["airConditioning", "bluetooth", "gps", "abs"], // Sample features
     }))
   );
 
@@ -177,6 +182,10 @@ const DashboardCarsContent = () => {
   const handleDeleteCar = (carId: string) => {
     setCars(cars.filter((car) => car.id !== carId));
     setCarToDelete(null);
+  };
+
+  const handleViewCarDetails = (car: CarData) => {
+    setSelectedCar(car);
   };
 
   // Fixed function to handle form submission
@@ -265,12 +274,13 @@ const DashboardCarsContent = () => {
           <p className="text-gray-600">{t("cars.subtitle")}</p>
         </div>
         <Dialog open={isAddCarDialogOpen} onOpenChange={setIsAddCarDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-carbookers-red-600 hover:bg-carbookers-red-700 flex items-center gap-2">
-              <Plus className="h-4 w-4" />
-              {t("cars.addNew")}
-            </Button>
-          </DialogTrigger>
+          <Button
+            className="bg-carbookers-red-600 hover:bg-carbookers-red-700 flex items-center gap-2"
+            onClick={() => setIsAddCarDialogOpen(true)}
+          >
+            <Plus className="h-4 w-4" />
+            {t("cars.addNew")}
+          </Button>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{t("cars.form.title")}</DialogTitle>
@@ -449,7 +459,9 @@ const DashboardCarsContent = () => {
                           {t("common.actions")}
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleViewCarDetails(car)}
+                        >
                           <Eye className="mr-2 h-4 w-4" />
                           {t("cars.actions.viewDetails")}
                         </DropdownMenuItem>
@@ -474,6 +486,166 @@ const DashboardCarsContent = () => {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Car Details Modal */}
+      <Dialog
+        open={selectedCar !== null}
+        onOpenChange={() => setSelectedCar(null)}
+      >
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>{t("cars.details.title")}</DialogTitle>
+            <DialogDescription>
+              {t("cars.details.description")}
+            </DialogDescription>
+          </DialogHeader>
+          {selectedCar && (
+            <div className="space-y-6">
+              {/* Car Header */}
+              <div className="flex items-center gap-4">
+                <div className="w-20 h-16 relative rounded-lg overflow-hidden">
+                  <Image
+                    src={selectedCar.image}
+                    alt={`${selectedCar.brand} ${selectedCar.name}`}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold">
+                    {selectedCar.brand} {selectedCar.name}
+                  </h3>
+                  <p className="text-gray-600">
+                    {selectedCar.model} {selectedCar.year}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {selectedCar.licensePlate}
+                  </p>
+                  <div className="mt-2">
+                    {getStatusBadge(selectedCar.available)}
+                  </div>
+                </div>
+              </div>
+
+              {/* Car Details Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-3">
+                    {t("cars.details.basicInfo")}
+                  </h4>
+                  <div className="space-y-2">
+                    <p>
+                      <span className="text-gray-600">
+                        {t("cars.details.seats")}:
+                      </span>{" "}
+                      {selectedCar.seats}
+                    </p>
+                    <p>
+                      <span className="text-gray-600">
+                        {t("cars.details.doors")}:
+                      </span>{" "}
+                      {selectedCar.doors}
+                    </p>
+                    <p>
+                      <span className="text-gray-600">
+                        {t("cars.details.transmission")}:
+                      </span>{" "}
+                      {selectedCar.transmission}
+                    </p>
+                    <p>
+                      <span className="text-gray-600">
+                        {t("cars.details.fuelType")}:
+                      </span>{" "}
+                      {selectedCar.fuelType}
+                    </p>
+                    {selectedCar.mileage && (
+                      <p>
+                        <span className="text-gray-600">
+                          {t("cars.details.mileage")}:
+                        </span>{" "}
+                        {selectedCar.mileage} km
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-3">
+                    {t("cars.details.pricing")}
+                  </h4>
+                  <div className="space-y-2">
+                    <p>
+                      <span className="text-gray-600">
+                        {t("cars.details.dailyPrice")}:
+                      </span>{" "}
+                      €{selectedCar.price}
+                    </p>
+                    <p>
+                      <span className="text-gray-600">
+                        {t("cars.details.caution")}:
+                      </span>{" "}
+                      €{selectedCar.caution}
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-3">
+                    {t("cars.details.maintenance")}
+                  </h4>
+                  <div className="space-y-2">
+                    <p>
+                      <span className="text-gray-600">
+                        {t("cars.details.lastTechnicalVisit")}:
+                      </span>{" "}
+                      {selectedCar.lastTechnicalVisit
+                        ? new Date(
+                            selectedCar.lastTechnicalVisit
+                          ).toLocaleDateString()
+                        : "N/A"}
+                    </p>
+                    <p>
+                      <span className="text-gray-600">
+                        {t("cars.details.lastOilChange")}:
+                      </span>{" "}
+                      {selectedCar.lastOilChange
+                        ? new Date(
+                            selectedCar.lastOilChange
+                          ).toLocaleDateString()
+                        : "N/A"}
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-3">
+                    {t("cars.details.features")}
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedCar.features && selectedCar.features.length > 0 ? (
+                      selectedCar.features.map((feature) => (
+                        <Badge key={feature} variant="secondary">
+                          {t(`cars.form.features.${feature}`)}
+                        </Badge>
+                      ))
+                    ) : (
+                      <p className="text-gray-500">No features listed</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSelectedCar(null)}>
+              {t("cars.details.close")}
+            </Button>
+            <Button className="bg-carbookers-red-600 hover:bg-carbookers-red-700">
+              {t("cars.details.edit")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <Dialog

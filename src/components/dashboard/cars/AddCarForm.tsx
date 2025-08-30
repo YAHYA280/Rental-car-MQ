@@ -6,6 +6,8 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Select,
   SelectContent,
@@ -13,9 +15,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { X, Upload, Plus, Calendar } from "lucide-react";
+import { X, Upload, Plus, Calendar as CalendarIcon, Phone } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 import { CarFormData } from "./DashboardCarsContent";
 
 interface AddCarFormProps {
@@ -45,6 +54,9 @@ const AddCarForm: React.FC<AddCarFormProps> = ({ onSubmit, onClose }) => {
     dailyPrice: "",
     caution: "",
 
+    // Contact
+    whatsappNumber: "",
+
     // Maintenance
     lastTechnicalVisit: "",
     lastOilChange: "",
@@ -55,8 +67,11 @@ const AddCarForm: React.FC<AddCarFormProps> = ({ onSubmit, onClose }) => {
     description: "",
   });
 
-  const [newFeature, setNewFeature] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [technicalVisitDate, setTechnicalVisitDate] = useState<
+    Date | undefined
+  >();
+  const [oilChangeDate, setOilChangeDate] = useState<Date | undefined>();
 
   const brands = [
     "Cupra",
@@ -77,6 +92,7 @@ const AddCarForm: React.FC<AddCarFormProps> = ({ onSubmit, onClose }) => {
   const seatOptions = ["2", "4", "5", "7", "8"];
   const doorOptions = ["2", "3", "4", "5"];
 
+  // Updated with only 10 main basic features
   const availableFeatures = [
     "airConditioning",
     "bluetooth",
@@ -84,24 +100,10 @@ const AddCarForm: React.FC<AddCarFormProps> = ({ onSubmit, onClose }) => {
     "cruiseControl",
     "parkingSensors",
     "backupCamera",
-    "sunroof",
     "leatherSeats",
-    "heatedSeats",
     "keylessEntry",
-    "pushStartButton",
-    "automaticLights",
-    "rainSensors",
     "electricWindows",
-    "centralLocking",
     "abs",
-    "airbags",
-    "stabilityControl",
-    "tractionControl",
-    "usb",
-    "aux",
-    "cdPlayer",
-    "radioFm",
-    "premiumAudio",
   ];
 
   const handleInputChange = (field: keyof CarFormData, value: string) => {
@@ -154,6 +156,28 @@ const AddCarForm: React.FC<AddCarFormProps> = ({ onSubmit, onClose }) => {
     return plateRegex.test(plate.toUpperCase());
   };
 
+  const validateWhatsAppNumber = (number: string): boolean => {
+    // Morocco WhatsApp format: +212XXXXXXXXX or 212XXXXXXXXX or 0XXXXXXXXX
+    const phoneRegex = /^(\+212|212|0)[5-7]\d{8}$/;
+    return phoneRegex.test(number.replace(/\s/g, ""));
+  };
+
+  const handleDateChange = (
+    date: Date | undefined,
+    field: "technicalVisit" | "oilChange"
+  ) => {
+    if (date) {
+      const dateString = format(date, "yyyy-MM-dd");
+      if (field === "technicalVisit") {
+        setTechnicalVisitDate(date);
+        handleInputChange("lastTechnicalVisit", dateString);
+      } else {
+        setOilChangeDate(date);
+        handleInputChange("lastOilChange", dateString);
+      }
+    }
+  };
+
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
@@ -181,6 +205,11 @@ const AddCarForm: React.FC<AddCarFormProps> = ({ onSubmit, onClose }) => {
       newErrors.dailyPrice = t("cars.form.validation.dailyPriceRequired");
     if (!formData.caution)
       newErrors.caution = t("cars.form.validation.cautionRequired");
+    if (!formData.whatsappNumber) {
+      newErrors.whatsappNumber = t("cars.form.validation.whatsappRequired");
+    } else if (!validateWhatsAppNumber(formData.whatsappNumber)) {
+      newErrors.whatsappNumber = t("cars.form.validation.whatsappFormat");
+    }
     if (!formData.mainImage)
       newErrors.mainImage = t("cars.form.validation.mainImageRequired");
 
@@ -212,12 +241,15 @@ const AddCarForm: React.FC<AddCarFormProps> = ({ onSubmit, onClose }) => {
         mileage: "",
         dailyPrice: "",
         caution: "",
+        whatsappNumber: "",
         lastTechnicalVisit: "",
         lastOilChange: "",
         features: [],
         additionalImages: [],
         description: "",
       });
+      setTechnicalVisitDate(undefined);
+      setOilChangeDate(undefined);
     } catch (error) {
       console.error("Error submitting form:", error);
     } finally {
@@ -323,6 +355,34 @@ const AddCarForm: React.FC<AddCarFormProps> = ({ onSubmit, onClose }) => {
               {errors.licensePlate && (
                 <p className="text-red-500 text-sm mt-1">
                   {errors.licensePlate}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="whatsappNumber">
+                {t("cars.form.whatsappNumber")} *
+              </Label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Input
+                  id="whatsappNumber"
+                  value={formData.whatsappNumber}
+                  onChange={(e) =>
+                    handleInputChange("whatsappNumber", e.target.value)
+                  }
+                  placeholder={t("cars.form.placeholders.whatsappNumber")}
+                  className={`pl-10 ${
+                    errors.whatsappNumber ? "border-red-500" : ""
+                  }`}
+                />
+              </div>
+              <p className="text-sm text-gray-500 mt-1">
+                {t("cars.form.whatsappDescription")}
+              </p>
+              {errors.whatsappNumber && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.whatsappNumber}
                 </p>
               )}
             </div>
@@ -517,31 +577,65 @@ const AddCarForm: React.FC<AddCarFormProps> = ({ onSubmit, onClose }) => {
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="lastTechnicalVisit">
-                {t("cars.form.lastTechnicalVisit")}
-              </Label>
-              <Input
-                id="lastTechnicalVisit"
-                type="date"
-                value={formData.lastTechnicalVisit}
-                onChange={(e) =>
-                  handleInputChange("lastTechnicalVisit", e.target.value)
-                }
-              />
+              <Label>{t("cars.form.lastTechnicalVisit")}</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !technicalVisitDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {technicalVisitDate ? (
+                      format(technicalVisitDate, "PPP")
+                    ) : (
+                      <span>{t("cars.form.placeholders.selectDate")}</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={technicalVisitDate}
+                    onSelect={(date) =>
+                      handleDateChange(date, "technicalVisit")
+                    }
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
 
             <div>
-              <Label htmlFor="lastOilChange">
-                {t("cars.form.lastOilChange")}
-              </Label>
-              <Input
-                id="lastOilChange"
-                type="date"
-                value={formData.lastOilChange}
-                onChange={(e) =>
-                  handleInputChange("lastOilChange", e.target.value)
-                }
-              />
+              <Label>{t("cars.form.lastOilChange")}</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !oilChangeDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {oilChangeDate ? (
+                      format(oilChangeDate, "PPP")
+                    ) : (
+                      <span>{t("cars.form.placeholders.selectDate")}</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={oilChangeDate}
+                    onSelect={(date) => handleDateChange(date, "oilChange")}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
         </CardContent>
@@ -554,26 +648,28 @@ const AddCarForm: React.FC<AddCarFormProps> = ({ onSubmit, onClose }) => {
             {t("cars.form.sections.features")}
           </h3>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
               {availableFeatures.map((feature) => (
                 <div
                   key={feature}
-                  className={`flex items-center space-x-2 p-3 rounded-lg border cursor-pointer transition-colors ${
+                  className={`flex items-center space-x-3 p-3 rounded-lg border transition-colors ${
                     formData.features.includes(feature)
                       ? "border-carbookers-red-500 bg-carbookers-red-50"
                       : "border-gray-200 hover:border-gray-300"
                   }`}
-                  onClick={() => toggleFeature(feature)}
                 >
-                  <input
-                    type="checkbox"
+                  <Checkbox
+                    id={feature}
                     checked={formData.features.includes(feature)}
-                    onChange={() => toggleFeature(feature)}
-                    className="h-4 w-4 text-carbookers-red-600"
+                    onCheckedChange={() => toggleFeature(feature)}
                   />
-                  <span className="text-sm">
+                  <Label
+                    htmlFor={feature}
+                    className="text-sm cursor-pointer flex-1"
+                    onClick={() => toggleFeature(feature)}
+                  >
                     {t(`cars.form.features.${feature}`)}
-                  </span>
+                  </Label>
                 </div>
               ))}
             </div>
