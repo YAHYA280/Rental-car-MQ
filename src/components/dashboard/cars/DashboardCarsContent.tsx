@@ -43,10 +43,12 @@ import {
   Users,
   Fuel,
   Settings,
+  Phone,
 } from "lucide-react";
 import Image from "next/image";
 import { vehiclesData } from "@/components/data/vehicles";
 import AddCarForm from "./AddCarForm";
+import EditCarForm from "./EditCarForm";
 
 // Define proper types
 interface CarData {
@@ -114,8 +116,10 @@ const DashboardCarsContent = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [isAddCarDialogOpen, setIsAddCarDialogOpen] = useState(false);
+  const [isEditCarDialogOpen, setIsEditCarDialogOpen] = useState(false);
   const [carToDelete, setCarToDelete] = useState<string | null>(null);
   const [selectedCar, setSelectedCar] = useState<CarData | null>(null);
+  const [carToEdit, setCarToEdit] = useState<CarData | null>(null);
 
   // Mock data - using existing vehicles data
   const [cars, setCars] = useState<CarData[]>(
@@ -125,6 +129,9 @@ const DashboardCarsContent = () => {
         Math.floor(Math.random() * 90000) + 10000
       }${String.fromCharCode(65 + Math.floor(Math.random() * 26))}`,
       caution: Math.floor(car.price * 2), // 2x daily rate as caution
+      whatsappNumber: `+212${
+        Math.floor(Math.random() * 900000000) + 600000000
+      }`, // Random Moroccan WhatsApp number
       lastTechnicalVisit: new Date(
         Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000
       )
@@ -145,7 +152,8 @@ const DashboardCarsContent = () => {
       car.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       car.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
       car.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      car.licensePlate?.toLowerCase().includes(searchTerm.toLowerCase());
+      car.licensePlate?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      car.whatsappNumber?.includes(searchTerm);
 
     const matchesFilter =
       selectedFilter === "all" ||
@@ -188,6 +196,11 @@ const DashboardCarsContent = () => {
     setSelectedCar(car);
   };
 
+  const handleEditCar = (car: CarData) => {
+    setCarToEdit(car);
+    setIsEditCarDialogOpen(true);
+  };
+
   // Fixed function to handle form submission
   const handleAddCar = async (formData: CarFormData): Promise<void> => {
     try {
@@ -211,6 +224,7 @@ const DashboardCarsContent = () => {
         description: formData.description,
         licensePlate: formData.licensePlate,
         caution: parseFloat(formData.caution),
+        whatsappNumber: formData.whatsappNumber,
         lastTechnicalVisit: formData.lastTechnicalVisit,
         lastOilChange: formData.lastOilChange,
         // For now, use a placeholder image. In real implementation,
@@ -218,21 +232,48 @@ const DashboardCarsContent = () => {
         image: "/cars/placeholder/photo1.jpg",
       };
 
-      // In a real application, you would:
-      // 1. Upload the images to your storage service
-      // 2. Get back the URLs
-      // 3. Send the car data to your backend API
-      // 4. Update the state with the response
-
-      // For now, just add to local state
       setCars((prevCars) => [...prevCars, newCarData]);
       setIsAddCarDialogOpen(false);
-
-      // Show success message (you might want to use a toast library)
       console.log("Car added successfully:", newCarData);
     } catch (error) {
       console.error("Error adding car:", error);
-      // Handle error (show error message to user)
+    }
+  };
+
+  const handleUpdateCar = async (formData: CarFormData): Promise<void> => {
+    try {
+      if (!carToEdit) return;
+
+      const updatedCarData: CarData = {
+        ...carToEdit,
+        name: formData.name,
+        brand: formData.brand,
+        model: formData.model,
+        year: parseInt(formData.year),
+        price: parseFloat(formData.dailyPrice),
+        seats: parseInt(formData.seats),
+        doors: parseInt(formData.doors),
+        transmission: formData.transmission,
+        fuelType: formData.fuelType,
+        mileage: formData.mileage ? parseInt(formData.mileage) : undefined,
+        features: formData.features,
+        description: formData.description,
+        licensePlate: formData.licensePlate,
+        caution: parseFloat(formData.caution),
+        whatsappNumber: formData.whatsappNumber,
+        lastTechnicalVisit: formData.lastTechnicalVisit,
+        lastOilChange: formData.lastOilChange,
+      };
+
+      setCars((prevCars) =>
+        prevCars.map((car) => (car.id === carToEdit.id ? updatedCarData : car))
+      );
+
+      setIsEditCarDialogOpen(false);
+      setCarToEdit(null);
+      console.log("Car updated successfully:", updatedCarData);
+    } catch (error) {
+      console.error("Error updating car:", error);
     }
   };
 
@@ -281,7 +322,7 @@ const DashboardCarsContent = () => {
             <Plus className="h-4 w-4" />
             {t("cars.addNew")}
           </Button>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="w-[95vw] sm:max-w-[75vw] max-h-[75vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{t("cars.form.title")}</DialogTitle>
               <DialogDescription>
@@ -378,6 +419,7 @@ const DashboardCarsContent = () => {
                 <TableHead>{t("cars.table.details")}</TableHead>
                 <TableHead>{t("cars.table.pricing")}</TableHead>
                 <TableHead>{t("cars.table.caution")}</TableHead>
+                <TableHead>WhatsApp</TableHead>
                 <TableHead>{t("cars.table.status")}</TableHead>
                 <TableHead>{t("cars.table.lastTechnicalVisit")}</TableHead>
                 <TableHead>{t("cars.table.actions")}</TableHead>
@@ -439,6 +481,22 @@ const DashboardCarsContent = () => {
                       {t("cars.table.deposit")}
                     </p>
                   </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2 text-sm text-green-600">
+                      <Phone className="h-4 w-4" />
+                      <a
+                        href={`https://wa.me/${car.whatsappNumber?.replace(
+                          /[^0-9]/g,
+                          ""
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:underline"
+                      >
+                        {car.whatsappNumber}
+                      </a>
+                    </div>
+                  </TableCell>
                   <TableCell>{getStatusBadge(car.available)}</TableCell>
                   <TableCell>
                     <p className="text-sm text-gray-600">
@@ -465,7 +523,7 @@ const DashboardCarsContent = () => {
                           <Eye className="mr-2 h-4 w-4" />
                           {t("cars.actions.viewDetails")}
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleEditCar(car)}>
                           <Edit className="mr-2 h-4 w-4" />
                           {t("cars.actions.edit")}
                         </DropdownMenuItem>
@@ -590,6 +648,27 @@ const DashboardCarsContent = () => {
                 </div>
 
                 <div>
+                  <h4 className="font-semibold text-gray-900 mb-3">Contact</h4>
+                  <div className="space-y-2">
+                    <p>
+                      <span className="text-gray-600">WhatsApp:</span>{" "}
+                      <a
+                        href={`https://wa.me/${selectedCar.whatsappNumber?.replace(
+                          /[^0-9]/g,
+                          ""
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-green-600 hover:underline flex items-center gap-1"
+                      >
+                        <Phone className="h-4 w-4" />
+                        {selectedCar.whatsappNumber}
+                      </a>
+                    </p>
+                  </div>
+                </div>
+
+                <div>
                   <h4 className="font-semibold text-gray-900 mb-3">
                     {t("cars.details.maintenance")}
                   </h4>
@@ -617,7 +696,7 @@ const DashboardCarsContent = () => {
                   </div>
                 </div>
 
-                <div>
+                <div className="md:col-span-2">
                   <h4 className="font-semibold text-gray-900 mb-3">
                     {t("cars.details.features")}
                   </h4>
@@ -640,10 +719,40 @@ const DashboardCarsContent = () => {
             <Button variant="outline" onClick={() => setSelectedCar(null)}>
               {t("cars.details.close")}
             </Button>
-            <Button className="bg-carbookers-red-600 hover:bg-carbookers-red-700">
+            <Button
+              className="bg-carbookers-red-600 hover:bg-carbookers-red-700"
+              onClick={() => {
+                if (selectedCar) {
+                  handleEditCar(selectedCar);
+                  setSelectedCar(null);
+                }
+              }}
+            >
               {t("cars.details.edit")}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Car Modal */}
+      <Dialog open={isEditCarDialogOpen} onOpenChange={setIsEditCarDialogOpen}>
+        <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Car</DialogTitle>
+            <DialogDescription>
+              Update the vehicle information and details
+            </DialogDescription>
+          </DialogHeader>
+          {carToEdit && (
+            <EditCarForm
+              car={carToEdit}
+              onSubmit={handleUpdateCar}
+              onClose={() => {
+                setIsEditCarDialogOpen(false);
+                setCarToEdit(null);
+              }}
+            />
+          )}
         </DialogContent>
       </Dialog>
 

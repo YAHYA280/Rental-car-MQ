@@ -43,6 +43,7 @@ import {
   Clock,
   MapPin,
   DollarSign,
+  Phone,
 } from "lucide-react";
 
 const DashboardBookingsContent = () => {
@@ -52,7 +53,7 @@ const DashboardBookingsContent = () => {
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const [bookingToCancel, setBookingToCancel] = useState<string | null>(null);
 
-  // Mock bookings data
+  // Mock bookings data with WhatsApp numbers
   const [bookings, setBookings] = useState([
     {
       id: "BK001",
@@ -65,6 +66,7 @@ const DashboardBookingsContent = () => {
         name: "Mercedes G63 AMG",
         brand: "Mercedes",
         image: "/cars/Mercedes G63/photo1.jpg",
+        whatsappNumber: "+212612077309", // WhatsApp for reservations
       },
       dates: {
         pickup: "2024-12-15",
@@ -93,6 +95,7 @@ const DashboardBookingsContent = () => {
         name: "Porsche Macan",
         brand: "Porsche",
         image: "/cars/Porsche Macan/photo1.jpg",
+        whatsappNumber: "+212623456001", // WhatsApp for reservations
       },
       dates: {
         pickup: "2024-12-18",
@@ -121,6 +124,7 @@ const DashboardBookingsContent = () => {
         name: "Hyundai Tucson",
         brand: "Hyundai",
         image: "/cars/Hyundai Tucson/photo1.jpg",
+        whatsappNumber: "+212634567001", // WhatsApp for reservations
       },
       dates: {
         pickup: "2024-12-20",
@@ -149,6 +153,7 @@ const DashboardBookingsContent = () => {
         name: "Volkswagen Golf 8",
         brand: "Volkswagen",
         image: "/cars/Golf8/photo1.png",
+        whatsappNumber: "+212645678001", // WhatsApp for reservations
       },
       dates: {
         pickup: "2024-12-22",
@@ -173,7 +178,8 @@ const DashboardBookingsContent = () => {
     const matchesSearch =
       booking.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       booking.car.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      booking.id.toLowerCase().includes(searchTerm.toLowerCase());
+      booking.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      booking.car.whatsappNumber?.includes(searchTerm);
 
     const matchesFilter =
       selectedFilter === "all" || booking.status === selectedFilter;
@@ -362,6 +368,7 @@ const DashboardBookingsContent = () => {
                 <TableHead>{t("bookings.table.booking")}</TableHead>
                 <TableHead>{t("bookings.table.customer")}</TableHead>
                 <TableHead>{t("bookings.table.car")}</TableHead>
+                <TableHead>WhatsApp Contact</TableHead>
                 <TableHead>{t("bookings.table.dates")}</TableHead>
                 <TableHead>{t("bookings.table.locations")}</TableHead>
                 <TableHead>{t("bookings.table.amount")}</TableHead>
@@ -411,6 +418,22 @@ const DashboardBookingsContent = () => {
                           €{booking.dailyRate}/day
                         </p>
                       </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2 text-sm text-green-600">
+                      <Phone className="h-4 w-4" />
+                      <a
+                        href={`https://wa.me/${booking.car.whatsappNumber?.replace(
+                          /[^0-9]/g,
+                          ""
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:underline"
+                      >
+                        {booking.car.whatsappNumber}
+                      </a>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -500,7 +523,7 @@ const DashboardBookingsContent = () => {
         open={selectedBooking !== null}
         onOpenChange={() => setSelectedBooking(null)}
       >
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-4xl">
           <DialogHeader>
             <DialogTitle>{t("bookings.details.title")}</DialogTitle>
             <DialogDescription>
@@ -571,6 +594,21 @@ const DashboardBookingsContent = () => {
                         {t("bookings.details.totalDays")}:
                       </span>{" "}
                       {selectedBooking.days}
+                    </p>
+                    <p>
+                      <span className="text-gray-600">WhatsApp Contact:</span>{" "}
+                      <a
+                        href={`https://wa.me/${selectedBooking.car.whatsappNumber?.replace(
+                          /[^0-9]/g,
+                          ""
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-green-600 hover:underline flex items-center gap-1"
+                      >
+                        <Phone className="h-4 w-4" />
+                        {selectedBooking.car.whatsappNumber}
+                      </a>
                     </p>
                   </div>
                 </div>
