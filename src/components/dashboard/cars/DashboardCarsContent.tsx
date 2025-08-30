@@ -6,23 +6,6 @@ import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -31,24 +14,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Plus,
-  Search,
-  Filter,
-  MoreHorizontal,
-  Edit,
-  Trash2,
-  Eye,
-  Car,
-  Users,
-  Fuel,
-  Settings,
-  Phone,
-} from "lucide-react";
-import Image from "next/image";
+import { Plus, Search } from "lucide-react";
 import { vehiclesData } from "@/components/data/vehicles";
 import AddCarForm from "./AddCarForm";
 import EditCarForm from "./EditCarForm";
+import CarStatsGrid from "./components/CarStatsGrid";
+import CarFilters from "./components/CarFilters";
+import CarsTable from "./components/CarsTable";
+import CarDetailsModal from "./components/CarDetailsModal";
+import DeleteConfirmationDialog from "./components/DeleteConfirmationDialog";
 
 // Define proper types
 interface CarData {
@@ -164,29 +138,6 @@ const DashboardCarsContent = () => {
     return matchesSearch && matchesFilter;
   });
 
-  const getStatusBadge = (available: boolean) => {
-    return available ? (
-      <Badge className="bg-green-100 text-green-800">
-        {t("cars.statusBadges.available")}
-      </Badge>
-    ) : (
-      <Badge className="bg-red-100 text-red-800">
-        {t("cars.statusBadges.rented")}
-      </Badge>
-    );
-  };
-
-  const getFuelIcon = (fuelType: string) => {
-    switch (fuelType.toLowerCase()) {
-      case "electric":
-        return "⚡";
-      case "hybrid":
-        return "🔋";
-      default:
-        return "⛽";
-    }
-  };
-
   const handleDeleteCar = (carId: string) => {
     setCars(cars.filter((car) => car.id !== carId));
     setCarToDelete(null);
@@ -277,33 +228,6 @@ const DashboardCarsContent = () => {
     }
   };
 
-  const stats = [
-    {
-      title: t("stats.totalCars"),
-      value: cars.length.toString(),
-      icon: Car,
-      color: "blue",
-    },
-    {
-      title: t("stats.activeCars"),
-      value: cars.filter((car) => car.available).length.toString(),
-      icon: Car,
-      color: "green",
-    },
-    {
-      title: t("stats.rentedCars"),
-      value: cars.filter((car) => !car.available).length.toString(),
-      icon: Users,
-      color: "red",
-    },
-    {
-      title: t("stats.maintenanceDue"),
-      value: "3",
-      icon: Settings,
-      color: "yellow",
-    },
-  ];
-
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -322,47 +246,25 @@ const DashboardCarsContent = () => {
             <Plus className="h-4 w-4" />
             {t("cars.addNew")}
           </Button>
-          <DialogContent className="w-[95vw] sm:max-w-[75vw] max-h-[75vh] overflow-y-auto">
+          <DialogContent className="w-[min(1400px,95vw)] sm:max-w-[min(1400px,95vw)] max-h-[95vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{t("cars.form.title")}</DialogTitle>
               <DialogDescription>
                 {t("cars.form.description")}
               </DialogDescription>
             </DialogHeader>
-            <AddCarForm
-              onSubmit={handleAddCar}
-              onClose={() => setIsAddCarDialogOpen(false)}
-            />
+            <div className="overflow-y-auto max-h-[calc(95vh-200px)] px-1">
+              <AddCarForm
+                onSubmit={handleAddCar}
+                onClose={() => setIsAddCarDialogOpen(false)}
+              />
+            </div>
           </DialogContent>
         </Dialog>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => (
-          <Card key={stat.title} className="border-0 shadow-md">
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-600">
-                    {stat.title}
-                  </p>
-                  <p className="text-3xl font-bold text-gray-900">
-                    {stat.value}
-                  </p>
-                </div>
-                <div className="ml-4">
-                  <div
-                    className={`w-12 h-12 bg-${stat.color}-100 rounded-lg flex items-center justify-center`}
-                  >
-                    <stat.icon className={`h-6 w-6 text-${stat.color}-600`} />
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <CarStatsGrid cars={cars} />
 
       {/* Search and Filters */}
       <Card className="border-0 shadow-md">
@@ -377,29 +279,10 @@ const DashboardCarsContent = () => {
                 className="pl-10"
               />
             </div>
-            <div className="flex gap-2">
-              <Button
-                variant={selectedFilter === "all" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedFilter("all")}
-              >
-                {t("cars.allCars")}
-              </Button>
-              <Button
-                variant={selectedFilter === "available" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedFilter("available")}
-              >
-                {t("cars.available")}
-              </Button>
-              <Button
-                variant={selectedFilter === "rented" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedFilter("rented")}
-              >
-                {t("cars.rented")}
-              </Button>
-            </div>
+            <CarFilters
+              selectedFilter={selectedFilter}
+              onFilterChange={setSelectedFilter}
+            />
           </div>
         </CardContent>
       </Card>
@@ -412,375 +295,52 @@ const DashboardCarsContent = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t("cars.table.car")}</TableHead>
-                <TableHead>{t("cars.table.details")}</TableHead>
-                <TableHead>{t("cars.table.pricing")}</TableHead>
-                <TableHead>{t("cars.table.caution")}</TableHead>
-                <TableHead>WhatsApp</TableHead>
-                <TableHead>{t("cars.table.status")}</TableHead>
-                <TableHead>{t("cars.table.lastTechnicalVisit")}</TableHead>
-                <TableHead>{t("cars.table.actions")}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredCars.map((car) => (
-                <TableRow key={car.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <div className="w-16 h-12 relative rounded-lg overflow-hidden">
-                        <Image
-                          src={car.image}
-                          alt={`${car.brand} ${car.name}`}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                      <div>
-                        <p className="font-semibold text-gray-900">
-                          {car.brand} {car.name}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          {car.model} {car.year}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {car.licensePlate}
-                        </p>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Users className="h-4 w-4" />
-                        {car.seats} {t("cars.table.seats")}
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <span>{getFuelIcon(car.fuelType)}</span>
-                        {car.fuelType}
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Settings className="h-4 w-4" />
-                        {car.transmission}
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <p className="font-semibold text-gray-900">€{car.price}</p>
-                    <p className="text-sm text-gray-600">
-                      {t("cars.table.perDay")}
-                    </p>
-                  </TableCell>
-                  <TableCell>
-                    <p className="font-semibold text-gray-900">
-                      €{car.caution}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      {t("cars.table.deposit")}
-                    </p>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2 text-sm text-green-600">
-                      <Phone className="h-4 w-4" />
-                      <a
-                        href={`https://wa.me/${car.whatsappNumber?.replace(
-                          /[^0-9]/g,
-                          ""
-                        )}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="hover:underline"
-                      >
-                        {car.whatsappNumber}
-                      </a>
-                    </div>
-                  </TableCell>
-                  <TableCell>{getStatusBadge(car.available)}</TableCell>
-                  <TableCell>
-                    <p className="text-sm text-gray-600">
-                      {car.lastTechnicalVisit
-                        ? new Date(car.lastTechnicalVisit).toLocaleDateString()
-                        : "N/A"}
-                    </p>
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>
-                          {t("common.actions")}
-                        </DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={() => handleViewCarDetails(car)}
-                        >
-                          <Eye className="mr-2 h-4 w-4" />
-                          {t("cars.actions.viewDetails")}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleEditCar(car)}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          {t("cars.actions.edit")}
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          className="text-red-600"
-                          onClick={() => setCarToDelete(car.id)}
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          {t("cars.actions.delete")}
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <CarsTable
+            cars={filteredCars}
+            onViewDetails={handleViewCarDetails}
+            onEditCar={handleEditCar}
+            onDeleteCar={setCarToDelete}
+          />
         </CardContent>
       </Card>
 
       {/* Car Details Modal */}
-      <Dialog
-        open={selectedCar !== null}
-        onOpenChange={() => setSelectedCar(null)}
-      >
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>{t("cars.details.title")}</DialogTitle>
-            <DialogDescription>
-              {t("cars.details.description")}
-            </DialogDescription>
-          </DialogHeader>
-          {selectedCar && (
-            <div className="space-y-6">
-              {/* Car Header */}
-              <div className="flex items-center gap-4">
-                <div className="w-20 h-16 relative rounded-lg overflow-hidden">
-                  <Image
-                    src={selectedCar.image}
-                    alt={`${selectedCar.brand} ${selectedCar.name}`}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold">
-                    {selectedCar.brand} {selectedCar.name}
-                  </h3>
-                  <p className="text-gray-600">
-                    {selectedCar.model} {selectedCar.year}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    {selectedCar.licensePlate}
-                  </p>
-                  <div className="mt-2">
-                    {getStatusBadge(selectedCar.available)}
-                  </div>
-                </div>
-              </div>
-
-              {/* Car Details Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-3">
-                    {t("cars.details.basicInfo")}
-                  </h4>
-                  <div className="space-y-2">
-                    <p>
-                      <span className="text-gray-600">
-                        {t("cars.details.seats")}:
-                      </span>{" "}
-                      {selectedCar.seats}
-                    </p>
-                    <p>
-                      <span className="text-gray-600">
-                        {t("cars.details.doors")}:
-                      </span>{" "}
-                      {selectedCar.doors}
-                    </p>
-                    <p>
-                      <span className="text-gray-600">
-                        {t("cars.details.transmission")}:
-                      </span>{" "}
-                      {selectedCar.transmission}
-                    </p>
-                    <p>
-                      <span className="text-gray-600">
-                        {t("cars.details.fuelType")}:
-                      </span>{" "}
-                      {selectedCar.fuelType}
-                    </p>
-                    {selectedCar.mileage && (
-                      <p>
-                        <span className="text-gray-600">
-                          {t("cars.details.mileage")}:
-                        </span>{" "}
-                        {selectedCar.mileage} km
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-3">
-                    {t("cars.details.pricing")}
-                  </h4>
-                  <div className="space-y-2">
-                    <p>
-                      <span className="text-gray-600">
-                        {t("cars.details.dailyPrice")}:
-                      </span>{" "}
-                      €{selectedCar.price}
-                    </p>
-                    <p>
-                      <span className="text-gray-600">
-                        {t("cars.details.caution")}:
-                      </span>{" "}
-                      €{selectedCar.caution}
-                    </p>
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-3">Contact</h4>
-                  <div className="space-y-2">
-                    <p>
-                      <span className="text-gray-600">WhatsApp:</span>{" "}
-                      <a
-                        href={`https://wa.me/${selectedCar.whatsappNumber?.replace(
-                          /[^0-9]/g,
-                          ""
-                        )}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-green-600 hover:underline flex items-center gap-1"
-                      >
-                        <Phone className="h-4 w-4" />
-                        {selectedCar.whatsappNumber}
-                      </a>
-                    </p>
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-3">
-                    {t("cars.details.maintenance")}
-                  </h4>
-                  <div className="space-y-2">
-                    <p>
-                      <span className="text-gray-600">
-                        {t("cars.details.lastTechnicalVisit")}:
-                      </span>{" "}
-                      {selectedCar.lastTechnicalVisit
-                        ? new Date(
-                            selectedCar.lastTechnicalVisit
-                          ).toLocaleDateString()
-                        : "N/A"}
-                    </p>
-                    <p>
-                      <span className="text-gray-600">
-                        {t("cars.details.lastOilChange")}:
-                      </span>{" "}
-                      {selectedCar.lastOilChange
-                        ? new Date(
-                            selectedCar.lastOilChange
-                          ).toLocaleDateString()
-                        : "N/A"}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="md:col-span-2">
-                  <h4 className="font-semibold text-gray-900 mb-3">
-                    {t("cars.details.features")}
-                  </h4>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedCar.features && selectedCar.features.length > 0 ? (
-                      selectedCar.features.map((feature) => (
-                        <Badge key={feature} variant="secondary">
-                          {t(`cars.form.features.${feature}`)}
-                        </Badge>
-                      ))
-                    ) : (
-                      <p className="text-gray-500">No features listed</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setSelectedCar(null)}>
-              {t("cars.details.close")}
-            </Button>
-            <Button
-              className="bg-carbookers-red-600 hover:bg-carbookers-red-700"
-              onClick={() => {
-                if (selectedCar) {
-                  handleEditCar(selectedCar);
-                  setSelectedCar(null);
-                }
-              }}
-            >
-              {t("cars.details.edit")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <CarDetailsModal
+        car={selectedCar}
+        onClose={() => setSelectedCar(null)}
+        onEdit={handleEditCar}
+      />
 
       {/* Edit Car Modal */}
       <Dialog open={isEditCarDialogOpen} onOpenChange={setIsEditCarDialogOpen}>
-        <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto">
+        <DialogContent className="w-[min(1400px,95vw)] sm:max-w-[min(1400px,95vw)] max-h-[95vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Car</DialogTitle>
             <DialogDescription>
               Update the vehicle information and details
             </DialogDescription>
           </DialogHeader>
-          {carToEdit && (
-            <EditCarForm
-              car={carToEdit}
-              onSubmit={handleUpdateCar}
-              onClose={() => {
-                setIsEditCarDialogOpen(false);
-                setCarToEdit(null);
-              }}
-            />
-          )}
+          <div className="overflow-y-auto max-h-[calc(95vh-200px)] px-1">
+            {carToEdit && (
+              <EditCarForm
+                car={carToEdit}
+                onSubmit={handleUpdateCar}
+                onClose={() => {
+                  setIsEditCarDialogOpen(false);
+                  setCarToEdit(null);
+                }}
+              />
+            )}
+          </div>
         </DialogContent>
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog
-        open={carToDelete !== null}
-        onOpenChange={() => setCarToDelete(null)}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("cars.deleteConfirmation.title")}</DialogTitle>
-            <DialogDescription>
-              {t("cars.deleteConfirmation.description")}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setCarToDelete(null)}>
-              {t("cars.deleteConfirmation.cancel")}
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => carToDelete && handleDeleteCar(carToDelete)}
-            >
-              {t("cars.deleteConfirmation.confirm")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <DeleteConfirmationDialog
+        isOpen={carToDelete !== null}
+        onClose={() => setCarToDelete(null)}
+        onConfirm={() => carToDelete && handleDeleteCar(carToDelete)}
+      />
     </div>
   );
 };

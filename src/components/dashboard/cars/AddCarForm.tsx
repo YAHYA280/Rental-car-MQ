@@ -1,30 +1,19 @@
+// src/components/dashboard/cars/AddCarForm.tsx
 "use client";
 
 import React, { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { X, Upload, Plus, Calendar as CalendarIcon, Phone } from "lucide-react";
 import { format } from "date-fns";
-import { cn } from "@/lib/utils";
 import { CarFormData } from "./DashboardCarsContent";
+
+// Import form section components
+import BasicInfoSection from "./components/form/BasicInfoSection";
+import TechnicalSpecsSection from "./components/form/TechnicalSpecsSection";
+import PricingSection from "./components/form/PricingSection";
+import MaintenanceSection from "./components/form/MaintenanceSection";
+import FeaturesSection from "./components/form/FeaturesSection";
+import ImagesSection from "./components/form/ImagesSection";
 
 interface AddCarFormProps {
   onSubmit: (data: CarFormData) => Promise<void>;
@@ -72,40 +61,8 @@ const AddCarForm: React.FC<AddCarFormProps> = ({ onSubmit, onClose }) => {
   >();
   const [oilChangeDate, setOilChangeDate] = useState<Date | undefined>();
 
-  const brands = [
-    "Cupra",
-    "Dacia",
-    "Hyundai",
-    "KIA",
-    "Mercedes",
-    "Opel",
-    "Peugeot",
-    "Porsche",
-    "Renault",
-    "SEAT",
-    "Volkswagen",
-  ];
-
-  const transmissionTypes = ["manual", "automatic"];
-  const fuelTypes = ["petrol", "diesel", "electric", "hybrid"];
-  const seatOptions = ["2", "4", "5", "7", "8"];
-  const doorOptions = ["2", "3", "4", "5"];
-
-  // Updated with only 10 main basic features
-  const availableFeatures = [
-    "airConditioning",
-    "bluetooth",
-    "gps",
-    "cruiseControl",
-    "parkingSensors",
-    "backupCamera",
-    "leatherSeats",
-    "keylessEntry",
-    "electricWindows",
-    "abs",
-  ];
-
-  const handleInputChange = (field: keyof CarFormData, value: string) => {
+  // Create a type-compatible handleInputChange function
+  const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -116,14 +73,14 @@ const AddCarForm: React.FC<AddCarFormProps> = ({ onSubmit, onClose }) => {
     }
   };
 
-  const handleFileChange = (field: "mainImage", file: File | undefined) => {
+  const handleMainImageChange = (file: File | undefined) => {
     setFormData((prev) => ({
       ...prev,
-      [field]: file,
+      mainImage: file,
     }));
   };
 
-  const handleMultipleFileChange = (files: FileList | null) => {
+  const handleAdditionalImagesChange = (files: FileList | null) => {
     if (files) {
       const fileArray = Array.from(files);
       setFormData((prev) => ({
@@ -257,660 +214,83 @@ const AddCarForm: React.FC<AddCarFormProps> = ({ onSubmit, onClose }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Left Column */}
-      <div className="space-y-6">
-        {/* Basic Information */}
-        <Card>
-          <CardContent className="p-4">
-            <h3 className="text-lg font-semibold mb-4">
-              {t("cars.form.sections.basicInfo")}
-            </h3>
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="brand">{t("cars.form.brand")} *</Label>
-                <Select
-                  value={formData.brand}
-                  onValueChange={(value) => handleInputChange("brand", value)}
-                >
-                  <SelectTrigger
-                    className={errors.brand ? "border-red-500" : ""}
-                  >
-                    <SelectValue
-                      placeholder={t("cars.form.placeholders.selectBrand")}
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {brands.map((brand) => (
-                      <SelectItem key={brand} value={brand}>
-                        {brand}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.brand && (
-                  <p className="text-red-500 text-sm mt-1">{errors.brand}</p>
-                )}
-              </div>
+    <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        {/* Left Column */}
+        <div className="space-y-4 sm:space-y-6">
+          <BasicInfoSection
+            formData={{
+              brand: formData.brand,
+              name: formData.name,
+              model: formData.model,
+              year: formData.year,
+              licensePlate: formData.licensePlate,
+              whatsappNumber: formData.whatsappNumber,
+            }}
+            errors={errors}
+            onInputChange={handleInputChange}
+          />
 
-              <div>
-                <Label htmlFor="name">{t("cars.form.name")} *</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => handleInputChange("name", e.target.value)}
-                  placeholder={t("cars.form.placeholders.name")}
-                  className={errors.name ? "border-red-500" : ""}
-                />
-                {errors.name && (
-                  <p className="text-red-500 text-sm mt-1">{errors.name}</p>
-                )}
-              </div>
+          <TechnicalSpecsSection
+            formData={{
+              transmission: formData.transmission,
+              fuelType: formData.fuelType,
+              seats: formData.seats,
+              doors: formData.doors,
+              mileage: formData.mileage,
+            }}
+            errors={errors}
+            onInputChange={handleInputChange}
+          />
 
-              <div>
-                <Label htmlFor="model">{t("cars.form.model")} *</Label>
-                <Input
-                  id="model"
-                  value={formData.model}
-                  onChange={(e) => handleInputChange("model", e.target.value)}
-                  placeholder={t("cars.form.placeholders.model")}
-                  className={errors.model ? "border-red-500" : ""}
-                />
-                {errors.model && (
-                  <p className="text-red-500 text-sm mt-1">{errors.model}</p>
-                )}
-              </div>
+          <PricingSection
+            formData={{
+              dailyPrice: formData.dailyPrice,
+              caution: formData.caution,
+            }}
+            errors={errors}
+            onInputChange={handleInputChange}
+          />
+        </div>
 
-              <div>
-                <Label htmlFor="year">{t("cars.form.year")} *</Label>
-                <Input
-                  id="year"
-                  type="number"
-                  value={formData.year}
-                  onChange={(e) => handleInputChange("year", e.target.value)}
-                  placeholder="2024"
-                  min="2000"
-                  max="2025"
-                  className={errors.year ? "border-red-500" : ""}
-                />
-                {errors.year && (
-                  <p className="text-red-500 text-sm mt-1">{errors.year}</p>
-                )}
-              </div>
+        {/* Right Column */}
+        <div className="space-y-4 sm:space-y-6">
+          <MaintenanceSection
+            technicalVisitDate={technicalVisitDate}
+            oilChangeDate={oilChangeDate}
+            onDateChange={handleDateChange}
+          />
 
-              <div>
-                <Label htmlFor="licensePlate">
-                  {t("cars.form.licensePlate")} *
-                </Label>
-                <Input
-                  id="licensePlate"
-                  value={formData.licensePlate}
-                  onChange={(e) =>
-                    handleInputChange(
-                      "licensePlate",
-                      e.target.value.toUpperCase()
-                    )
-                  }
-                  placeholder={t("cars.form.placeholders.licensePlateFormat")}
-                  className={errors.licensePlate ? "border-red-500" : ""}
-                  maxLength={6}
-                />
-                {errors.licensePlate && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.licensePlate}
-                  </p>
-                )}
-              </div>
+          <FeaturesSection
+            selectedFeatures={formData.features}
+            onToggleFeature={toggleFeature}
+          />
 
-              <div>
-                <Label htmlFor="whatsappNumber">
-                  {t("cars.form.whatsappNumber")} *
-                </Label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="whatsappNumber"
-                    value={formData.whatsappNumber}
-                    onChange={(e) =>
-                      handleInputChange("whatsappNumber", e.target.value)
-                    }
-                    placeholder={t("cars.form.placeholders.whatsappNumber")}
-                    className={`pl-10 ${
-                      errors.whatsappNumber ? "border-red-500" : ""
-                    }`}
-                  />
-                </div>
-                <p className="text-sm text-gray-500 mt-1">
-                  {t("cars.form.whatsappDescription")}
-                </p>
-                {errors.whatsappNumber && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.whatsappNumber}
-                  </p>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Technical Specifications */}
-        <Card>
-          <CardContent className="p-4">
-            <h3 className="text-lg font-semibold mb-4">
-              {t("cars.form.sections.technicalSpecs")}
-            </h3>
-            <div className="grid grid-cols-3 md:grid-cols-4 gap-4">
-              <div>
-                <Label htmlFor="transmission">
-                  {t("cars.form.transmission")} *
-                </Label>
-                <Select
-                  value={formData.transmission}
-                  onValueChange={(value) =>
-                    handleInputChange("transmission", value)
-                  }
-                >
-                  <SelectTrigger
-                    className={errors.transmission ? "border-red-500" : ""}
-                  >
-                    <SelectValue
-                      placeholder={t(
-                        "cars.form.placeholders.selectTransmission"
-                      )}
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {transmissionTypes.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {t(`cars.form.transmissions.${type}`)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.transmission && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.transmission}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <Label htmlFor="fuelType">{t("cars.form.fuelType")} *</Label>
-                <Select
-                  value={formData.fuelType}
-                  onValueChange={(value) =>
-                    handleInputChange("fuelType", value)
-                  }
-                >
-                  <SelectTrigger
-                    className={errors.fuelType ? "border-red-500" : ""}
-                  >
-                    <SelectValue
-                      placeholder={t("cars.form.placeholders.selectFuelType")}
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {fuelTypes.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {t(`cars.form.fuelTypes.${type}`)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.fuelType && (
-                  <p className="text-red-500 text-sm mt-1">{errors.fuelType}</p>
-                )}
-              </div>
-
-              <div>
-                <Label htmlFor="seats">{t("cars.form.seats")} *</Label>
-                <Select
-                  value={formData.seats}
-                  onValueChange={(value) => handleInputChange("seats", value)}
-                >
-                  <SelectTrigger
-                    className={errors.seats ? "border-red-500" : ""}
-                  >
-                    <SelectValue
-                      placeholder={t("cars.form.placeholders.selectSeats")}
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {seatOptions.map((seats) => (
-                      <SelectItem key={seats} value={seats}>
-                        {seats} {t("cars.form.seatsLabel")}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.seats && (
-                  <p className="text-red-500 text-sm mt-1">{errors.seats}</p>
-                )}
-              </div>
-
-              <div>
-                <Label htmlFor="doors">{t("cars.form.doors")} *</Label>
-                <Select
-                  value={formData.doors}
-                  onValueChange={(value) => handleInputChange("doors", value)}
-                >
-                  <SelectTrigger
-                    className={errors.doors ? "border-red-500" : ""}
-                  >
-                    <SelectValue
-                      placeholder={t("cars.form.placeholders.selectDoors")}
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {doorOptions.map((doors) => (
-                      <SelectItem key={doors} value={doors}>
-                        {doors} {t("cars.form.doorsLabel")}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.doors && (
-                  <p className="text-red-500 text-sm mt-1">{errors.doors}</p>
-                )}
-              </div>
-
-              <div>
-                <Label htmlFor="mileage">{t("cars.form.mileage")} (km)</Label>
-                <Input
-                  id="mileage"
-                  type="number"
-                  value={formData.mileage}
-                  onChange={(e) => handleInputChange("mileage", e.target.value)}
-                  placeholder="15000"
-                  min="0"
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Pricing */}
-        <Card>
-          <CardContent className="p-4">
-            <h3 className="text-lg font-semibold mb-4">
-              {t("cars.form.sections.technicalSpecs")}
-            </h3>
-            <div className="grid grid-cols-1 gap-4">
-              <div>
-                <Label htmlFor="transmission">
-                  {t("cars.form.transmission")} *
-                </Label>
-                <Select
-                  value={formData.transmission}
-                  onValueChange={(value) =>
-                    handleInputChange("transmission", value)
-                  }
-                >
-                  <SelectTrigger
-                    className={errors.transmission ? "border-red-500" : ""}
-                  >
-                    <SelectValue
-                      placeholder={t(
-                        "cars.form.placeholders.selectTransmission"
-                      )}
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {transmissionTypes.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {t(`cars.form.transmissions.${type}`)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.transmission && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.transmission}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <Label htmlFor="fuelType">{t("cars.form.fuelType")} *</Label>
-                <Select
-                  value={formData.fuelType}
-                  onValueChange={(value) =>
-                    handleInputChange("fuelType", value)
-                  }
-                >
-                  <SelectTrigger
-                    className={errors.fuelType ? "border-red-500" : ""}
-                  >
-                    <SelectValue
-                      placeholder={t("cars.form.placeholders.selectFuelType")}
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {fuelTypes.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {t(`cars.form.fuelTypes.${type}`)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.fuelType && (
-                  <p className="text-red-500 text-sm mt-1">{errors.fuelType}</p>
-                )}
-              </div>
-
-              <div>
-                <Label htmlFor="seats">{t("cars.form.seats")} *</Label>
-                <Select
-                  value={formData.seats}
-                  onValueChange={(value) => handleInputChange("seats", value)}
-                >
-                  <SelectTrigger
-                    className={errors.seats ? "border-red-500" : ""}
-                  >
-                    <SelectValue
-                      placeholder={t("cars.form.placeholders.selectSeats")}
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {seatOptions.map((seats) => (
-                      <SelectItem key={seats} value={seats}>
-                        {seats} {t("cars.form.seatsLabel")}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.seats && (
-                  <p className="text-red-500 text-sm mt-1">{errors.seats}</p>
-                )}
-              </div>
-
-              <div>
-                <Label htmlFor="doors">{t("cars.form.doors")} *</Label>
-                <Select
-                  value={formData.doors}
-                  onValueChange={(value) => handleInputChange("doors", value)}
-                >
-                  <SelectTrigger
-                    className={errors.doors ? "border-red-500" : ""}
-                  >
-                    <SelectValue
-                      placeholder={t("cars.form.placeholders.selectDoors")}
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {doorOptions.map((doors) => (
-                      <SelectItem key={doors} value={doors}>
-                        {doors} {t("cars.form.doorsLabel")}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.doors && (
-                  <p className="text-red-500 text-sm mt-1">{errors.doors}</p>
-                )}
-              </div>
-
-              <div>
-                <Label htmlFor="mileage">{t("cars.form.mileage")} (km)</Label>
-                <Input
-                  id="mileage"
-                  type="number"
-                  value={formData.mileage}
-                  onChange={(e) => handleInputChange("mileage", e.target.value)}
-                  placeholder="15000"
-                  min="0"
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          <ImagesSection
+            mainImage={formData.mainImage}
+            additionalImages={formData.additionalImages}
+            errors={errors}
+            onMainImageChange={handleMainImageChange}
+            onAdditionalImagesChange={handleAdditionalImagesChange}
+            onRemoveAdditionalImage={removeAdditionalImage}
+          />
+        </div>
       </div>
-      {/* Maintenance */}
-      <div className="space-y-6">
-        <Card>
-          <CardContent className="p-4">
-            <h3 className="text-lg font-semibold mb-4">
-              {t("cars.form.sections.maintenance")}
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label>{t("cars.form.lastTechnicalVisit")}</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !technicalVisitDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {technicalVisitDate ? (
-                        format(technicalVisitDate, "PPP")
-                      ) : (
-                        <span>{t("cars.form.placeholders.selectDate")}</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={technicalVisitDate}
-                      onSelect={(date) =>
-                        handleDateChange(date, "technicalVisit")
-                      }
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
 
-              <div>
-                <Label>{t("cars.form.lastOilChange")}</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !oilChangeDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {oilChangeDate ? (
-                        format(oilChangeDate, "PPP")
-                      ) : (
-                        <span>{t("cars.form.placeholders.selectDate")}</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={oilChangeDate}
-                      onSelect={(date) => handleDateChange(date, "oilChange")}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Features */}
-        <Card>
-          <CardContent className="p-4">
-            <h3 className="text-lg font-semibold mb-4">
-              {t("cars.form.sections.features")}
-            </h3>
-            <div className="grid grid-cols-5 gap-2">
-              {availableFeatures.map((feature) => {
-                const checked = formData.features.includes(feature);
-                return (
-                  <label
-                    key={feature}
-                    htmlFor={`feat-${feature}`}
-                    className={[
-                      "flex items-center gap-3 p-3 rounded-xl border shadow-sm cursor-pointer select-none",
-                      "transition-colors focus-within:ring-2 focus-within:ring-carbookers-red-500",
-                      checked
-                        ? "border-carbookers-red-500 bg-carbookers-red-50 text-carbookers-red-700"
-                        : "border-gray-200 hover:bg-gray-50",
-                    ].join(" ")}
-                  >
-                    <Checkbox
-                      id={`feat-${feature}`}
-                      checked={checked}
-                      onCheckedChange={() => toggleFeature(feature)}
-                      className="h-5 w-5 data-[state=checked]:bg-carbookers-red-500 data-[state=checked]:border-carbookers-red-500"
-                    />
-                    <span className="text-sm flex-1">
-                      {t(`cars.form.features.${feature}`)}
-                    </span>
-                  </label>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Images */}
-        <Card>
-          <CardContent className="p-4">
-            <h3 className="text-lg font-semibold mb-4">
-              {t("cars.form.sections.images")}
-            </h3>
-
-            {/* Main Image */}
-            <div className="mb-6">
-              <Label htmlFor="mainImage">{t("cars.form.mainImage")} *</Label>
-              <p className="text-sm text-gray-500 mb-2">
-                {t("cars.form.uploadMainImage")}
-              </p>
-              <div
-                className={`border-2 border-dashed rounded-lg p-6 text-center ${
-                  errors.mainImage ? "border-red-500" : "border-gray-300"
-                }`}
-              >
-                {formData.mainImage ? (
-                  <div className="space-y-3">
-                    <div className="w-32 h-24 mx-auto relative">
-                      <img
-                        src={URL.createObjectURL(formData.mainImage)}
-                        alt="Preview"
-                        className="w-full h-full object-cover rounded-lg"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => handleFileChange("mainImage", undefined)}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </div>
-                    <p className="text-sm text-gray-600">
-                      {formData.mainImage.name}
-                    </p>
-                  </div>
-                ) : (
-                  <>
-                    <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600 mb-2">
-                      {t("cars.form.mainImage")}
-                    </p>
-                    <p className="text-sm text-gray-500 mb-4">
-                      {t("cars.form.imageFormats")}
-                    </p>
-                  </>
-                )}
-                <input
-                  type="file"
-                  id="mainImage"
-                  accept="image/*"
-                  onChange={(e) =>
-                    handleFileChange("mainImage", e.target.files?.[0])
-                  }
-                  className="hidden"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => document.getElementById("mainImage")?.click()}
-                >
-                  {t("cars.form.chooseImage")}
-                </Button>
-              </div>
-              {errors.mainImage && (
-                <p className="text-red-500 text-sm mt-1">{errors.mainImage}</p>
-              )}
-            </div>
-
-            {/* Additional Images */}
-            <div>
-              <Label htmlFor="additionalImages">
-                {t("cars.form.additionalImages")}
-              </Label>
-              <p className="text-sm text-gray-500 mb-2">
-                {t("cars.form.additionalImagesDescription")}
-              </p>
-
-              {formData.additionalImages.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                  {formData.additionalImages.map((file, index) => (
-                    <div key={index} className="relative">
-                      <img
-                        src={URL.createObjectURL(file)}
-                        alt={`Additional ${index + 1}`}
-                        className="w-full h-24 object-cover rounded-lg"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeAdditionalImage(index)}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <input
-                type="file"
-                id="additionalImages"
-                accept="image/*"
-                multiple
-                onChange={(e) => handleMultipleFileChange(e.target.files)}
-                className="hidden"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() =>
-                  document.getElementById("additionalImages")?.click()
-                }
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                {t("cars.form.addMoreImages")}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
       {/* Form Actions */}
-      <div className="flex justify-end gap-3 pt-6 border-t">
+      <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 sm:pt-6 border-t">
         <Button
           type="button"
           variant="outline"
           onClick={onClose}
           disabled={isSubmitting}
+          className="w-full sm:w-auto order-2 sm:order-1"
         >
           {t("common.cancel")}
         </Button>
         <Button
           type="submit"
-          className="bg-carbookers-red-600 hover:bg-carbookers-red-700"
+          className="bg-carbookers-red-600 hover:bg-carbookers-red-700 w-full sm:w-auto order-1 sm:order-2"
           disabled={isSubmitting}
         >
           {isSubmitting ? t("common.loading") : t("cars.form.submit")}
