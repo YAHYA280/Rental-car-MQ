@@ -15,6 +15,25 @@
     "aboutTitle": "About MELHOR QUE NADA - Premier Car Rental Tangier Morocco"
   },
 
+  "auth": {
+    "email": "Email Address",
+    "password": "Password",
+    "emailPlaceholder": "Enter your email address",
+    "passwordPlaceholder": "Enter your password",
+    "signIn": "Sign In",
+    "signingIn": "Signing In...",
+    "logout": "Logout",
+    "adminLogin": "Admin Login",
+    "signInToAccess": "Sign in to access the dashboard",
+    "defaultCredentials": "Default Credentials",
+    "errors": {
+      "emailRequired": "Email address is required",
+      "emailInvalid": "Please enter a valid email address",
+      "passwordRequired": "Password is required",
+      "loginFailed": "Invalid email or password. Please try again."
+    }
+  },
+
   "search": {
     "title": "Find Your Perfect Rental Car",
     "subtitle": "Choose from our premium fleet",

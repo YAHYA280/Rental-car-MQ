@@ -14,6 +14,24 @@
     "homeTitle": "MELHOR QUE NADA - Location Voiture Tanger | Voitures Luxe Maroc",
     "aboutTitle": "À Propos de MELHOR QUE NADA - Leader Location Voiture Tanger"
   },
+  "auth": {
+    "email": "Adresse Email",
+    "password": "Mot de Passe",
+    "emailPlaceholder": "Saisissez votre adresse email",
+    "passwordPlaceholder": "Saisissez votre mot de passe",
+    "signIn": "Se Connecter",
+    "signingIn": "Connexion en cours...",
+    "logout": "Déconnexion",
+    "adminLogin": "Connexion Admin",
+    "signInToAccess": "Connectez-vous pour accéder au tableau de bord",
+    "defaultCredentials": "Identifiants par défaut",
+    "errors": {
+      "emailRequired": "L'adresse email est requise",
+      "emailInvalid": "Veuillez saisir une adresse email valide",
+      "passwordRequired": "Le mot de passe est requis",
+      "loginFailed": "Email ou mot de passe incorrect. Veuillez réessayer."
+    }
+  },
 
   "search": {
     "title": "Trouvez Votre Voiture de Location Parfaite",

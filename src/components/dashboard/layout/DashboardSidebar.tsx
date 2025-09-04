@@ -1,4 +1,4 @@
-// src/components/dashboard/layout/DashboardSidebar.tsx
+// src/components/dashboard/layout/DashboardSidebar.tsx - Same Design + Auth
 "use client";
 
 import React from "react";
@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
+import { useAuth } from "@/hooks/useAuth";
 import {
   BarChart3,
   Car,
@@ -29,6 +30,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
 }) => {
   const pathname = usePathname();
   const t = useTranslations("dashboard");
+  const { admin, logout } = useAuth(); // 🔐 Auth integration
 
   const navigation = [
     {
@@ -62,6 +64,10 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
       current: pathname.includes("/dashboard/settings"),
     },
   ];
+
+  const handleLogout = () => {
+    logout();
+  };
 
   return (
     <>
@@ -121,21 +127,28 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
               {/* Bottom section */}
               <li className="mt-auto">
                 <div className="border-t border-gray-800 pt-6">
-                  {/* User Profile */}
+                  {/* User Profile - 🔐 Using real admin data */}
                   <div className="flex items-center gap-x-3 p-2 text-sm text-gray-300">
                     <div className="h-8 w-8 rounded-full bg-carbookers-red-600 flex items-center justify-center">
-                      <span className="text-white font-semibold">A</span>
+                      <span className="text-white font-semibold">
+                        {admin?.name?.charAt(0)?.toUpperCase() || "A"}
+                      </span>
                     </div>
                     <div>
-                      <p className="font-semibold text-white">Admin User</p>
-                      <p className="text-xs text-gray-400">
-                        {t("sidebar.administrator")}
+                      <p className="font-semibold text-white">
+                        {admin?.name || "Admin User"}
+                      </p>
+                      <p className="text-xs text-gray-400 capitalize">
+                        {admin?.role || "administrator"}
                       </p>
                     </div>
                   </div>
 
-                  {/* Logout */}
-                  <button className="mt-4 group flex w-full gap-x-3 rounded-md p-2 text-sm font-semibold text-gray-300 hover:text-white hover:bg-gray-800 transition-colors duration-200">
+                  {/* Logout - 🔐 Real logout function */}
+                  <button
+                    onClick={handleLogout}
+                    className="mt-4 group flex w-full gap-x-3 rounded-md p-2 text-sm font-semibold text-gray-300 hover:text-white hover:bg-gray-800 transition-colors duration-200"
+                  >
                     <LogOut className="h-6 w-6 shrink-0" aria-hidden="true" />
                     {t("header.logout")}
                   </button>
