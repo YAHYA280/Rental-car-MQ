@@ -831,10 +831,17 @@
       "active": "Active",
       "completed": "Completed",
       "cancelled": "Cancelled",
+      "addNewBooking": "Add New Booking",
+      "createBooking": "Create Booking",
+      "bookingOverview": "Booking Overview",
       "actions": {
         "viewDetails": "View Details",
         "confirmBooking": "Confirm Booking",
-        "cancelBooking": "Cancel Booking"
+        "cancelBooking": "Cancel Booking",
+        "editBooking": "Edit Booking",
+        "deleteBooking": "Delete Booking",
+        "sendConfirmation": "Send Confirmation",
+        "contactCustomer": "Contact Customer"
       },
       "table": {
         "booking": "Booking",
@@ -845,7 +852,10 @@
         "amount": "Amount",
         "status": "Status",
         "actions": "Actions",
-        "days": "days"
+        "days": "days",
+        "createdAt": "Created",
+        "source": "Source",
+        "notes": "Notes"
       },
       "details": {
         "title": "Booking Details",
@@ -853,7 +863,9 @@
         "customerInformation": "Customer Information",
         "vehicleInformation": "Vehicle Information",
         "rentalPeriod": "Rental Period",
-        "locations": "Pickup & Return",
+        "locations": "Pickup & Return Locations",
+        "paymentInfo": "Payment Information",
+        "additionalInfo": "Additional Information",
         "name": "Name",
         "email": "Email",
         "phone": "Phone",
@@ -866,14 +878,161 @@
         "totalAmount": "Total Amount",
         "close": "Close",
         "confirmBooking": "Confirm Booking",
-        "createdOn": "Created on"
+        "createdOn": "Created on",
+        "bookingSource": "Booking Source",
+        "internalNotes": "Internal Notes",
+        "whatsappContact": "WhatsApp Contact",
+        "licensePlate": "License Plate"
+      },
+      "form": {
+        "title": "Create New Booking",
+        "description": "Create a new booking by selecting a customer and vehicle. Admin bookings are automatically confirmed.",
+        "customerSelection": "Customer Selection",
+        "vehicleSelection": "Vehicle Selection",
+        "dateTimeSelection": "Date & Time Selection",
+        "locationSelection": "Location Selection",
+        "additionalNotes": "Additional Notes",
+        "bookingSummary": "Booking Summary",
+        "selectCustomer": "Select Customer",
+        "selectVehicle": "Select Vehicle",
+        "pickupDate": "Pickup Date",
+        "returnDate": "Return Date",
+        "pickupTime": "Pickup Time",
+        "returnTime": "Return Time",
+        "pickupLocation": "Pickup Location",
+        "returnLocation": "Return Location",
+        "notes": "Internal Notes",
+        "submit": "Create Booking",
+        "cancel": "Cancel",
+        "validation": {
+          "customerRequired": "Customer selection is required",
+          "vehicleRequired": "Vehicle selection is required",
+          "pickupDateRequired": "Pickup date is required",
+          "returnDateRequired": "Return date is required",
+          "pickupTimeRequired": "Pickup time is required",
+          "returnTimeRequired": "Return time is required",
+          "pickupLocationRequired": "Pickup location is required",
+          "returnLocationRequired": "Return location is required",
+          "invalidDateRange": "Return date must be after pickup date",
+          "vehicleNotAvailable": "Vehicle not available for selected dates",
+          "minimumRental": "Minimum 1 day rental period required"
+        },
+        "placeholders": {
+          "selectCustomer": "Choose a customer",
+          "selectVehicle": "Choose a vehicle",
+          "selectDate": "Select date",
+          "selectTime": "Select time",
+          "selectLocation": "Select location",
+          "notes": "Enter any special instructions or notes..."
+        },
+        "locations": {
+          "tangierAirport": "Tangier Airport",
+          "tangierCityCenter": "Tangier City Center",
+          "tangierPort": "Tangier Port",
+          "hotelPickup": "Hotel Pickup",
+          "customLocation": "Custom Location"
+        }
       },
       "cancelConfirmation": {
         "title": "Cancel Booking",
         "description": "Are you sure you want to cancel this booking? This action cannot be undone.",
         "keepBooking": "Keep Booking",
-        "cancelBooking": "Cancel Booking"
-      }
+        "cancelBooking": "Cancel Booking",
+        "warning": "Warning: This action cannot be undone. The booking will be marked as cancelled and the vehicle will become available again."
+      },
+      "confirmBooking": {
+        "title": "Confirm Booking",
+        "description": "Are you sure you want to confirm this booking?",
+        "confirm": "Confirm Booking",
+        "cancel": "Cancel"
+      },
+      "deleteConfirmation": {
+        "title": "Delete Booking",
+        "description": "Are you sure you want to delete this booking? This action cannot be undone.",
+        "delete": "Delete Booking",
+        "cancel": "Cancel"
+      },
+      "filters": {
+        "all": "All Bookings",
+        "pending": "Pending Approval",
+        "confirmed": "Confirmed Bookings",
+        "active": "Active Rentals",
+        "completed": "Completed Bookings",
+        "cancelled": "Cancelled Bookings",
+        "today": "Today's Bookings",
+        "thisWeek": "This Week",
+        "thisMonth": "This Month"
+      },
+      "stats": {
+        "totalBookings": "Total Bookings",
+        "activeBookings": "Active Bookings",
+        "pendingBookings": "Pending Approval",
+        "monthlyRevenue": "Monthly Revenue",
+        "averageBookingValue": "Average Booking Value",
+        "bookingGrowth": "Booking Growth",
+        "customerSatisfaction": "Customer Satisfaction"
+      },
+      "messages": {
+        "bookingCreated": "Booking created successfully!",
+        "bookingConfirmed": "Booking confirmed successfully!",
+        "bookingCancelled": "Booking cancelled successfully!",
+        "bookingDeleted": "Booking deleted successfully!",
+        "bookingUpdated": "Booking updated successfully!",
+        "errorCreating": "Error creating booking",
+        "errorConfirming": "Error confirming booking",
+        "errorCancelling": "Error cancelling booking",
+        "errorDeleting": "Error deleting booking",
+        "errorUpdating": "Error updating booking",
+        "noBookingsFound": "No bookings found",
+        "loadingBookings": "Loading bookings..."
+      },
+      "timeline": {
+        "created": "Booking Created",
+        "confirmed": "Booking Confirmed",
+        "started": "Rental Started",
+        "completed": "Rental Completed",
+        "cancelled": "Booking Cancelled"
+      },
+      "quickNotes": {
+        "vipCustomer": "VIP customer - ensure premium service",
+        "firstTime": "First-time customer - verify documentation",
+        "repeatCustomer": "Repeat customer - apply loyalty discount",
+        "specialOccasion": "Special occasion - birthday/anniversary",
+        "businessCustomer": "Business customer - provide invoice",
+        "longTerm": "Long-term rental - weekly inspection",
+        "airportPickup": "Airport pickup - confirm flight details",
+        "hotelDelivery": "Hotel delivery required",
+        "whatsappPreferred": "Customer prefers WhatsApp communication",
+        "fuelTopUp": "Vehicle requires fuel top-up",
+        "inspectionRequired": "Check vehicle condition thoroughly",
+        "mobilityRequirements": "Customer has mobility requirements"
+      },
+      "summary": {
+        "title": "Booking Summary",
+        "customer": "Customer",
+        "vehicle": "Vehicle",
+        "duration": "Duration",
+        "totalAmount": "Total Amount",
+        "dailyRate": "Daily Rate",
+        "pickupDetails": "Pickup Details",
+        "returnDetails": "Return Details",
+        "includedFeatures": "Included Features",
+        "comprehensiveInsurance": "Comprehensive insurance coverage",
+        "roadsideAssistance": "24/7 roadside assistance",
+        "fuelService": "Fuel top-up service available",
+        "freeCancellation": "Free cancellation up to 24h",
+        "adminBooking": "Admin Booking",
+        "autoConfirmed": "This booking will be automatically confirmed",
+        "noPaymentRequired": "No payment processing required",
+        "customerNotified": "Customer will be notified via email/WhatsApp",
+        "vehicleReserved": "Vehicle will be reserved immediately"
+      },
+      "businessHours": "Business hours: 8:00 AM - 8:30 PM",
+      "sameDayRental": "Same Day Rental",
+      "differentLocationFee": "Additional fees may apply for different pickup/return locations",
+      "availableLocations": "All locations are within Tangier metropolitan area",
+      "hotelPickupNotice": "Hotel pickup available with 24hr advance notice",
+      "customLocationApproval": "Custom locations subject to approval"
     },
     "settings": {
       "title": "Settings",

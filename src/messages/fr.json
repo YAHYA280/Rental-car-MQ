@@ -822,7 +822,7 @@
       }
     },
     "bookings": {
-      "title": "Gestion Réservations",
+      "title": "Gestion des Réservations",
       "subtitle": "Gérez les réservations et les plannings de location",
       "recent": "Réservations Récentes",
       "all": "Toutes",
@@ -831,10 +831,17 @@
       "active": "Actives",
       "completed": "Terminées",
       "cancelled": "Annulées",
+      "addNewBooking": "Nouvelle Réservation",
+      "createBooking": "Créer Réservation",
+      "bookingOverview": "Aperçu des Réservations",
       "actions": {
         "viewDetails": "Voir Détails",
         "confirmBooking": "Confirmer Réservation",
-        "cancelBooking": "Annuler Réservation"
+        "cancelBooking": "Annuler Réservation",
+        "editBooking": "Modifier Réservation",
+        "deleteBooking": "Supprimer Réservation",
+        "sendConfirmation": "Envoyer Confirmation",
+        "contactCustomer": "Contacter Client"
       },
       "table": {
         "booking": "Réservation",
@@ -845,7 +852,10 @@
         "amount": "Montant",
         "status": "Statut",
         "actions": "Actions",
-        "days": "jours"
+        "days": "jours",
+        "createdAt": "Créée",
+        "source": "Source",
+        "notes": "Notes"
       },
       "details": {
         "title": "Détails de la Réservation",
@@ -853,7 +863,9 @@
         "customerInformation": "Informations Client",
         "vehicleInformation": "Informations Véhicule",
         "rentalPeriod": "Période de Location",
-        "locations": "Prise et Retour",
+        "locations": "Lieux de Prise et Retour",
+        "paymentInfo": "Informations de Paiement",
+        "additionalInfo": "Informations Supplémentaires",
         "name": "Nom",
         "email": "Email",
         "phone": "Téléphone",
@@ -866,14 +878,161 @@
         "totalAmount": "Montant Total",
         "close": "Fermer",
         "confirmBooking": "Confirmer Réservation",
-        "createdOn": "Créée le"
+        "createdOn": "Créée le",
+        "bookingSource": "Source de Réservation",
+        "internalNotes": "Notes Internes",
+        "whatsappContact": "Contact WhatsApp",
+        "licensePlate": "Plaque d'Immatriculation"
+      },
+      "form": {
+        "title": "Créer Nouvelle Réservation",
+        "description": "Créez une nouvelle réservation en sélectionnant un client et un véhicule. Les réservations admin sont automatiquement confirmées.",
+        "customerSelection": "Sélection Client",
+        "vehicleSelection": "Sélection Véhicule",
+        "dateTimeSelection": "Sélection Date & Heure",
+        "locationSelection": "Sélection Emplacement",
+        "additionalNotes": "Notes Supplémentaires",
+        "bookingSummary": "Résumé de Réservation",
+        "selectCustomer": "Sélectionner Client",
+        "selectVehicle": "Sélectionner Véhicule",
+        "pickupDate": "Date de Prise",
+        "returnDate": "Date de Retour",
+        "pickupTime": "Heure de Prise",
+        "returnTime": "Heure de Retour",
+        "pickupLocation": "Lieu de Prise",
+        "returnLocation": "Lieu de Retour",
+        "notes": "Notes Internes",
+        "submit": "Créer Réservation",
+        "cancel": "Annuler",
+        "validation": {
+          "customerRequired": "La sélection du client est requise",
+          "vehicleRequired": "La sélection du véhicule est requise",
+          "pickupDateRequired": "La date de prise est requise",
+          "returnDateRequired": "La date de retour est requise",
+          "pickupTimeRequired": "L'heure de prise est requise",
+          "returnTimeRequired": "L'heure de retour est requise",
+          "pickupLocationRequired": "Le lieu de prise est requis",
+          "returnLocationRequired": "Le lieu de retour est requis",
+          "invalidDateRange": "La date de retour doit être après la date de prise",
+          "vehicleNotAvailable": "Véhicule non disponible pour les dates sélectionnées",
+          "minimumRental": "Période de location minimum de 1 jour requise"
+        },
+        "placeholders": {
+          "selectCustomer": "Choisir un client",
+          "selectVehicle": "Choisir un véhicule",
+          "selectDate": "Sélectionner date",
+          "selectTime": "Sélectionner heure",
+          "selectLocation": "Sélectionner emplacement",
+          "notes": "Entrez toute instruction ou note spéciale..."
+        },
+        "locations": {
+          "tangierAirport": "Aéroport de Tanger",
+          "tangierCityCenter": "Centre-ville de Tanger",
+          "tangierPort": "Port de Tanger",
+          "hotelPickup": "Prise à l'hôtel",
+          "customLocation": "Emplacement personnalisé"
+        }
       },
       "cancelConfirmation": {
         "title": "Annuler Réservation",
         "description": "Êtes-vous sûr de vouloir annuler cette réservation ? Cette action ne peut pas être annulée.",
         "keepBooking": "Garder Réservation",
-        "cancelBooking": "Annuler Réservation"
-      }
+        "cancelBooking": "Annuler Réservation",
+        "warning": "Attention : Cette action ne peut pas être annulée. La réservation sera marquée comme annulée et le véhicule redeviendra disponible."
+      },
+      "confirmBooking": {
+        "title": "Confirmer Réservation",
+        "description": "Êtes-vous sûr de vouloir confirmer cette réservation ?",
+        "confirm": "Confirmer Réservation",
+        "cancel": "Annuler"
+      },
+      "deleteConfirmation": {
+        "title": "Supprimer Réservation",
+        "description": "Êtes-vous sûr de vouloir supprimer cette réservation ? Cette action ne peut pas être annulée.",
+        "delete": "Supprimer Réservation",
+        "cancel": "Annuler"
+      },
+      "filters": {
+        "all": "Toutes Réservations",
+        "pending": "En Attente d'Approbation",
+        "confirmed": "Réservations Confirmées",
+        "active": "Locations Actives",
+        "completed": "Réservations Terminées",
+        "cancelled": "Réservations Annulées",
+        "today": "Réservations d'Aujourd'hui",
+        "thisWeek": "Cette Semaine",
+        "thisMonth": "Ce Mois"
+      },
+      "stats": {
+        "totalBookings": "Total Réservations",
+        "activeBookings": "Réservations Actives",
+        "pendingBookings": "En Attente d'Approbation",
+        "monthlyRevenue": "Revenus Mensuels",
+        "averageBookingValue": "Valeur Moyenne Réservation",
+        "bookingGrowth": "Croissance Réservations",
+        "customerSatisfaction": "Satisfaction Client"
+      },
+      "messages": {
+        "bookingCreated": "Réservation créée avec succès !",
+        "bookingConfirmed": "Réservation confirmée avec succès !",
+        "bookingCancelled": "Réservation annulée avec succès !",
+        "bookingDeleted": "Réservation supprimée avec succès !",
+        "bookingUpdated": "Réservation mise à jour avec succès !",
+        "errorCreating": "Erreur lors de la création de la réservation",
+        "errorConfirming": "Erreur lors de la confirmation de la réservation",
+        "errorCancelling": "Erreur lors de l'annulation de la réservation",
+        "errorDeleting": "Erreur lors de la suppression de la réservation",
+        "errorUpdating": "Erreur lors de la mise à jour de la réservation",
+        "noBookingsFound": "Aucune réservation trouvée",
+        "loadingBookings": "Chargement des réservations..."
+      },
+      "timeline": {
+        "created": "Réservation Créée",
+        "confirmed": "Réservation Confirmée",
+        "started": "Location Commencée",
+        "completed": "Location Terminée",
+        "cancelled": "Réservation Annulée"
+      },
+      "quickNotes": {
+        "vipCustomer": "Client VIP - assurer un service premium",
+        "firstTime": "Nouveau client - vérifier la documentation",
+        "repeatCustomer": "Client fidèle - appliquer remise de fidélité",
+        "specialOccasion": "Occasion spéciale - anniversaire/mariage",
+        "businessCustomer": "Client entreprise - fournir facture",
+        "longTerm": "Location long terme - inspection hebdomadaire",
+        "airportPickup": "Prise aéroport - confirmer détails vol",
+        "hotelDelivery": "Livraison hôtel requise",
+        "whatsappPreferred": "Client préfère communication WhatsApp",
+        "fuelTopUp": "Véhicule nécessite appoint carburant",
+        "inspectionRequired": "Vérifier état véhicule minutieusement",
+        "mobilityRequirements": "Client a des exigences de mobilité"
+      },
+      "summary": {
+        "title": "Résumé de Réservation",
+        "customer": "Client",
+        "vehicle": "Véhicule",
+        "duration": "Durée",
+        "totalAmount": "Montant Total",
+        "dailyRate": "Tarif Journalier",
+        "pickupDetails": "Détails de Prise",
+        "returnDetails": "Détails de Retour",
+        "includedFeatures": "Services Inclus",
+        "comprehensiveInsurance": "Couverture d'assurance complète",
+        "roadsideAssistance": "Assistance routière 24/7",
+        "fuelService": "Service d'appoint carburant disponible",
+        "freeCancellation": "Annulation gratuite jusqu'à 24h",
+        "adminBooking": "Réservation Admin",
+        "autoConfirmed": "Cette réservation sera automatiquement confirmée",
+        "noPaymentRequired": "Aucun traitement de paiement requis",
+        "customerNotified": "Le client sera notifié par email/WhatsApp",
+        "vehicleReserved": "Le véhicule sera réservé immédiatement"
+      },
+      "businessHours": "Heures d'ouverture : 8h00 - 20h30",
+      "sameDayRental": "Location Même Jour",
+      "differentLocationFee": "Des frais supplémentaires peuvent s'appliquer pour des lieux de prise/retour différents",
+      "availableLocations": "Tous les emplacements sont dans la zone métropolitaine de Tanger",
+      "hotelPickupNotice": "Prise à l'hôtel disponible avec préavis de 24h",
+      "customLocationApproval": "Emplacements personnalisés sujets à approbation"
     },
     "settings": {
       "title": "Paramètres",
