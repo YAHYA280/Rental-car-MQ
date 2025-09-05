@@ -1,4 +1,4 @@
-// src/components/dashboard/cars/EditCarForm.tsx - Updated with proper data loading and validation
+// src/components/dashboard/cars/EditCarForm.tsx - Fixed with proper data loading
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -30,7 +30,7 @@ interface CarData {
   fuelType: string;
   available: boolean;
   rating: number;
-  bookings?: number;
+  totalBookings?: number;
   mileage?: number;
   features?: string[];
   description?: string;
@@ -54,6 +54,11 @@ interface CarData {
     path: string;
     fullPath?: string;
   }>;
+  createdBy?: {
+    id: string;
+    name: string;
+    email: string;
+  };
 }
 
 interface CarFormData {
@@ -116,12 +121,13 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
   >();
   const [oilChangeDate, setOilChangeDate] = useState<Date | undefined>();
 
-  // Initialize form data with car data
+  // Initialize form data with car data - FIXED VERSION
   useEffect(() => {
     if (car) {
-      console.log("Loading car data:", car); // Debug log
+      console.log("Loading car data for editing:", car); // Debug log
 
-      setFormData({
+      // Create the properly mapped form data
+      const mappedFormData: CarFormData = {
         brand: car.brand || "",
         name: car.name || "",
         year: car.year?.toString() || "",
@@ -130,21 +136,27 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
         fuelType: car.fuelType || "",
         seats: car.seats?.toString() || "",
         doors: car.doors?.toString() || "",
-        mileage: car.mileage?.toString() || "",
+        mileage: car.mileage?.toString() || "0",
         dailyPrice: car.price?.toString() || "",
         caution: car.caution?.toString() || "",
         whatsappNumber: car.whatsappNumber || "",
         lastTechnicalVisit: car.lastTechnicalVisit || "",
         lastOilChange: car.lastOilChange || "",
-        features: car.features || [],
+        features: Array.isArray(car.features) ? car.features : [],
         additionalImages: [],
         description: car.description || "",
-      });
+      };
 
-      // Set dates if they exist
+      console.log("Mapped form data:", mappedFormData); // Debug log
+      setFormData(mappedFormData);
+
+      // Set dates if they exist and are valid
       if (car.lastTechnicalVisit) {
         try {
-          setTechnicalVisitDate(new Date(car.lastTechnicalVisit));
+          const techDate = new Date(car.lastTechnicalVisit);
+          if (!isNaN(techDate.getTime())) {
+            setTechnicalVisitDate(techDate);
+          }
         } catch (error) {
           console.warn("Invalid technical visit date:", car.lastTechnicalVisit);
         }
@@ -152,7 +164,10 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
 
       if (car.lastOilChange) {
         try {
-          setOilChangeDate(new Date(car.lastOilChange));
+          const oilDate = new Date(car.lastOilChange);
+          if (!isNaN(oilDate.getTime())) {
+            setOilChangeDate(oilDate);
+          }
         } catch (error) {
           console.warn("Invalid oil change date:", car.lastOilChange);
         }
@@ -160,8 +175,14 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
     }
   }, [car]);
 
+  // Debug log for form data changes
+  useEffect(() => {
+    console.log("Form data updated:", formData);
+  }, [formData]);
+
   // Create a type-compatible handleInputChange function
   const handleInputChange = (field: string, value: string) => {
+    console.log(`Changing ${field} to:`, value); // Debug log
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -278,6 +299,7 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
 
     setIsSubmitting(true);
     try {
+      console.log("Submitting form data:", formData); // Debug log
       await onSubmit(formData);
     } catch (error) {
       console.error("Error updating car:", error);
@@ -305,6 +327,18 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
     }
     return "/cars/car1.jpg";
   };
+
+  // Show loading state while form data is being set
+  if (!formData.brand && car.brand) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-carbookers-red-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading car data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
