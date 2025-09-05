@@ -1,4 +1,4 @@
-// src/components/dashboard/cars/components/CarsTable.tsx - Updated with model field
+// src/components/dashboard/cars/components/CarsTable.tsx - Fixed with unified types
 "use client";
 
 import React from "react";
@@ -30,10 +30,9 @@ import {
   Settings,
   Phone,
 } from "lucide-react";
-import Image from "next/image";
 
-// Import unified types
-import { CarData } from "../../../types/car";
+// Import unified types from the correct location
+import { CarData } from "@/components/types";
 
 interface CarsTableProps {
   cars: CarData[];
@@ -73,24 +72,22 @@ const CarsTable: React.FC<CarsTableProps> = ({
     }
   };
 
-  // Get proper image URL with fallback
+  // FIXED: Get proper image URL using unified types
   const getImageUrl = (car: CarData) => {
-    if (car.mainImage?.fullPath) {
-      return car.mainImage.fullPath;
-    }
-    if (car.mainImage?.path) {
-      return `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}${
-        car.mainImage.path
-      }`;
+    // Priority: mainImage dataUrl > image field > fallback
+    if (car.mainImage?.dataUrl) {
+      return car.mainImage.dataUrl;
     }
     if (car.image) {
       return car.image.startsWith("http")
         ? car.image
+        : car.image.startsWith("data:")
+        ? car.image // Already a data URL
         : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}${
             car.image
           }`;
     }
-    return "/cars/car1.jpg";
+    return "/cars/car1.jpg"; // Fallback placeholder
   };
 
   return (

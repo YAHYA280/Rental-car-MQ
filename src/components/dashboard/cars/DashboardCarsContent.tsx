@@ -1,4 +1,4 @@
-// src/components/dashboard/cars/DashboardCarsContent.tsx - Fixed version
+// src/components/dashboard/cars/DashboardCarsContent.tsx - Updated with unified types
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -15,10 +15,10 @@ import {
 } from "@/components/ui/dialog";
 import { Plus, Search, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { carService } from "@/services/carService";
 
 // Import unified types from single source
-import { CarData, CarFormData, CarFilters } from "../../types/car";
+import { CarData, CarFormData, CarFilters } from "@/components/types";
+import { carService } from "@/services/carService";
 
 // Import components
 import AddCarForm from "./AddCarForm";
@@ -70,7 +70,6 @@ const DashboardCarsContent = () => {
       const response = await carService.getCars(apiFilters);
 
       if (response.success && response.data) {
-        // Response.data is already CarData[] from carService
         setCars(response.data);
         setTotal(response.total || 0);
         setPagination(response.pagination);
@@ -158,7 +157,7 @@ const DashboardCarsContent = () => {
       }
     });
 
-    // Add files
+    // Add files properly
     if (formData.mainImage) {
       apiFormData.append("mainImage", formData.mainImage);
     }
@@ -179,13 +178,7 @@ const DashboardCarsContent = () => {
       // Transform to FormData for API
       const apiFormData = transformFormDataToAPI(formData);
 
-      // Log FormData contents for debugging
-      console.log("FormData contents:");
-      for (let [key, value] of apiFormData.entries()) {
-        console.log(key, value);
-      }
-
-      // Use fetch directly for better error handling
+      // Use direct fetch with proper headers
       const token = localStorage.getItem("token");
       const response = await fetch(
         `${
@@ -200,16 +193,35 @@ const DashboardCarsContent = () => {
         }
       );
 
-      const result = await response.json();
-      console.log("API Response:", result);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("API Error Response:", errorText);
 
-      if (response.ok && result.success) {
+        if (response.status === 431) {
+          throw new Error(
+            "Request too large. Please use smaller image files (max 5MB each)."
+          );
+        }
+
+        try {
+          const errorJson = JSON.parse(errorText);
+          throw new Error(
+            errorJson.message || `HTTP error! status: ${response.status}`
+          );
+        } catch {
+          throw new Error(
+            `HTTP error! status: ${response.status} - ${errorText}`
+          );
+        }
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
         toast.success("Car created successfully");
         setIsAddCarDialogOpen(false);
         await fetchCars();
       } else {
-        console.error("API Error:", result);
-        toast.error(result.message || "Failed to create car");
         throw new Error(result.message || "Failed to create car");
       }
     } catch (error: any) {
@@ -228,7 +240,7 @@ const DashboardCarsContent = () => {
       // Transform to FormData for API
       const apiFormData = transformFormDataToAPI(formData);
 
-      // Use fetch directly for better error handling
+      // Use direct fetch with proper headers
       const token = localStorage.getItem("token");
       const response = await fetch(
         `${
@@ -243,17 +255,36 @@ const DashboardCarsContent = () => {
         }
       );
 
-      const result = await response.json();
-      console.log("Update API Response:", result);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Update API Error Response:", errorText);
 
-      if (response.ok && result.success) {
+        if (response.status === 431) {
+          throw new Error(
+            "Request too large. Please use smaller image files (max 5MB each)."
+          );
+        }
+
+        try {
+          const errorJson = JSON.parse(errorText);
+          throw new Error(
+            errorJson.message || `HTTP error! status: ${response.status}`
+          );
+        } catch {
+          throw new Error(
+            `HTTP error! status: ${response.status} - ${errorText}`
+          );
+        }
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
         toast.success("Car updated successfully");
         setIsEditCarDialogOpen(false);
         setCarToEdit(null);
         await fetchCars();
       } else {
-        console.error("Update API Error:", result);
-        toast.error(result.message || "Failed to update car");
         throw new Error(result.message || "Failed to update car");
       }
     } catch (error: any) {

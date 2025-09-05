@@ -16,7 +16,7 @@ import {
 import { Phone } from "lucide-react";
 
 // Import unified types
-import { CarData } from "@/components/types/car";
+import { CarData } from "@/components/types";
 
 interface CarDetailsModalProps {
   car: CarData | null;
@@ -45,22 +45,20 @@ const CarDetailsModal: React.FC<CarDetailsModalProps> = ({
 
   // Get proper image URL with fallback
   const getImageUrl = (car: CarData) => {
-    if (car.mainImage?.fullPath) {
-      return car.mainImage.fullPath;
-    }
-    if (car.mainImage?.path) {
-      return `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}${
-        car.mainImage.path
-      }`;
+    // Priority: mainImage dataUrl > image field > fallback
+    if (car.mainImage?.dataUrl) {
+      return car.mainImage.dataUrl;
     }
     if (car.image) {
       return car.image.startsWith("http")
+        ? car.image
+        : car.image.startsWith("data:")
         ? car.image
         : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}${
             car.image
           }`;
     }
-    return "/cars/car1.jpg";
+    return "/cars/car1.jpg"; // Fallback placeholder
   };
 
   // Format WhatsApp number for display

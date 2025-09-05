@@ -2,7 +2,7 @@
 import axios, { AxiosInstance, AxiosResponse } from "axios";
 
 // Re-export types from unified location
-export * from "@/components/types/car";
+export * from "@/components/types";
 
 // Types
 export interface ApiResponse<T = any> {

@@ -1,4 +1,4 @@
-// src/components/dashboard/cars/EditCarForm.tsx - Fixed with proper data loading
+// src/components/dashboard/cars/EditCarForm.tsx - Updated with unified types
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -16,71 +16,8 @@ import PricingSection from "./components/form/PricingSection";
 import MaintenanceSection from "./components/form/MaintenanceSection";
 import FeaturesSection from "./components/form/FeaturesSection";
 
-// Import types
-interface CarData {
-  id: string;
-  name: string;
-  brand: string;
-  year: number;
-  price: number;
-  image: string;
-  seats: number;
-  doors: number;
-  transmission: string;
-  fuelType: string;
-  available: boolean;
-  rating: number;
-  totalBookings?: number;
-  mileage?: number;
-  features?: string[];
-  description?: string;
-  licensePlate?: string;
-  caution?: number;
-  whatsappNumber?: string;
-  lastTechnicalVisit?: string;
-  lastOilChange?: string;
-  status: "active" | "maintenance" | "inactive";
-  createdAt: string;
-  updatedAt: string;
-  mainImage?: {
-    filename: string;
-    originalName: string;
-    path: string;
-    fullPath?: string;
-  };
-  images?: Array<{
-    filename: string;
-    originalName: string;
-    path: string;
-    fullPath?: string;
-  }>;
-  createdBy?: {
-    id: string;
-    name: string;
-    email: string;
-  };
-}
-
-interface CarFormData {
-  brand: string;
-  name: string;
-  year: string;
-  licensePlate: string;
-  transmission: string;
-  fuelType: string;
-  seats: string;
-  doors: string;
-  mileage: string;
-  dailyPrice: string;
-  caution: string;
-  whatsappNumber: string;
-  lastTechnicalVisit: string;
-  lastOilChange: string;
-  features: string[];
-  mainImage?: File;
-  additionalImages: File[];
-  description?: string;
-}
+// Import unified types
+import { CarData, CarFormData } from "@/components/types";
 
 interface EditCarFormProps {
   car: CarData;
@@ -121,12 +58,11 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
   >();
   const [oilChangeDate, setOilChangeDate] = useState<Date | undefined>();
 
-  // Initialize form data with car data - FIXED VERSION
+  // Initialize form data with car data
   useEffect(() => {
     if (car) {
-      console.log("Loading car data for editing:", car); // Debug log
+      console.log("Loading car data for editing:", car);
 
-      // Create the properly mapped form data
       const mappedFormData: CarFormData = {
         brand: car.brand || "",
         name: car.name || "",
@@ -147,7 +83,7 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
         description: car.description || "",
       };
 
-      console.log("Mapped form data:", mappedFormData); // Debug log
+      console.log("Mapped form data:", mappedFormData);
       setFormData(mappedFormData);
 
       // Set dates if they exist and are valid
@@ -175,19 +111,12 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
     }
   }, [car]);
 
-  // Debug log for form data changes
-  useEffect(() => {
-    console.log("Form data updated:", formData);
-  }, [formData]);
-
-  // Create a type-compatible handleInputChange function
   const handleInputChange = (field: string, value: string) => {
-    console.log(`Changing ${field} to:`, value); // Debug log
+    console.log(`Changing ${field} to:`, value);
     setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
-    // Clear error when user starts typing
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: "" }));
     }
@@ -227,13 +156,11 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
   };
 
   const validateLicensePlate = (plate: string): boolean => {
-    // Format: 5 digits + 1 letter (e.g., 12345A)
     const plateRegex = /^\d{5}[A-Z]$/;
     return plateRegex.test(plate.toUpperCase());
   };
 
   const validateWhatsAppNumber = (number: string): boolean => {
-    // Updated validation for 10-digit format: 06XXXXXXXX or 07XXXXXXXX
     const phoneRegex = /^0[67]\d{8}$/;
     return phoneRegex.test(number.replace(/\s/g, ""));
   };
@@ -257,7 +184,6 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    // Required fields validation
     if (!formData.brand)
       newErrors.brand = t("cars.form.validation.brandRequired");
     if (!formData.name) newErrors.name = t("cars.form.validation.nameRequired");
@@ -299,7 +225,7 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
 
     setIsSubmitting(true);
     try {
-      console.log("Submitting form data:", formData); // Debug log
+      console.log("Submitting form data:", formData);
       await onSubmit(formData);
     } catch (error) {
       console.error("Error updating car:", error);
@@ -308,19 +234,17 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
     }
   };
 
-  // Get current image URL with fallback
+  // FIXED: Get current image URL using unified types
   const getCurrentImageUrl = () => {
-    if (car.mainImage?.fullPath) {
-      return car.mainImage.fullPath;
-    }
-    if (car.mainImage?.path) {
-      return `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}${
-        car.mainImage.path
-      }`;
+    // Priority: mainImage dataUrl > image field > fallback
+    if (car.mainImage?.dataUrl) {
+      return car.mainImage.dataUrl;
     }
     if (car.image) {
       return car.image.startsWith("http")
         ? car.image
+        : car.image.startsWith("data:")
+        ? car.image // Already a data URL
         : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}${
             car.image
           }`;

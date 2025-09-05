@@ -15,7 +15,7 @@ import FeaturesSection from "./components/form/FeaturesSection";
 import ImagesSection from "./components/form/ImagesSection";
 
 // Import the unified types
-import { CarFormData } from "../../types/car";
+import { CarFormData } from "../../types";
 
 interface AddCarFormProps {
   onSubmit: (data: CarFormData) => Promise<void>;

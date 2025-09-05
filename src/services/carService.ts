@@ -1,6 +1,10 @@
-// src/services/carService.ts - Updated Car API Service with model field
-import { ApiResponse } from "@/lib/api";
-import { CarData, CarFormData, CarFilters } from "@/components/types/car";
+// src/services/carService.ts - Updated with unified types and no mock data
+import {
+  ApiResponse,
+  CarData,
+  CarFormData,
+  CarFilters,
+} from "../components/types";
 
 class CarService {
   private baseUrl =
@@ -98,7 +102,7 @@ class CarService {
     }
   }
 
-  // Create new car - This method is called from the form
+  // Create new car using FormData
   async createCar(formData: FormData): Promise<ApiResponse<CarData>> {
     try {
       const token = localStorage.getItem("token");
@@ -126,7 +130,7 @@ class CarService {
     }
   }
 
-  // Update car
+  // Update car using FormData
   async updateCar(
     id: string,
     formData: FormData
@@ -335,24 +339,20 @@ class CarService {
     }
   }
 
-  // Helper to get proper image URL
-  private getImageUrl(car: any): string {
-    if (car.mainImage?.fullPath) {
-      return car.mainImage.fullPath;
-    }
-    if (car.mainImage?.path) {
-      return `${this.baseUrl.replace("/api", "")}${car.mainImage.path}`;
+  // Helper to get proper image URL with fallback
+  getImageUrl(car: CarData): string {
+    // Priority: mainImage dataUrl > image field > fallback
+    if (car.mainImage?.dataUrl) {
+      return car.mainImage.dataUrl;
     }
     if (car.image) {
-      return car.image.startsWith("http")
-        ? car.image
-        : `${this.baseUrl.replace("/api", "")}${car.image}`;
+      return car.image;
     }
-    return "/cars/car1.jpg";
+    return "/cars/car1.jpg"; // Fallback placeholder
   }
 
   // Helper to format WhatsApp number for display
-  private formatWhatsAppNumber(number: string): string {
+  formatWhatsAppNumber(number: string): string {
     if (!number) return "";
 
     // Remove any existing formatting
@@ -373,13 +373,19 @@ class CarService {
   }
 
   // Transform backend response to frontend format
-  private transformCarResponse(backendCar: any): CarData {
+  transformCarResponse(backendCar: any): CarData {
     return {
       ...backendCar,
       // Ensure image paths are properly formatted
       image: this.getImageUrl(backendCar),
       // Format WhatsApp number for display
       whatsappNumber: this.formatWhatsAppNumber(backendCar.whatsappNumber),
+      // Ensure features is always an array
+      features: Array.isArray(backendCar.features) ? backendCar.features : [],
+      // Ensure rating is a number
+      rating: parseFloat(backendCar.rating) || 4.5,
+      // Ensure totalBookings is a number
+      totalBookings: parseInt(backendCar.totalBookings) || 0,
     };
   }
 
