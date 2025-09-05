@@ -1,16 +1,16 @@
-// src/components/dashboard/cars/components/CarFilters.tsx
+// src/components/dashboard/cars/components/CarFilters.tsx - Fixed naming
 "use client";
 
 import React from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 
-interface CarFiltersProps {
+interface CarFiltersComponentProps {
   selectedFilter: string;
   onFilterChange: (filter: string) => void;
 }
 
-const CarFilters: React.FC<CarFiltersProps> = ({
+const CarFiltersComponent: React.FC<CarFiltersComponentProps> = ({
   selectedFilter,
   onFilterChange,
 }) => {
@@ -38,4 +38,4 @@ const CarFilters: React.FC<CarFiltersProps> = ({
   );
 };
 
-export default CarFilters;
+export default CarFiltersComponent;

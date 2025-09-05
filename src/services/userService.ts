@@ -1,4 +1,4 @@
-// src/services/userService.ts - User API Service
+// src/services/userService.ts - Updated User API Service
 import {
   apiService,
   User,
@@ -81,8 +81,10 @@ class UserService {
       }
 
       if (key === "emergencyContact" && value && typeof value === "object") {
+        // Backend expects JSON string for nested objects
         formData.append(key, JSON.stringify(value));
       } else if (key === "preferences" && value && typeof value === "object") {
+        // Backend expects JSON string for nested objects
         formData.append(key, JSON.stringify(value));
       } else if (value !== undefined && value !== null && value !== "") {
         formData.append(key, value.toString());
@@ -95,6 +97,44 @@ class UserService {
     }
 
     return formData;
+  }
+
+  // Transform backend response to frontend format
+  private transformUserResponse(backendUser: any): User {
+    return {
+      ...backendUser,
+      // Ensure all required fields have default values
+      country: backendUser.country || "MA",
+      totalBookings: backendUser.totalBookings || 0,
+      totalSpent: backendUser.totalSpent || 0,
+      source: backendUser.source || "admin",
+      referralCode: backendUser.referralCode || "",
+      emailVerified: backendUser.emailVerified || false,
+      phoneVerified: backendUser.phoneVerified || false,
+      status: backendUser.status || "active",
+    };
+  }
+
+  // Get users with transformation
+  async getUsersTransformed(
+    filters: UserFilters = {}
+  ): Promise<ApiResponse<User[]>> {
+    const response = await this.getUsers(filters);
+    if (response.data) {
+      response.data = response.data.map((user) =>
+        this.transformUserResponse(user)
+      );
+    }
+    return response;
+  }
+
+  // Get user bookings
+  async getUserBookings(
+    userId: string,
+    page = 1,
+    limit = 10
+  ): Promise<ApiResponse<any[]>> {
+    return apiService.get(`/bookings/customer/${userId}`, { page, limit });
   }
 }
 

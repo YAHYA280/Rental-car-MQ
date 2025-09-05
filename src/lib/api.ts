@@ -1,30 +1,25 @@
-// src/lib/api.ts - Core API Service
+// src/lib/api.ts - API Service Configuration
 import axios, { AxiosInstance, AxiosResponse } from "axios";
 
 // Types
 export interface ApiResponse<T = any> {
   success: boolean;
   message?: string;
-  data: T;
-  count?: number;
+  data?: T;
   total?: number;
+  count?: number;
   pagination?: {
+    page: number;
+    limit: number;
+    pages: number;
     current: number;
     totalPages: number;
     next?: { page: number; limit: number };
     prev?: { page: number; limit: number };
   };
+  errors?: any[];
 }
 
-export interface PaginationParams {
-  page?: number;
-  limit?: number;
-  search?: string;
-  sort?: string;
-  order?: "ASC" | "DESC";
-}
-
-// Car Types
 export interface Car {
   id: string;
   name: string;
@@ -32,20 +27,7 @@ export interface Car {
   model: string;
   year: number;
   price: number;
-  transmission: string;
-  fuelType: string;
-  seats: number;
-  doors: number;
-  mileage?: number;
-  licensePlate: string;
-  whatsappNumber: string;
-  caution: number;
-  available: boolean;
-  location: string;
-  rating: number;
-  totalBookings: number;
-  description?: string;
-  features: string[];
+  image: string;
   mainImage?: {
     filename: string;
     originalName: string;
@@ -60,8 +42,22 @@ export interface Car {
     size: number;
     mimetype: string;
   }>;
+  seats: number;
+  doors: number;
+  transmission: string;
+  fuelType: string;
+  available: boolean;
+  rating: number;
+  totalBookings?: number;
+  mileage?: number;
+  features?: string[];
+  description?: string;
+  licensePlate: string;
+  caution: number;
+  whatsappNumber: string;
   lastTechnicalVisit?: string;
   lastOilChange?: string;
+  location: string;
   status: "active" | "maintenance" | "inactive";
   createdAt: string;
   updatedAt: string;
@@ -73,41 +69,60 @@ export interface Car {
 }
 
 export interface CarFormData {
-  name: string;
+  // Basic Info
   brand: string;
+  name: string;
   model: string;
   year: string;
-  price: string;
+  licensePlate: string;
+  location: string;
+
+  // Technical Specs
   transmission: string;
   fuelType: string;
   seats: string;
   doors: string;
   mileage?: string;
-  licensePlate: string;
-  whatsappNumber: string;
+
+  // Pricing
+  price: string; // Changed from dailyPrice to match backend
   caution: string;
-  location: string;
-  description?: string;
-  features: string[];
+
+  // Contact Information
+  whatsappNumber: string;
+
+  // Maintenance
   lastTechnicalVisit?: string;
   lastOilChange?: string;
+
+  // Features and Images
+  features: string[];
   mainImage?: File;
-  additionalImages?: File[];
+  additionalImages: File[];
+
+  // Optional fields
+  description?: string;
+  available?: boolean;
+  status?: "active" | "maintenance" | "inactive";
 }
 
-export interface CarFilters extends PaginationParams {
-  brand?: string[];
-  transmission?: string[];
-  fuelType?: string[];
+export interface CarFilters {
+  page?: number;
+  limit?: number;
+  search?: string;
+  brand?: string;
+  transmission?: string;
+  fuelType?: string;
   available?: boolean;
-  location?: string[];
+  location?: string;
   minPrice?: number;
   maxPrice?: number;
-  seats?: string[];
+  seats?: number;
   status?: string;
+  sort?: string;
+  order?: "ASC" | "DESC";
 }
 
-// User Types
 export interface User {
   id: string;
   firstName: string;
@@ -138,7 +153,7 @@ export interface User {
   totalSpent: number;
   averageRating?: number;
   lastBookingDate?: string;
-  source: string;
+  source: "website" | "admin" | "referral" | "social" | "other";
   referralCode: string;
   emailVerified: boolean;
   phoneVerified: boolean;
@@ -170,25 +185,74 @@ export interface UserFormData {
     relationship: string;
   };
   preferences?: Record<string, any>;
+  status?: "active" | "inactive" | "blocked";
   notes?: string;
 }
 
-export interface UserFilters extends PaginationParams {
-  status?: string[];
-  source?: string[];
+export interface UserFilters {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: string;
+  source?: string;
   tier?: string;
+  sort?: string;
+  order?: "ASC" | "DESC";
 }
 
-// API Configuration
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+export interface Booking {
+  id: string;
+  bookingNumber: string;
+  customerId: string;
+  vehicleId: string;
+  pickupDate: string;
+  returnDate: string;
+  pickupTime: string;
+  returnTime: string;
+  pickupLocation: string;
+  returnLocation: string;
+  pickupAddress?: string;
+  returnAddress?: string;
+  dailyRate: number;
+  totalDays: number;
+  subtotal: number;
+  discountAmount: number;
+  discountType?: string;
+  discountCode?: string;
+  taxAmount: number;
+  totalAmount: number;
+  cautionAmount: number;
+  status: "pending" | "confirmed" | "active" | "completed" | "cancelled";
+  source: "website" | "admin" | "phone" | "mobile-app";
+  paymentStatus: "pending" | "partial" | "paid" | "refunded";
+  paymentMethod?: string;
+  paidAmount: number;
+  pickupCondition?: any;
+  returnCondition?: any;
+  additionalServices: string[];
+  additionalServicesTotal: number;
+  specialRequirements?: string;
+  customerNotes?: string;
+  adminNotes?: string;
+  customerRating?: number;
+  customerFeedback?: string;
+  createdAt: string;
+  updatedAt: string;
+  customer?: User;
+  vehicle?: Car;
+  createdBy?: {
+    id: string;
+    name: string;
+    email: string;
+  };
+}
 
 class ApiService {
   private api: AxiosInstance;
 
   constructor() {
     this.api = axios.create({
-      baseURL: API_BASE_URL,
+      baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api",
       timeout: 30000,
       headers: {
         "Content-Type": "application/json",
@@ -198,85 +262,131 @@ class ApiService {
     // Request interceptor to add auth token
     this.api.interceptors.request.use(
       (config) => {
-        const token = this.getToken();
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
+        if (typeof window !== "undefined") {
+          const token = localStorage.getItem("token");
+          if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+          }
         }
         return config;
       },
-      (error) => Promise.reject(error)
+      (error) => {
+        return Promise.reject(error);
+      }
     );
 
     // Response interceptor for error handling
     this.api.interceptors.response.use(
-      (response: AxiosResponse) => response,
+      (response: AxiosResponse) => {
+        return response.data;
+      },
       (error) => {
+        // Handle token expiration
         if (error.response?.status === 401) {
-          // Token expired or invalid
-          this.removeToken();
           if (typeof window !== "undefined") {
+            localStorage.removeItem("token");
             window.location.href = "/login";
           }
         }
-        return Promise.reject(error);
+
+        // Return structured error response
+        const errorResponse = {
+          success: false,
+          message:
+            error.response?.data?.message ||
+            error.message ||
+            "An error occurred",
+          errors: error.response?.data?.errors || [],
+        };
+
+        return Promise.reject(errorResponse);
       }
     );
   }
 
-  private getToken(): string | null {
-    if (typeof window === "undefined") return null;
-    return localStorage.getItem("token");
+  // Generic HTTP methods
+  async get<T>(url: string, params?: any): Promise<ApiResponse<T>> {
+    return this.api.get(url, { params });
   }
 
-  private removeToken(): void {
-    if (typeof window === "undefined") return;
-    localStorage.removeItem("token");
+  async post<T>(url: string, data?: any): Promise<ApiResponse<T>> {
+    return this.api.post(url, data);
   }
 
-  // Generic CRUD methods
-  async get<T>(endpoint: string, params?: any): Promise<ApiResponse<T>> {
-    const response = await this.api.get(endpoint, { params });
-    return response.data;
+  async put<T>(url: string, data?: any): Promise<ApiResponse<T>> {
+    return this.api.put(url, data);
   }
 
-  async post<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
-    const response = await this.api.post(endpoint, data);
-    return response.data;
+  async delete<T>(url: string): Promise<ApiResponse<T>> {
+    return this.api.delete(url);
   }
 
-  async put<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
-    const response = await this.api.put(endpoint, data);
-    return response.data;
-  }
-
-  async delete<T>(endpoint: string): Promise<ApiResponse<T>> {
-    const response = await this.api.delete(endpoint);
-    return response.data;
-  }
-
+  // FormData methods
   async postFormData<T>(
-    endpoint: string,
+    url: string,
     formData: FormData
   ): Promise<ApiResponse<T>> {
-    const response = await this.api.post(endpoint, formData, {
+    return this.api.post(url, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
     });
-    return response.data;
   }
 
   async putFormData<T>(
-    endpoint: string,
+    url: string,
     formData: FormData
   ): Promise<ApiResponse<T>> {
-    const response = await this.api.put(endpoint, formData, {
+    return this.api.put(url, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
     });
-    return response.data;
+  }
+
+  // File upload with progress
+  async uploadFile<T>(
+    url: string,
+    formData: FormData,
+    onProgress?: (progress: number) => void
+  ): Promise<ApiResponse<T>> {
+    return this.api.post(url, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      onUploadProgress: (progressEvent) => {
+        if (onProgress && progressEvent.total) {
+          const progress = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total
+          );
+          onProgress(progress);
+        }
+      },
+    });
+  }
+
+  // Health check
+  async healthCheck(): Promise<ApiResponse> {
+    return this.api.get("/health");
   }
 }
 
 export const apiService = new ApiService();
+
+// Utility functions
+export const formatApiError = (error: any): string => {
+  if (error.errors && Array.isArray(error.errors) && error.errors.length > 0) {
+    return error.errors.map((err: any) => err.msg || err.message).join(", ");
+  }
+  return error.message || "An unexpected error occurred";
+};
+
+export const buildQueryString = (params: Record<string, any>): string => {
+  const filteredParams = Object.entries(params)
+    .filter(
+      ([_, value]) => value !== undefined && value !== null && value !== ""
+    )
+    .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
+
+  return new URLSearchParams(filteredParams).toString();
+};

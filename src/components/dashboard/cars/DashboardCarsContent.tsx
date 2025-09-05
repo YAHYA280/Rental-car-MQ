@@ -1,7 +1,7 @@
-// src/components/dashboard/cars/DashboardCarsContent.tsx
+// src/components/dashboard/cars/DashboardCarsContent.tsx - Clean Version
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,83 +10,28 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Plus, Search } from "lucide-react";
-import { vehiclesData } from "@/components/data/vehicles";
+import { Plus, Search, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { carService } from "@/services/carService";
+import { Car, CarFilters } from "@/lib/api";
+import { CarData, CarFormData } from "../../types/car";
 import AddCarForm from "./AddCarForm";
 import EditCarForm from "./EditCarForm";
 import CarStatsGrid from "./components/CarStatsGrid";
-import CarFilters from "./components/CarFilters";
+import CarFiltersComponent from "./components/CarFilters";
 import CarsTable from "./components/CarsTable";
 import CarDetailsModal from "./components/CarDetailsModal";
 import DeleteConfirmationDialog from "./components/DeleteConfirmationDialog";
 
-// Define proper types
-interface CarData {
-  id: string;
-  name: string;
-  brand: string;
-  model: string;
-  year: number;
-  price: number;
-  image: string;
-  seats: number;
-  doors: number;
-  transmission: string;
-  fuelType: string;
-  available: boolean;
-  rating: number;
-  bookings?: number;
-  mileage?: number;
-  features?: string[];
-  description?: string;
-  licensePlate?: string;
-  caution?: number;
-  whatsappNumber?: string;
-  lastTechnicalVisit?: string;
-  lastOilChange?: string;
-}
-
-export interface CarFormData {
-  // Basic Info
-  brand: string;
-  name: string;
-  model: string;
-  year: string;
-  licensePlate: string;
-
-  // Technical Specs
-  transmission: string;
-  fuelType: string;
-  seats: string;
-  doors: string;
-  mileage: string;
-
-  // Pricing
-  dailyPrice: string;
-  caution: string;
-
-  // Contact Information
-  whatsappNumber: string;
-
-  // Maintenance
-  lastTechnicalVisit: string;
-  lastOilChange: string;
-
-  // Features and Images
-  features: string[];
-  mainImage?: File;
-  additionalImages: File[];
-
-  // Optional fields
-  description?: string;
-}
-
 const DashboardCarsContent = () => {
   const t = useTranslations("dashboard");
+
+  // State management
+  const [cars, setCars] = useState<CarData[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [isAddCarDialogOpen, setIsAddCarDialogOpen] = useState(false);
@@ -94,33 +39,90 @@ const DashboardCarsContent = () => {
   const [carToDelete, setCarToDelete] = useState<string | null>(null);
   const [selectedCar, setSelectedCar] = useState<CarData | null>(null);
   const [carToEdit, setCarToEdit] = useState<CarData | null>(null);
+  const [pagination, setPagination] = useState<any>(null);
+  const [total, setTotal] = useState(0);
 
-  // Mock data - using existing vehicles data
-  const [cars, setCars] = useState<CarData[]>(
-    vehiclesData.map((car) => ({
-      ...car,
-      licensePlate: `${
-        Math.floor(Math.random() * 90000) + 10000
-      }${String.fromCharCode(65 + Math.floor(Math.random() * 26))}`,
-      caution: Math.floor(car.price * 2), // 2x daily rate as caution
-      whatsappNumber: `+212${
-        Math.floor(Math.random() * 900000000) + 600000000
-      }`, // Random Moroccan WhatsApp number
-      lastTechnicalVisit: new Date(
-        Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000
-      )
-        .toISOString()
-        .split("T")[0],
-      lastOilChange: new Date(
-        Date.now() - Math.random() * 180 * 24 * 60 * 60 * 1000
-      )
-        .toISOString()
-        .split("T")[0],
-      features: ["airConditioning", "bluetooth", "gps", "abs"], // Sample features
-    }))
-  );
+  // Transform Car API response to CarData
+  const transformToCarData = (car: Car): CarData => {
+    return {
+      id: car.id,
+      name: car.name,
+      brand: car.brand,
+      model: car.model,
+      year: car.year,
+      price: car.price,
+      image: car.mainImage?.path || car.image || "/cars/placeholder.jpg",
+      mainImage: car.mainImage,
+      images: car.images,
+      seats: car.seats,
+      doors: car.doors,
+      transmission: car.transmission,
+      fuelType: car.fuelType,
+      available: car.available,
+      rating: car.rating,
+      totalBookings: car.totalBookings || 0,
+      mileage: car.mileage,
+      features: car.features || [],
+      description: car.description,
+      licensePlate: car.licensePlate,
+      caution: car.caution,
+      whatsappNumber: car.whatsappNumber,
+      location: car.location,
+      status: car.status,
+      lastTechnicalVisit: car.lastTechnicalVisit,
+      lastOilChange: car.lastOilChange,
+      createdAt: car.createdAt,
+      updatedAt: car.updatedAt,
+      createdBy: car.createdBy,
+    };
+  };
 
-  // Filter cars based on search and filter criteria
+  // Fetch cars from API
+  const fetchCars = async (filters: CarFilters = {}) => {
+    try {
+      setLoading(true);
+
+      const apiFilters: CarFilters = {
+        page: 1,
+        limit: 25,
+        search: searchTerm || undefined,
+        ...filters,
+      };
+
+      if (selectedFilter !== "all") {
+        if (selectedFilter === "available") {
+          apiFilters.available = true;
+        } else if (selectedFilter === "rented") {
+          apiFilters.available = false;
+        } else {
+          apiFilters.fuelType = selectedFilter;
+        }
+      }
+
+      const response = await carService.getCars(apiFilters);
+
+      if (response.success && response.data) {
+        const transformedCars = response.data.map(transformToCarData);
+        setCars(transformedCars);
+        setTotal(response.total || 0);
+        setPagination(response.pagination);
+      } else {
+        toast.error("Failed to fetch cars");
+        setCars([]);
+      }
+    } catch (error: any) {
+      console.error("Error fetching cars:", error);
+      toast.error(error.message || "Failed to fetch cars");
+      setCars([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCars();
+  }, [searchTerm, selectedFilter]);
+
   const filteredCars = cars.filter((car) => {
     const matchesSearch =
       car.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -138,9 +140,21 @@ const DashboardCarsContent = () => {
     return matchesSearch && matchesFilter;
   });
 
-  const handleDeleteCar = (carId: string) => {
-    setCars(cars.filter((car) => car.id !== carId));
-    setCarToDelete(null);
+  const handleDeleteCar = async (carId: string) => {
+    try {
+      const response = await carService.deleteCar(carId);
+
+      if (response.success) {
+        toast.success("Car deleted successfully");
+        setCars(cars.filter((car) => car.id !== carId));
+        setCarToDelete(null);
+      } else {
+        toast.error(response.message || "Failed to delete car");
+      }
+    } catch (error: any) {
+      console.error("Error deleting car:", error);
+      toast.error(error.message || "Failed to delete car");
+    }
   };
 
   const handleViewCarDetails = (car: CarData) => {
@@ -152,42 +166,30 @@ const DashboardCarsContent = () => {
     setIsEditCarDialogOpen(true);
   };
 
-  // Fixed function to handle form submission
+  const transformFormDataToAPI = (formData: CarFormData) => {
+    return {
+      ...formData,
+      price: formData.dailyPrice,
+    };
+  };
+
   const handleAddCar = async (formData: CarFormData): Promise<void> => {
     try {
-      // Convert FormData to CarData
-      const newCarData: CarData = {
-        id: `car-${Date.now()}`,
-        name: formData.name,
-        brand: formData.brand,
-        model: formData.model,
-        year: parseInt(formData.year),
-        price: parseFloat(formData.dailyPrice),
-        seats: parseInt(formData.seats),
-        doors: parseInt(formData.doors),
-        transmission: formData.transmission,
-        fuelType: formData.fuelType,
-        available: true,
-        rating: 4.5, // Default rating
-        bookings: 0,
-        mileage: formData.mileage ? parseInt(formData.mileage) : undefined,
-        features: formData.features,
-        description: formData.description,
-        licensePlate: formData.licensePlate,
-        caution: parseFloat(formData.caution),
-        whatsappNumber: formData.whatsappNumber,
-        lastTechnicalVisit: formData.lastTechnicalVisit,
-        lastOilChange: formData.lastOilChange,
-        // For now, use a placeholder image. In real implementation,
-        // you would upload the file and get back a URL
-        image: "/cars/placeholder/photo1.jpg",
-      };
+      const apiData = transformFormDataToAPI(formData);
+      const response = await carService.createCar(apiData);
 
-      setCars((prevCars) => [...prevCars, newCarData]);
-      setIsAddCarDialogOpen(false);
-      console.log("Car added successfully:", newCarData);
-    } catch (error) {
-      console.error("Error adding car:", error);
+      if (response.success) {
+        toast.success("Car created successfully");
+        setIsAddCarDialogOpen(false);
+        await fetchCars();
+      } else {
+        toast.error(response.message || "Failed to create car");
+        throw new Error(response.message || "Failed to create car");
+      }
+    } catch (error: any) {
+      console.error("Error creating car:", error);
+      toast.error(error.message || "Failed to create car");
+      throw error;
     }
   };
 
@@ -195,37 +197,31 @@ const DashboardCarsContent = () => {
     try {
       if (!carToEdit) return;
 
-      const updatedCarData: CarData = {
-        ...carToEdit,
-        name: formData.name,
-        brand: formData.brand,
-        model: formData.model,
-        year: parseInt(formData.year),
-        price: parseFloat(formData.dailyPrice),
-        seats: parseInt(formData.seats),
-        doors: parseInt(formData.doors),
-        transmission: formData.transmission,
-        fuelType: formData.fuelType,
-        mileage: formData.mileage ? parseInt(formData.mileage) : undefined,
-        features: formData.features,
-        description: formData.description,
-        licensePlate: formData.licensePlate,
-        caution: parseFloat(formData.caution),
-        whatsappNumber: formData.whatsappNumber,
-        lastTechnicalVisit: formData.lastTechnicalVisit,
-        lastOilChange: formData.lastOilChange,
-      };
+      const apiData = transformFormDataToAPI(formData);
+      const response = await carService.updateCar(carToEdit.id, apiData);
 
-      setCars((prevCars) =>
-        prevCars.map((car) => (car.id === carToEdit.id ? updatedCarData : car))
-      );
-
-      setIsEditCarDialogOpen(false);
-      setCarToEdit(null);
-      console.log("Car updated successfully:", updatedCarData);
-    } catch (error) {
+      if (response.success) {
+        toast.success("Car updated successfully");
+        setIsEditCarDialogOpen(false);
+        setCarToEdit(null);
+        await fetchCars();
+      } else {
+        toast.error(response.message || "Failed to update car");
+        throw new Error(response.message || "Failed to update car");
+      }
+    } catch (error: any) {
       console.error("Error updating car:", error);
+      toast.error(error.message || "Failed to update car");
+      throw error;
     }
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+  };
+
+  const handleFilterChange = (filter: string) => {
+    setSelectedFilter(filter);
   };
 
   return (
@@ -275,13 +271,13 @@ const DashboardCarsContent = () => {
               <Input
                 placeholder={t("common.searchCars")}
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
                 className="pl-10"
               />
             </div>
-            <CarFilters
+            <CarFiltersComponent
               selectedFilter={selectedFilter}
-              onFilterChange={setSelectedFilter}
+              onFilterChange={handleFilterChange}
             />
           </div>
         </CardContent>
@@ -290,17 +286,36 @@ const DashboardCarsContent = () => {
       {/* Cars Table */}
       <Card className="border-0 shadow-md">
         <CardHeader>
-          <CardTitle>
-            {t("cars.fleetOverview")} ({filteredCars.length} cars)
+          <CardTitle className="flex items-center gap-2">
+            {t("cars.fleetOverview")} ({total || filteredCars.length} cars)
+            {loading && <Loader2 className="h-4 w-4 animate-spin" />}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <CarsTable
-            cars={filteredCars}
-            onViewDetails={handleViewCarDetails}
-            onEditCar={handleEditCar}
-            onDeleteCar={setCarToDelete}
-          />
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-carbookers-red-600" />
+                <p className="text-gray-600">Loading cars...</p>
+              </div>
+            </div>
+          ) : filteredCars.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-600">No cars found</p>
+              {searchTerm && (
+                <p className="text-sm text-gray-500 mt-2">
+                  Try adjusting your search criteria
+                </p>
+              )}
+            </div>
+          ) : (
+            <CarsTable
+              cars={filteredCars}
+              onViewDetails={handleViewCarDetails}
+              onEditCar={handleEditCar}
+              onDeleteCar={setCarToDelete}
+            />
+          )}
         </CardContent>
       </Card>
 

@@ -1,4 +1,4 @@
-// src/services/carService.ts - Car API Service
+// src/services/carService.ts - Updated Car API Service
 import {
   apiService,
   Car,
@@ -95,18 +95,30 @@ class CarService {
   private buildFormData(carData: Partial<CarFormData>): FormData {
     const formData = new FormData();
 
+    // Map frontend field names to backend field names
+    const fieldMapping: Record<string, string> = {
+      price: "price", // Frontend uses 'price', backend expects 'price'
+      whatsappNumber: "whatsappNumber",
+      licensePlate: "licensePlate",
+      lastTechnicalVisit: "lastTechnicalVisit",
+      lastOilChange: "lastOilChange",
+    };
+
     // Add regular fields
     Object.entries(carData).forEach(([key, value]) => {
       if (key === "mainImage" || key === "additionalImages") {
         return; // Handle these separately
       }
 
+      // Map field name if needed
+      const backendFieldName = fieldMapping[key] || key;
+
       if (key === "features" && Array.isArray(value)) {
         value.forEach((feature, index) => {
           formData.append(`features[${index}]`, feature);
         });
       } else if (value !== undefined && value !== null && value !== "") {
-        formData.append(key, value.toString());
+        formData.append(backendFieldName, value.toString());
       }
     });
 
@@ -123,6 +135,31 @@ class CarService {
     }
 
     return formData;
+  }
+
+  // Transform backend response to frontend format
+  private transformCarResponse(backendCar: any): Car {
+    return {
+      ...backendCar,
+      // Map any backend fields to frontend format if needed
+      image:
+        backendCar.mainImage?.path ||
+        backendCar.image ||
+        "/cars/placeholder.jpg",
+    };
+  }
+
+  // Get cars with transformation
+  async getCarsTransformed(
+    filters: CarFilters = {}
+  ): Promise<ApiResponse<Car[]>> {
+    const response = await this.getCars(filters);
+    if (response.data) {
+      response.data = response.data.map((car) =>
+        this.transformCarResponse(car)
+      );
+    }
+    return response;
   }
 }
 

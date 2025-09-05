@@ -1,4 +1,4 @@
-// src/components/dashboard/cars/components/form/BasicInfoSection.tsx
+// src/components/dashboard/cars/components/form/BasicInfoSection.tsx - Clean Version
 "use client";
 
 import React from "react";
@@ -23,6 +23,7 @@ interface BasicInfoSectionProps {
     year: string;
     licensePlate: string;
     whatsappNumber: string;
+    location: string;
   };
   errors: Record<string, string>;
   onInputChange: (field: string, value: string) => void;
@@ -49,23 +50,21 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
     "Volkswagen",
   ];
 
+  const locations = ["Tangier Airport", "Tangier City Center", "Tangier Port"];
+
   return (
     <Card>
       <CardContent className="p-4">
-        <h3 className="text-lg font-semibold mb-4">
-          {t("cars.form.sections.basicInfo")}
-        </h3>
+        <h3 className="text-lg font-semibold mb-4">Basic Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div>
-            <Label htmlFor="brand">{t("cars.form.brand")} *</Label>
+            <Label htmlFor="brand">Brand *</Label>
             <Select
               value={formData.brand}
               onValueChange={(value) => onInputChange("brand", value)}
             >
               <SelectTrigger className={errors.brand ? "border-red-500" : ""}>
-                <SelectValue
-                  placeholder={t("cars.form.placeholders.selectBrand")}
-                />
+                <SelectValue placeholder="Select brand" />
               </SelectTrigger>
               <SelectContent>
                 {brands.map((brand) => (
@@ -81,12 +80,12 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
           </div>
 
           <div>
-            <Label htmlFor="name">{t("cars.form.name")} *</Label>
+            <Label htmlFor="name">Name *</Label>
             <Input
               id="name"
               value={formData.name}
               onChange={(e) => onInputChange("name", e.target.value)}
-              placeholder={t("cars.form.placeholders.name")}
+              placeholder="Car name"
               className={errors.name ? "border-red-500" : ""}
             />
             {errors.name && (
@@ -95,12 +94,12 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
           </div>
 
           <div>
-            <Label htmlFor="model">{t("cars.form.model")} *</Label>
+            <Label htmlFor="model">Model *</Label>
             <Input
               id="model"
               value={formData.model}
               onChange={(e) => onInputChange("model", e.target.value)}
-              placeholder={t("cars.form.placeholders.model")}
+              placeholder="Car model"
               className={errors.model ? "border-red-500" : ""}
             />
             {errors.model && (
@@ -109,7 +108,7 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
           </div>
 
           <div>
-            <Label htmlFor="year">{t("cars.form.year")} *</Label>
+            <Label htmlFor="year">Year *</Label>
             <Input
               id="year"
               type="number"
@@ -126,16 +125,14 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
           </div>
 
           <div>
-            <Label htmlFor="licensePlate">
-              {t("cars.form.licensePlate")} *
-            </Label>
+            <Label htmlFor="licensePlate">License Plate *</Label>
             <Input
               id="licensePlate"
               value={formData.licensePlate}
               onChange={(e) =>
                 onInputChange("licensePlate", e.target.value.toUpperCase())
               }
-              placeholder={t("cars.form.placeholders.licensePlateFormat")}
+              placeholder="12345A"
               className={errors.licensePlate ? "border-red-500" : ""}
               maxLength={6}
             />
@@ -145,9 +142,7 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
           </div>
 
           <div>
-            <Label htmlFor="whatsappNumber">
-              {t("cars.form.whatsappNumber")} *
-            </Label>
+            <Label htmlFor="whatsappNumber">WhatsApp Number *</Label>
             <div className="relative">
               <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
               <Input
@@ -156,17 +151,40 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
                 onChange={(e) =>
                   onInputChange("whatsappNumber", e.target.value)
                 }
-                placeholder={t("cars.form.placeholders.whatsappNumber")}
+                placeholder="+212612345678"
                 className={`pl-10 ${
                   errors.whatsappNumber ? "border-red-500" : ""
                 }`}
               />
             </div>
-
             {errors.whatsappNumber && (
               <p className="text-red-500 text-sm mt-1">
                 {errors.whatsappNumber}
               </p>
+            )}
+          </div>
+
+          <div>
+            <Label htmlFor="location">Location *</Label>
+            <Select
+              value={formData.location}
+              onValueChange={(value) => onInputChange("location", value)}
+            >
+              <SelectTrigger
+                className={errors.location ? "border-red-500" : ""}
+              >
+                <SelectValue placeholder="Select location" />
+              </SelectTrigger>
+              <SelectContent>
+                {locations.map((location) => (
+                  <SelectItem key={location} value={location}>
+                    {location}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.location && (
+              <p className="text-red-500 text-sm mt-1">{errors.location}</p>
             )}
           </div>
         </div>

@@ -1,11 +1,10 @@
-// src/components/dashboard/cars/AddCarForm.tsx
+// src/components/dashboard/cars/AddCarForm.tsx - Fixed with Location
 "use client";
 
 import React, { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
-import { CarFormData } from "./DashboardCarsContent";
 
 // Import form section components
 import BasicInfoSection from "./components/form/BasicInfoSection";
@@ -14,6 +13,45 @@ import PricingSection from "./components/form/PricingSection";
 import MaintenanceSection from "./components/form/MaintenanceSection";
 import FeaturesSection from "./components/form/FeaturesSection";
 import ImagesSection from "./components/form/ImagesSection";
+
+// Use the interface from DashboardCarsContent
+export interface CarFormData {
+  // Basic Info
+  brand: string;
+  name: string;
+  model: string;
+  year: string;
+  licensePlate: string;
+
+  // Technical Specs
+  transmission: string;
+  fuelType: string;
+  seats: string;
+  doors: string;
+  mileage: string;
+
+  // Pricing
+  dailyPrice: string;
+  caution: string;
+
+  // Contact Information
+  whatsappNumber: string;
+
+  // Location
+  location: string;
+
+  // Maintenance
+  lastTechnicalVisit: string;
+  lastOilChange: string;
+
+  // Features and Images
+  features: string[];
+  mainImage?: File;
+  additionalImages: File[];
+
+  // Optional fields
+  description?: string;
+}
 
 interface AddCarFormProps {
   onSubmit: (data: CarFormData) => Promise<void>;
@@ -44,6 +82,9 @@ const AddCarForm: React.FC<AddCarFormProps> = ({ onSubmit, onClose }) => {
 
     // Contact
     whatsappNumber: "",
+
+    // Location
+    location: "Tangier City Center",
 
     // Maintenance
     lastTechnicalVisit: "",
@@ -166,6 +207,7 @@ const AddCarForm: React.FC<AddCarFormProps> = ({ onSubmit, onClose }) => {
     } else if (!validateWhatsAppNumber(formData.whatsappNumber)) {
       newErrors.whatsappNumber = t("cars.form.validation.whatsappFormat");
     }
+    if (!formData.location) newErrors.location = "Location is required";
     if (!formData.mainImage)
       newErrors.mainImage = t("cars.form.validation.mainImageRequired");
 
@@ -198,6 +240,7 @@ const AddCarForm: React.FC<AddCarFormProps> = ({ onSubmit, onClose }) => {
         dailyPrice: "",
         caution: "",
         whatsappNumber: "",
+        location: "Tangier City Center",
         lastTechnicalVisit: "",
         lastOilChange: "",
         features: [],
@@ -226,6 +269,7 @@ const AddCarForm: React.FC<AddCarFormProps> = ({ onSubmit, onClose }) => {
               year: formData.year,
               licensePlate: formData.licensePlate,
               whatsappNumber: formData.whatsappNumber,
+              location: formData.location,
             }}
             errors={errors}
             onInputChange={handleInputChange}

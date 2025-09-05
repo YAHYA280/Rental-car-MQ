@@ -1,4 +1,4 @@
-// src/components/dashboard/cars/EditCarForm.tsx
+// src/components/dashboard/cars/EditCarForm.tsx - Fixed Types
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -16,7 +16,7 @@ import PricingSection from "./components/form/PricingSection";
 import MaintenanceSection from "./components/form/MaintenanceSection";
 import FeaturesSection from "./components/form/FeaturesSection";
 
-// Import types from DashboardCarsContent
+// Import types
 interface CarData {
   id: string;
   name: string;
@@ -40,6 +40,10 @@ interface CarData {
   whatsappNumber?: string;
   lastTechnicalVisit?: string;
   lastOilChange?: string;
+  location: string;
+  status: "active" | "maintenance" | "inactive";
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface CarFormData {
@@ -56,6 +60,7 @@ interface CarFormData {
   dailyPrice: string;
   caution: string;
   whatsappNumber: string;
+  location: string;
   lastTechnicalVisit: string;
   lastOilChange: string;
   features: string[];
@@ -91,6 +96,7 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
     dailyPrice: "",
     caution: "",
     whatsappNumber: "",
+    location: "",
     lastTechnicalVisit: "",
     lastOilChange: "",
     features: [],
@@ -121,6 +127,7 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
         dailyPrice: car.price?.toString() || "",
         caution: car.caution?.toString() || "",
         whatsappNumber: car.whatsappNumber || "",
+        location: car.location || "Tangier City Center",
         lastTechnicalVisit: car.lastTechnicalVisit || "",
         lastOilChange: car.lastOilChange || "",
         features: car.features || [],
@@ -243,6 +250,7 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
     } else if (!validateWhatsAppNumber(formData.whatsappNumber)) {
       newErrors.whatsappNumber = t("cars.form.validation.whatsappFormat");
     }
+    if (!formData.location) newErrors.location = "Location is required";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -278,6 +286,7 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
               year: formData.year,
               licensePlate: formData.licensePlate,
               whatsappNumber: formData.whatsappNumber,
+              location: formData.location,
             }}
             errors={errors}
             onInputChange={handleInputChange}

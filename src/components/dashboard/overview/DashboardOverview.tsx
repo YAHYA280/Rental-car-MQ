@@ -1,7 +1,7 @@
 // src/components/dashboard/overview/DashboardOverview.tsx
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,132 +10,179 @@ import {
   Users,
   Calendar,
   TrendingUp,
-  ArrowUpRight,
-  ArrowDownRight,
-  Plus,
-  Eye,
-  Settings,
   DollarSign,
-  Clock,
-  UserCheck,
+  AlertTriangle,
+  Plus,
+  Loader2,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import { useLocale } from "next-intl";
+import { carService } from "@/services/carService";
+import { userService } from "@/services/userService";
+import { toast } from "sonner";
+
+interface DashboardStats {
+  totalCars: number;
+  activeCars: number;
+  totalUsers: number;
+  activeUsers: number;
+  totalBookings: number;
+  monthlyRevenue: number;
+  pendingBookings: number;
+  maintenanceDue: number;
+}
 
 const DashboardOverview = () => {
   const t = useTranslations("dashboard");
+  const locale = useLocale();
 
-  // Mock data - will be replaced with real data later
-  const stats = [
+  const [stats, setStats] = useState<DashboardStats>({
+    totalCars: 0,
+    activeCars: 0,
+    totalUsers: 0,
+    activeUsers: 0,
+    totalBookings: 0,
+    monthlyRevenue: 0,
+    pendingBookings: 0,
+    maintenanceDue: 0,
+  });
+
+  const [loading, setLoading] = useState(true);
+  const [recentActivity, setRecentActivity] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+
+      // Fetch cars and users data in parallel
+      const [carsResponse, usersResponse] = await Promise.all([
+        carService.getCars({ limit: 100 }), // Get all cars for stats
+        userService.getUsers({ limit: 100 }), // Get all users for stats
+      ]);
+
+      if (carsResponse.success && usersResponse.success) {
+        const cars = carsResponse.data || [];
+        const users = usersResponse.data || [];
+
+        // Calculate stats
+        const activeCars = cars.filter(
+          (car) => car.available && car.status === "active"
+        ).length;
+        const activeUsers = users.filter(
+          (user) => user.status === "active"
+        ).length;
+        const totalRevenue = users.reduce(
+          (sum, user) => sum + (user.totalSpent || 0),
+          0
+        );
+
+        setStats({
+          totalCars: cars.length,
+          activeCars,
+          totalUsers: users.length,
+          activeUsers,
+          totalBookings: users.reduce(
+            (sum, user) => sum + (user.totalBookings || 0),
+            0
+          ),
+          monthlyRevenue: totalRevenue, // This should be calculated from actual bookings
+          pendingBookings: 0, // This should come from bookings API
+          maintenanceDue: cars.filter((car) => car.status === "maintenance")
+            .length,
+        });
+
+        // Set recent activity (mock data for now)
+        setRecentActivity([
+          {
+            id: 1,
+            type: "booking",
+            message: "New booking created for Toyota Corolla",
+            time: "2 minutes ago",
+            status: "success",
+          },
+          {
+            id: 2,
+            type: "user",
+            message: "New customer registered: John Doe",
+            time: "15 minutes ago",
+            status: "info",
+          },
+          {
+            id: 3,
+            type: "maintenance",
+            message: "BMW X5 scheduled for maintenance",
+            time: "1 hour ago",
+            status: "warning",
+          },
+        ]);
+      }
+    } catch (error: any) {
+      console.error("Error fetching dashboard data:", error);
+      toast.error("Failed to load dashboard data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const statsCards = [
     {
       title: t("stats.totalCars"),
-      value: "42",
-      change: "+12%",
-      changeType: "positive" as const,
+      value: stats.totalCars.toString(),
       icon: Car,
-      description: t("stats.totalCarsDescription"),
       color: "blue",
+      href: `/${locale}/dashboard/cars`,
     },
     {
-      title: t("stats.activeBookings"),
-      value: "28",
-      change: "+8%",
-      changeType: "positive" as const,
-      icon: Calendar,
-      description: t("stats.activeBookingsDescription"),
+      title: t("stats.activeCars"),
+      value: stats.activeCars.toString(),
+      icon: Car,
       color: "green",
+      href: `/${locale}/dashboard/cars?filter=available`,
     },
     {
       title: t("stats.totalUsers"),
-      value: "1,247",
-      change: "+23%",
-      changeType: "positive" as const,
+      value: stats.totalUsers.toString(),
       icon: Users,
-      description: t("stats.totalUsersDescription"),
       color: "purple",
+      href: `/${locale}/dashboard/users`,
     },
     {
-      title: t("stats.monthlyRevenue"),
-      value: "€12,460",
-      change: "-3%",
-      changeType: "negative" as const,
+      title: "Monthly Revenue",
+      value: `€${stats.monthlyRevenue.toLocaleString()}`,
       icon: DollarSign,
-      description: t("stats.monthlyRevenueDescription"),
-      color: "yellow",
+      color: "green",
+      href: `/${locale}/dashboard/bookings`,
+    },
+    {
+      title: "Total Bookings",
+      value: stats.totalBookings.toString(),
+      icon: Calendar,
+      color: "blue",
+      href: `/${locale}/dashboard/bookings`,
+    },
+    {
+      title: "Maintenance Due",
+      value: stats.maintenanceDue.toString(),
+      icon: AlertTriangle,
+      color: "orange",
+      href: `/${locale}/dashboard/cars?filter=maintenance`,
     },
   ];
 
-  const recentBookings = [
-    {
-      id: "BK001",
-      customer: "Sarah Johnson",
-      car: "Mercedes G63 AMG",
-      period: "Dec 15 - Dec 20",
-      status: "confirmed",
-      amount: "€6,250",
-    },
-    {
-      id: "BK002",
-      customer: "Michael Chen",
-      car: "Porsche Macan",
-      period: "Dec 18 - Dec 22",
-      status: "pending",
-      amount: "€720",
-    },
-    {
-      id: "BK003",
-      customer: "Emma Davis",
-      car: "BMW Series 7",
-      period: "Dec 20 - Dec 25",
-      status: "confirmed",
-      amount: "€1,495",
-    },
-    {
-      id: "BK004",
-      customer: "John Smith",
-      car: "Volkswagen Golf 8",
-      period: "Dec 22 - Dec 28",
-      status: "pending",
-      amount: "€420",
-    },
-  ];
-
-  const topCars = [
-    {
-      id: "1",
-      name: "Mercedes G63 AMG",
-      bookings: 12,
-      revenue: "€15,000",
-      availability: "Available",
-    },
-    {
-      id: "2",
-      name: "Porsche Macan",
-      bookings: 8,
-      revenue: "€1,440",
-      availability: "Booked",
-    },
-    {
-      id: "3",
-      name: "Hyundai Tucson",
-      bookings: 15,
-      revenue: "€1,050",
-      availability: "Available",
-    },
-  ];
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "confirmed":
-        return <Badge className="bg-green-100 text-green-800">Confirmed</Badge>;
-      case "pending":
-        return <Badge className="bg-yellow-100 text-yellow-800">Pending</Badge>;
-      case "cancelled":
-        return <Badge className="bg-red-100 text-red-800">Cancelled</Badge>;
-      default:
-        return <Badge variant="secondary">{status}</Badge>;
-    }
-  };
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-carbookers-red-600" />
+          <p className="text-gray-600">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -148,225 +195,191 @@ const DashboardOverview = () => {
           <p className="text-gray-600">{t("overview.subtitle")}</p>
         </div>
         <div className="flex gap-3">
-          <Link href="/dashboard/cars">
-            <Button variant="outline" className="flex items-center gap-2">
-              <Plus className="h-4 w-4" />
-              {t("overview.addNewCar")}
+          <Link href={`/${locale}/dashboard/cars`}>
+            <Button className="bg-carbookers-red-600 hover:bg-carbookers-red-700">
+              <Car className="h-4 w-4 mr-2" />
+              Manage Cars
             </Button>
           </Link>
-          <Link href="/dashboard/bookings">
-            <Button className="bg-carbookers-red-600 hover:bg-carbookers-red-700 flex items-center gap-2">
-              <Eye className="h-4 w-4" />
-              {t("overview.viewBookings")}
+          <Link href={`/${locale}/dashboard/users`}>
+            <Button variant="outline">
+              <Users className="h-4 w-4 mr-2" />
+              Manage Users
             </Button>
           </Link>
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => (
-          <Card key={stat.title} className="border-0 shadow-md">
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-600">
-                    {stat.title}
-                  </p>
-                  <p className="text-3xl font-bold text-gray-900 mt-1">
-                    {stat.value}
-                  </p>
-                  <div className="flex items-center mt-2">
-                    {stat.changeType === "positive" ? (
-                      <ArrowUpRight className="h-4 w-4 text-green-600" />
-                    ) : (
-                      <ArrowDownRight className="h-4 w-4 text-red-600" />
-                    )}
-                    <span
-                      className={`text-sm font-medium ${
-                        stat.changeType === "positive"
-                          ? "text-green-600"
-                          : "text-red-600"
-                      }`}
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {statsCards.map((stat) => (
+          <Link key={stat.title} href={stat.href}>
+            <Card className="border-0 shadow-md hover:shadow-lg transition-shadow cursor-pointer">
+              <CardContent className="p-6">
+                <div className="flex items-center">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-600">
+                      {stat.title}
+                    </p>
+                    <p className="text-3xl font-bold text-gray-900">
+                      {stat.value}
+                    </p>
+                  </div>
+                  <div className="ml-4">
+                    <div
+                      className={`w-12 h-12 bg-${stat.color}-100 rounded-lg flex items-center justify-center`}
                     >
-                      {stat.change}
-                    </span>
-                    <span className="text-sm text-gray-500 ml-2">
-                      vs last month
-                    </span>
+                      <stat.icon className={`h-6 w-6 text-${stat.color}-600`} />
+                    </div>
                   </div>
                 </div>
-                <div className="ml-4">
-                  <div
-                    className={`w-12 h-12 bg-${stat.color}-100 rounded-lg flex items-center justify-center`}
-                  >
-                    <stat.icon className={`h-6 w-6 text-${stat.color}-600`} />
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </Link>
         ))}
       </div>
 
+      {/* Quick Actions & Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Recent Bookings */}
+        {/* Quick Actions */}
         <Card className="border-0 shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-xl font-bold">
-              {t("overview.recentBookings")}
-            </CardTitle>
-            <Link href="/dashboard/bookings">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-carbookers-red-600 hover:text-carbookers-red-700"
-              >
-                {t("common.viewAll")}
-                <ArrowUpRight className="h-4 w-4 ml-1" />
+          <CardHeader>
+            <CardTitle>Quick Actions</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Link href={`/${locale}/dashboard/cars`}>
+              <Button className="w-full justify-start bg-carbookers-red-600 hover:bg-carbookers-red-700">
+                <Plus className="h-4 w-4 mr-2" />
+                Add New Car
               </Button>
             </Link>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentBookings.map((booking) => (
-                <div
-                  key={booking.id}
-                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-carbookers-red-600 flex items-center justify-center text-white font-semibold text-sm">
-                        {booking.customer
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
-                      </div>
-                      <div>
-                        <p className="font-semibold text-gray-900">
-                          {booking.customer}
-                        </p>
-                        <p className="text-sm text-gray-600">{booking.car}</p>
-                        <p className="text-xs text-gray-500">
-                          {booking.period}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {getStatusBadge(booking.status)}
-                    <p className="font-semibold text-gray-900">
-                      {booking.amount}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <Link href={`/${locale}/dashboard/users`}>
+              <Button variant="outline" className="w-full justify-start">
+                <Plus className="h-4 w-4 mr-2" />
+                Add New Customer
+              </Button>
+            </Link>
+            <Link href={`/${locale}/dashboard/bookings`}>
+              <Button variant="outline" className="w-full justify-start">
+                <Calendar className="h-4 w-4 mr-2" />
+                Create Booking
+              </Button>
+            </Link>
+            <Link href={`/${locale}/dashboard/cars?filter=maintenance`}>
+              <Button variant="outline" className="w-full justify-start">
+                <AlertTriangle className="h-4 w-4 mr-2" />
+                View Maintenance Due
+              </Button>
+            </Link>
           </CardContent>
         </Card>
 
-        {/* Top Performing Cars */}
+        {/* Recent Activity */}
         <Card className="border-0 shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-xl font-bold">
-              {t("overview.topPerformingCars")}
-            </CardTitle>
-            <Link href="/dashboard/cars">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-carbookers-red-600 hover:text-carbookers-red-700"
-              >
-                Manage Fleet
-                <ArrowUpRight className="h-4 w-4 ml-1" />
-              </Button>
-            </Link>
+          <CardHeader>
+            <CardTitle>Recent Activity</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {topCars.map((car, index) => (
-                <div
-                  key={car.id}
-                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-carbookers-red-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                      {index + 1}
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-900">{car.name}</p>
-                      <p className="text-sm text-gray-600">
-                        {car.bookings} bookings
+              {recentActivity.length > 0 ? (
+                recentActivity.map((activity) => (
+                  <div key={activity.id} className="flex items-start space-x-3">
+                    <div
+                      className={`w-2 h-2 rounded-full mt-2 ${
+                        activity.status === "success"
+                          ? "bg-green-500"
+                          : activity.status === "warning"
+                          ? "bg-orange-500"
+                          : "bg-blue-500"
+                      }`}
+                    />
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-900">
+                        {activity.message}
                       </p>
+                      <p className="text-xs text-gray-500">{activity.time}</p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-gray-900">{car.revenue}</p>
-                    <Badge
-                      className={
-                        car.availability === "Available"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                      }
-                    >
-                      {car.availability}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-gray-500 text-sm">No recent activity</p>
+              )}
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Quick Actions */}
-      <Card className="border-0 shadow-md">
-        <CardHeader>
-          <CardTitle className="text-xl font-bold">
-            {t("overview.quickActions")}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Link href="/dashboard/cars/new">
-              <Button
-                variant="outline"
-                className="w-full h-24 flex flex-col gap-2 hover:bg-gray-50 transition-colors"
-              >
-                <Car className="h-6 w-6" />
-                <span>{t("overview.addNewCar")}</span>
-              </Button>
-            </Link>
-            <Link href="/dashboard/bookings">
-              <Button
-                variant="outline"
-                className="w-full h-24 flex flex-col gap-2 hover:bg-gray-50 transition-colors"
-              >
-                <Calendar className="h-6 w-6" />
-                <span>{t("overview.viewBookings")}</span>
-              </Button>
-            </Link>
-            <Link href="/dashboard/users">
-              <Button
-                variant="outline"
-                className="w-full h-24 flex flex-col gap-2 hover:bg-gray-50 transition-colors"
-              >
-                <Users className="h-6 w-6" />
-                <span>{t("overview.manageUsers")}</span>
-              </Button>
-            </Link>
-            <Link href="/dashboard/settings">
-              <Button
-                variant="outline"
-                className="w-full h-24 flex flex-col gap-2 hover:bg-gray-50 transition-colors"
-              >
-                <Settings className="h-6 w-6" />
-                <span>{t("overview.viewReports")}</span>
-              </Button>
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Fleet Overview */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <Card className="border-0 shadow-md lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Fleet Overview</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Available Cars</span>
+                <span className="font-semibold">
+                  {stats.activeCars} / {stats.totalCars}
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className="bg-green-500 h-2 rounded-full"
+                  style={{
+                    width: `${
+                      stats.totalCars > 0
+                        ? (stats.activeCars / stats.totalCars) * 100
+                        : 0
+                    }%`,
+                  }}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Active Customers</span>
+                <span className="font-semibold">
+                  {stats.activeUsers} / {stats.totalUsers}
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className="bg-blue-500 h-2 rounded-full"
+                  style={{
+                    width: `${
+                      stats.totalUsers > 0
+                        ? (stats.activeUsers / stats.totalUsers) * 100
+                        : 0
+                    }%`,
+                  }}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-0 shadow-md">
+          <CardHeader>
+            <CardTitle>System Health</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">API Status</span>
+                <span className="text-green-600 font-semibold">Online</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Database</span>
+                <span className="text-green-600 font-semibold">Connected</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Last Backup</span>
+                <span className="text-gray-600 font-semibold">2 hours ago</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
