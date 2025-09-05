@@ -1,4 +1,4 @@
-// src/components/dashboard/cars/components/CarDetailsModal.tsx
+// src/components/dashboard/cars/components/CarDetailsModal.tsx - Updated with proper image display
 "use client";
 
 import React from "react";
@@ -20,7 +20,6 @@ interface CarData {
   id: string;
   name: string;
   brand: string;
-  model: string;
   year: number;
   price: number;
   image: string;
@@ -39,6 +38,18 @@ interface CarData {
   whatsappNumber?: string;
   lastTechnicalVisit?: string;
   lastOilChange?: string;
+  mainImage?: {
+    filename: string;
+    originalName: string;
+    path: string;
+    fullPath?: string;
+  };
+  images?: Array<{
+    filename: string;
+    originalName: string;
+    path: string;
+    fullPath?: string;
+  }>;
 }
 
 interface CarDetailsModalProps {
@@ -66,6 +77,40 @@ const CarDetailsModal: React.FC<CarDetailsModalProps> = ({
     );
   };
 
+  // Get proper image URL with fallback
+  const getImageUrl = (car: CarData) => {
+    if (car.mainImage?.fullPath) {
+      return car.mainImage.fullPath;
+    }
+    if (car.mainImage?.path) {
+      return `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}${
+        car.mainImage.path
+      }`;
+    }
+    if (car.image) {
+      return car.image.startsWith("http")
+        ? car.image
+        : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}${
+            car.image
+          }`;
+    }
+    return "/cars/placeholder.jpg";
+  };
+
+  // Format WhatsApp number for display
+  const formatWhatsAppNumber = (number: string) => {
+    if (number.length === 10) {
+      return `${number.substring(0, 2)} ${number.substring(
+        2,
+        4
+      )} ${number.substring(4, 6)} ${number.substring(6, 8)} ${number.substring(
+        8,
+        10
+      )}`;
+    }
+    return number;
+  };
+
   if (!car) return null;
 
   return (
@@ -85,20 +130,20 @@ const CarDetailsModal: React.FC<CarDetailsModalProps> = ({
             {/* Car Header */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-gray-50 rounded-lg">
               <div className="w-full sm:w-24 h-32 sm:h-20 relative rounded-lg overflow-hidden flex-shrink-0">
-                <Image
-                  src={car.image}
+                <img
+                  src={getImageUrl(car)}
                   alt={`${car.brand} ${car.name}`}
-                  fill
-                  className="object-cover"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = "/cars/placeholder.jpg";
+                  }}
                 />
               </div>
               <div className="flex-1 w-full sm:w-auto">
                 <h3 className="text-lg sm:text-xl font-bold">
                   {car.brand} {car.name}
                 </h3>
-                <p className="text-gray-600 text-sm sm:text-base">
-                  {car.model} {car.year}
-                </p>
+                <p className="text-gray-600 text-sm sm:text-base">{car.year}</p>
                 <p className="text-xs sm:text-sm text-gray-500">
                   {car.licensePlate}
                 </p>
@@ -195,7 +240,7 @@ const CarDetailsModal: React.FC<CarDetailsModalProps> = ({
                     </span>
                     <a
                       href={`https://wa.me/${car.whatsappNumber?.replace(
-                        /[^0-9]/g,
+                        /\s/g,
                         ""
                       )}`}
                       target="_blank"
@@ -203,7 +248,11 @@ const CarDetailsModal: React.FC<CarDetailsModalProps> = ({
                       className="text-green-600 hover:underline flex items-center gap-1 font-medium text-sm sm:text-base bg-green-50 p-2 rounded-lg inline-flex w-fit"
                     >
                       <Phone className="h-4 w-4 flex-shrink-0" />
-                      <span className="break-all">{car.whatsappNumber}</span>
+                      <span className="break-all">
+                        {car.whatsappNumber
+                          ? formatWhatsAppNumber(car.whatsappNumber)
+                          : ""}
+                      </span>
                     </a>
                   </div>
                 </div>

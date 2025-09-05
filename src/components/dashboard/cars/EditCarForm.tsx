@@ -1,4 +1,4 @@
-// src/components/dashboard/cars/EditCarForm.tsx - Fixed Types
+// src/components/dashboard/cars/EditCarForm.tsx - Updated with proper data loading and validation
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -21,7 +21,6 @@ interface CarData {
   id: string;
   name: string;
   brand: string;
-  model: string;
   year: number;
   price: number;
   image: string;
@@ -40,16 +39,26 @@ interface CarData {
   whatsappNumber?: string;
   lastTechnicalVisit?: string;
   lastOilChange?: string;
-  location: string;
   status: "active" | "maintenance" | "inactive";
   createdAt: string;
   updatedAt: string;
+  mainImage?: {
+    filename: string;
+    originalName: string;
+    path: string;
+    fullPath?: string;
+  };
+  images?: Array<{
+    filename: string;
+    originalName: string;
+    path: string;
+    fullPath?: string;
+  }>;
 }
 
 interface CarFormData {
   brand: string;
   name: string;
-  model: string;
   year: string;
   licensePlate: string;
   transmission: string;
@@ -60,7 +69,6 @@ interface CarFormData {
   dailyPrice: string;
   caution: string;
   whatsappNumber: string;
-  location: string;
   lastTechnicalVisit: string;
   lastOilChange: string;
   features: string[];
@@ -85,7 +93,6 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
   const [formData, setFormData] = useState<CarFormData>({
     brand: "",
     name: "",
-    model: "",
     year: "",
     licensePlate: "",
     transmission: "",
@@ -96,7 +103,6 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
     dailyPrice: "",
     caution: "",
     whatsappNumber: "",
-    location: "",
     lastTechnicalVisit: "",
     lastOilChange: "",
     features: [],
@@ -113,10 +119,11 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
   // Initialize form data with car data
   useEffect(() => {
     if (car) {
+      console.log("Loading car data:", car); // Debug log
+
       setFormData({
         brand: car.brand || "",
         name: car.name || "",
-        model: car.model || "",
         year: car.year?.toString() || "",
         licensePlate: car.licensePlate || "",
         transmission: car.transmission || "",
@@ -127,7 +134,6 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
         dailyPrice: car.price?.toString() || "",
         caution: car.caution?.toString() || "",
         whatsappNumber: car.whatsappNumber || "",
-        location: car.location || "Tangier City Center",
         lastTechnicalVisit: car.lastTechnicalVisit || "",
         lastOilChange: car.lastOilChange || "",
         features: car.features || [],
@@ -135,12 +141,21 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
         description: car.description || "",
       });
 
-      // Set dates
+      // Set dates if they exist
       if (car.lastTechnicalVisit) {
-        setTechnicalVisitDate(new Date(car.lastTechnicalVisit));
+        try {
+          setTechnicalVisitDate(new Date(car.lastTechnicalVisit));
+        } catch (error) {
+          console.warn("Invalid technical visit date:", car.lastTechnicalVisit);
+        }
       }
+
       if (car.lastOilChange) {
-        setOilChangeDate(new Date(car.lastOilChange));
+        try {
+          setOilChangeDate(new Date(car.lastOilChange));
+        } catch (error) {
+          console.warn("Invalid oil change date:", car.lastOilChange);
+        }
       }
     }
   }, [car]);
@@ -197,8 +212,8 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
   };
 
   const validateWhatsAppNumber = (number: string): boolean => {
-    // Morocco WhatsApp format: +212XXXXXXXXX or 212XXXXXXXXX or 0XXXXXXXXX
-    const phoneRegex = /^(\+212|212|0)[5-7]\d{8}$/;
+    // Updated validation for 10-digit format: 06XXXXXXXX or 07XXXXXXXX
+    const phoneRegex = /^0[67]\d{8}$/;
     return phoneRegex.test(number.replace(/\s/g, ""));
   };
 
@@ -225,8 +240,6 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
     if (!formData.brand)
       newErrors.brand = t("cars.form.validation.brandRequired");
     if (!formData.name) newErrors.name = t("cars.form.validation.nameRequired");
-    if (!formData.model)
-      newErrors.model = t("cars.form.validation.modelRequired");
     if (!formData.year) newErrors.year = t("cars.form.validation.yearRequired");
     if (!formData.licensePlate) {
       newErrors.licensePlate = t("cars.form.validation.licensePlateRequired");
@@ -248,9 +261,9 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
     if (!formData.whatsappNumber) {
       newErrors.whatsappNumber = t("cars.form.validation.whatsappRequired");
     } else if (!validateWhatsAppNumber(formData.whatsappNumber)) {
-      newErrors.whatsappNumber = t("cars.form.validation.whatsappFormat");
+      newErrors.whatsappNumber =
+        "Please enter a valid WhatsApp number (06XXXXXXXX or 07XXXXXXXX)";
     }
-    if (!formData.location) newErrors.location = "Location is required";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -273,6 +286,26 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
     }
   };
 
+  // Get current image URL with fallback
+  const getCurrentImageUrl = () => {
+    if (car.mainImage?.fullPath) {
+      return car.mainImage.fullPath;
+    }
+    if (car.mainImage?.path) {
+      return `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}${
+        car.mainImage.path
+      }`;
+    }
+    if (car.image) {
+      return car.image.startsWith("http")
+        ? car.image
+        : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}${
+            car.image
+          }`;
+    }
+    return "/cars/placeholder.jpg";
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
@@ -282,11 +315,9 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
             formData={{
               brand: formData.brand,
               name: formData.name,
-              model: formData.model,
               year: formData.year,
               licensePlate: formData.licensePlate,
               whatsappNumber: formData.whatsappNumber,
-              location: formData.location,
             }}
             errors={errors}
             onInputChange={handleInputChange}
@@ -335,9 +366,12 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
               </h3>
               <div className="w-full h-40 sm:h-48 relative rounded-lg overflow-hidden mb-3 sm:mb-4">
                 <img
-                  src={car.image}
+                  src={getCurrentImageUrl()}
                   alt={`${car.brand} ${car.name}`}
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = "/cars/placeholder.jpg";
+                  }}
                 />
               </div>
 

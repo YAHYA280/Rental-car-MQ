@@ -1,4 +1,4 @@
-// src/components/dashboard/cars/DashboardCarsContent.tsx - Clean Version
+// src/components/dashboard/cars/DashboardCarsContent.tsx - Fixed version
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -48,7 +48,6 @@ const DashboardCarsContent = () => {
       id: car.id,
       name: car.name,
       brand: car.brand,
-      model: car.model,
       year: car.year,
       price: car.price,
       image: car.mainImage?.path || car.image || "/cars/placeholder.jpg",
@@ -67,7 +66,6 @@ const DashboardCarsContent = () => {
       licensePlate: car.licensePlate,
       caution: car.caution,
       whatsappNumber: car.whatsappNumber,
-      location: car.location,
       status: car.status,
       lastTechnicalVisit: car.lastTechnicalVisit,
       lastOilChange: car.lastOilChange,
@@ -127,7 +125,6 @@ const DashboardCarsContent = () => {
     const matchesSearch =
       car.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       car.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      car.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
       car.licensePlate?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       car.whatsappNumber?.includes(searchTerm);
 
@@ -166,25 +163,85 @@ const DashboardCarsContent = () => {
     setIsEditCarDialogOpen(true);
   };
 
+  // Fixed transform function for form data
   const transformFormDataToAPI = (formData: CarFormData) => {
-    return {
-      ...formData,
-      price: formData.dailyPrice,
-    };
+    // Create a new FormData object for the API
+    const apiFormData = new FormData();
+
+    // Add all text fields
+    Object.entries(formData).forEach(([key, value]) => {
+      if (key === "mainImage" || key === "additionalImages") {
+        return; // Handle these separately
+      }
+
+      if (key === "features" && Array.isArray(value)) {
+        value.forEach((feature, index) => {
+          apiFormData.append(`features[${index}]`, feature);
+        });
+      } else if (key === "dailyPrice") {
+        // Map dailyPrice to price for backend
+        apiFormData.append("price", value.toString());
+      } else if (key === "whatsappNumber" && typeof value === "string") {
+        // Clean WhatsApp number - remove spaces
+        apiFormData.append(key, value.replace(/\s/g, ""));
+      } else if (value !== undefined && value !== null && value !== "") {
+        apiFormData.append(key, value.toString());
+      }
+    });
+
+    // Add files
+    if (formData.mainImage) {
+      apiFormData.append("mainImage", formData.mainImage);
+    }
+
+    if (formData.additionalImages && formData.additionalImages.length > 0) {
+      formData.additionalImages.forEach((file) => {
+        apiFormData.append("additionalImages", file);
+      });
+    }
+
+    return apiFormData;
   };
 
   const handleAddCar = async (formData: CarFormData): Promise<void> => {
     try {
-      const apiData = transformFormDataToAPI(formData);
-      const response = await carService.createCar(apiData);
+      console.log("Submitting car data:", formData);
 
-      if (response.success) {
+      // Transform to FormData for API
+      const apiFormData = transformFormDataToAPI(formData);
+
+      // Log FormData contents for debugging
+      console.log("FormData contents:");
+      for (let [key, value] of apiFormData.entries()) {
+        console.log(key, value);
+      }
+
+      // Use fetch directly for better error handling
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `${
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"
+        }/vehicles`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: apiFormData,
+        }
+      );
+
+      const result = await response.json();
+      console.log("API Response:", result);
+
+      if (response.ok && result.success) {
         toast.success("Car created successfully");
         setIsAddCarDialogOpen(false);
         await fetchCars();
       } else {
-        toast.error(response.message || "Failed to create car");
-        throw new Error(response.message || "Failed to create car");
+        console.error("API Error:", result);
+        toast.error(result.message || "Failed to create car");
+        throw new Error(result.message || "Failed to create car");
       }
     } catch (error: any) {
       console.error("Error creating car:", error);
@@ -197,17 +254,38 @@ const DashboardCarsContent = () => {
     try {
       if (!carToEdit) return;
 
-      const apiData = transformFormDataToAPI(formData);
-      const response = await carService.updateCar(carToEdit.id, apiData);
+      console.log("Updating car data:", formData);
 
-      if (response.success) {
+      // Transform to FormData for API
+      const apiFormData = transformFormDataToAPI(formData);
+
+      // Use fetch directly for better error handling
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `${
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"
+        }/vehicles/${carToEdit.id}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: apiFormData,
+        }
+      );
+
+      const result = await response.json();
+      console.log("Update API Response:", result);
+
+      if (response.ok && result.success) {
         toast.success("Car updated successfully");
         setIsEditCarDialogOpen(false);
         setCarToEdit(null);
         await fetchCars();
       } else {
-        toast.error(response.message || "Failed to update car");
-        throw new Error(response.message || "Failed to update car");
+        console.error("Update API Error:", result);
+        toast.error(result.message || "Failed to update car");
+        throw new Error(result.message || "Failed to update car");
       }
     } catch (error: any) {
       console.error("Error updating car:", error);

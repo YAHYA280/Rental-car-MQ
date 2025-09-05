@@ -1,4 +1,4 @@
-// src/components/dashboard/cars/AddCarForm.tsx - Fixed with Location
+// src/components/dashboard/cars/AddCarForm.tsx - Updated interface and validation
 "use client";
 
 import React, { useState } from "react";
@@ -14,12 +14,11 @@ import MaintenanceSection from "./components/form/MaintenanceSection";
 import FeaturesSection from "./components/form/FeaturesSection";
 import ImagesSection from "./components/form/ImagesSection";
 
-// Use the interface from DashboardCarsContent
+// Updated interface without model and location
 export interface CarFormData {
   // Basic Info
   brand: string;
   name: string;
-  model: string;
   year: string;
   licensePlate: string;
 
@@ -36,9 +35,6 @@ export interface CarFormData {
 
   // Contact Information
   whatsappNumber: string;
-
-  // Location
-  location: string;
 
   // Maintenance
   lastTechnicalVisit: string;
@@ -65,7 +61,6 @@ const AddCarForm: React.FC<AddCarFormProps> = ({ onSubmit, onClose }) => {
     // Basic Info
     brand: "",
     name: "",
-    model: "",
     year: "",
     licensePlate: "",
 
@@ -82,9 +77,6 @@ const AddCarForm: React.FC<AddCarFormProps> = ({ onSubmit, onClose }) => {
 
     // Contact
     whatsappNumber: "",
-
-    // Location
-    location: "Tangier City Center",
 
     // Maintenance
     lastTechnicalVisit: "",
@@ -154,8 +146,8 @@ const AddCarForm: React.FC<AddCarFormProps> = ({ onSubmit, onClose }) => {
   };
 
   const validateWhatsAppNumber = (number: string): boolean => {
-    // Morocco WhatsApp format: +212XXXXXXXXX or 212XXXXXXXXX or 0XXXXXXXXX
-    const phoneRegex = /^(\+212|212|0)[5-7]\d{8}$/;
+    // Updated validation for 10-digit format: 06XXXXXXXX or 07XXXXXXXX
+    const phoneRegex = /^0[67]\d{8}$/;
     return phoneRegex.test(number.replace(/\s/g, ""));
   };
 
@@ -182,8 +174,6 @@ const AddCarForm: React.FC<AddCarFormProps> = ({ onSubmit, onClose }) => {
     if (!formData.brand)
       newErrors.brand = t("cars.form.validation.brandRequired");
     if (!formData.name) newErrors.name = t("cars.form.validation.nameRequired");
-    if (!formData.model)
-      newErrors.model = t("cars.form.validation.modelRequired");
     if (!formData.year) newErrors.year = t("cars.form.validation.yearRequired");
     if (!formData.licensePlate) {
       newErrors.licensePlate = t("cars.form.validation.licensePlateRequired");
@@ -205,9 +195,9 @@ const AddCarForm: React.FC<AddCarFormProps> = ({ onSubmit, onClose }) => {
     if (!formData.whatsappNumber) {
       newErrors.whatsappNumber = t("cars.form.validation.whatsappRequired");
     } else if (!validateWhatsAppNumber(formData.whatsappNumber)) {
-      newErrors.whatsappNumber = t("cars.form.validation.whatsappFormat");
+      newErrors.whatsappNumber =
+        "Please enter a valid WhatsApp number (06XXXXXXXX or 07XXXXXXXX)";
     }
-    if (!formData.location) newErrors.location = "Location is required";
     if (!formData.mainImage)
       newErrors.mainImage = t("cars.form.validation.mainImageRequired");
 
@@ -229,7 +219,6 @@ const AddCarForm: React.FC<AddCarFormProps> = ({ onSubmit, onClose }) => {
       setFormData({
         brand: "",
         name: "",
-        model: "",
         year: "",
         licensePlate: "",
         transmission: "",
@@ -240,7 +229,6 @@ const AddCarForm: React.FC<AddCarFormProps> = ({ onSubmit, onClose }) => {
         dailyPrice: "",
         caution: "",
         whatsappNumber: "",
-        location: "Tangier City Center",
         lastTechnicalVisit: "",
         lastOilChange: "",
         features: [],
@@ -265,11 +253,9 @@ const AddCarForm: React.FC<AddCarFormProps> = ({ onSubmit, onClose }) => {
             formData={{
               brand: formData.brand,
               name: formData.name,
-              model: formData.model,
               year: formData.year,
               licensePlate: formData.licensePlate,
               whatsappNumber: formData.whatsappNumber,
-              location: formData.location,
             }}
             errors={errors}
             onInputChange={handleInputChange}

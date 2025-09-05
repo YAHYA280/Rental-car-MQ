@@ -1,9 +1,8 @@
-// src/types/car.ts - Centralized Car Types
+// src/components/types/car.ts - Updated interface without model and location
 export interface CarData {
   id: string;
   name: string;
   brand: string;
-  model: string;
   year: number;
   price: number;
   image: string;
@@ -13,6 +12,7 @@ export interface CarData {
     path: string;
     size: number;
     mimetype: string;
+    fullPath?: string;
   };
   images?: Array<{
     filename: string;
@@ -20,6 +20,7 @@ export interface CarData {
     path: string;
     size: number;
     mimetype: string;
+    fullPath?: string;
   }>;
   seats: number;
   doors: number;
@@ -34,7 +35,6 @@ export interface CarData {
   licensePlate: string;
   caution: number;
   whatsappNumber: string;
-  location: string;
   status: "active" | "maintenance" | "inactive";
   lastTechnicalVisit?: string;
   lastOilChange?: string;
@@ -50,7 +50,6 @@ export interface CarData {
 export interface CarFormData {
   brand: string;
   name: string;
-  model: string;
   year: string;
   licensePlate: string;
   transmission: string;
@@ -61,7 +60,6 @@ export interface CarFormData {
   dailyPrice: string;
   caution: string;
   whatsappNumber: string;
-  location: string;
   lastTechnicalVisit: string;
   lastOilChange: string;
   features: string[];

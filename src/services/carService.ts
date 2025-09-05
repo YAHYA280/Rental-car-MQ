@@ -1,4 +1,4 @@
-// src/services/carService.ts - Updated Car API Service
+// src/services/carService.ts - Fixed Car API Service
 import {
   apiService,
   Car,
@@ -10,32 +10,124 @@ import {
 class CarService {
   // Get all cars with filtering and pagination
   async getCars(filters: CarFilters = {}): Promise<ApiResponse<Car[]>> {
-    return apiService.get("/vehicles", filters);
+    try {
+      return await apiService.get("/vehicles", filters);
+    } catch (error) {
+      console.error("CarService.getCars error:", error);
+      throw error;
+    }
   }
 
   // Get single car by ID
   async getCar(id: string): Promise<ApiResponse<Car>> {
-    return apiService.get(`/vehicles/${id}`);
+    try {
+      return await apiService.get(`/vehicles/${id}`);
+    } catch (error) {
+      console.error("CarService.getCar error:", error);
+      throw error;
+    }
   }
 
-  // Create new car
-  async createCar(carData: CarFormData): Promise<ApiResponse<Car>> {
-    const formData = this.buildFormData(carData);
-    return apiService.postFormData("/vehicles", formData);
+  // Get available brands
+  async getBrands(): Promise<ApiResponse<string[]>> {
+    try {
+      return await apiService.get("/vehicles/brands");
+    } catch (error) {
+      console.error("CarService.getBrands error:", error);
+      // Return fallback brands if API fails
+      return {
+        success: true,
+        data: [
+          "Cupra",
+          "Dacia",
+          "Hyundai",
+          "KIA",
+          "Mercedes",
+          "Opel",
+          "Peugeot",
+          "Porsche",
+          "Renault",
+          "SEAT",
+          "Volkswagen",
+        ],
+      };
+    }
+  }
+
+  // Create new car - This method is called from the form
+  async createCar(formData: FormData): Promise<ApiResponse<Car>> {
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await fetch(
+        `${
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"
+        }/vehicles`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.message || `HTTP error! status: ${response.status}`
+        );
+      }
+
+      return result;
+    } catch (error) {
+      console.error("CarService.createCar error:", error);
+      throw error;
+    }
   }
 
   // Update car
-  async updateCar(
-    id: string,
-    carData: Partial<CarFormData>
-  ): Promise<ApiResponse<Car>> {
-    const formData = this.buildFormData(carData);
-    return apiService.putFormData(`/vehicles/${id}`, formData);
+  async updateCar(id: string, formData: FormData): Promise<ApiResponse<Car>> {
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await fetch(
+        `${
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"
+        }/vehicles/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.message || `HTTP error! status: ${response.status}`
+        );
+      }
+
+      return result;
+    } catch (error) {
+      console.error("CarService.updateCar error:", error);
+      throw error;
+    }
   }
 
   // Delete car
   async deleteCar(id: string): Promise<ApiResponse<void>> {
-    return apiService.delete(`/vehicles/${id}`);
+    try {
+      return await apiService.delete(`/vehicles/${id}`);
+    } catch (error) {
+      console.error("CarService.deleteCar error:", error);
+      throw error;
+    }
   }
 
   // Upload car images
@@ -44,19 +136,24 @@ class CarService {
     mainImage?: File,
     additionalImages?: File[]
   ): Promise<ApiResponse<Car>> {
-    const formData = new FormData();
+    try {
+      const formData = new FormData();
 
-    if (mainImage) {
-      formData.append("mainImage", mainImage);
+      if (mainImage) {
+        formData.append("mainImage", mainImage);
+      }
+
+      if (additionalImages && additionalImages.length > 0) {
+        additionalImages.forEach((file) => {
+          formData.append("additionalImages", file);
+        });
+      }
+
+      return await apiService.putFormData(`/vehicles/${id}/images`, formData);
+    } catch (error) {
+      console.error("CarService.uploadCarImages error:", error);
+      throw error;
     }
-
-    if (additionalImages && additionalImages.length > 0) {
-      additionalImages.forEach((file) => {
-        formData.append("additionalImages", file);
-      });
-    }
-
-    return apiService.putFormData(`/vehicles/${id}/images`, formData);
   }
 
   // Remove car image
@@ -64,7 +161,12 @@ class CarService {
     id: string,
     imageIndex: number
   ): Promise<ApiResponse<Car>> {
-    return apiService.delete(`/vehicles/${id}/images/${imageIndex}`);
+    try {
+      return await apiService.delete(`/vehicles/${id}/images/${imageIndex}`);
+    } catch (error) {
+      console.error("CarService.removeCarImage error:", error);
+      throw error;
+    }
   }
 
   // Update car status
@@ -72,12 +174,22 @@ class CarService {
     id: string,
     status: "active" | "maintenance" | "inactive"
   ): Promise<ApiResponse<Car>> {
-    return apiService.put(`/vehicles/${id}/status`, { status });
+    try {
+      return await apiService.put(`/vehicles/${id}/status`, { status });
+    } catch (error) {
+      console.error("CarService.updateCarStatus error:", error);
+      throw error;
+    }
   }
 
   // Get car statistics
   async getCarStats(): Promise<ApiResponse<any>> {
-    return apiService.get("/vehicles/stats");
+    try {
+      return await apiService.get("/vehicles/stats");
+    } catch (error) {
+      console.error("CarService.getCarStats error:", error);
+      throw error;
+    }
   }
 
   // Get available cars for date range
@@ -86,66 +198,65 @@ class CarService {
     endDate: string,
     location?: string
   ): Promise<ApiResponse<Car[]>> {
-    const params: any = { startDate, endDate };
-    if (location) params.location = location;
-    return apiService.get("/vehicles/availability", params);
+    try {
+      const params: any = { startDate, endDate };
+      if (location) params.location = location;
+      return await apiService.get("/vehicles/availability", params);
+    } catch (error) {
+      console.error("CarService.getAvailableCars error:", error);
+      throw error;
+    }
   }
 
-  // Helper method to build FormData from CarFormData
-  private buildFormData(carData: Partial<CarFormData>): FormData {
-    const formData = new FormData();
+  // Helper to get proper image URL
+  private getImageUrl(car: any): string {
+    if (car.mainImage?.fullPath) {
+      return car.mainImage.fullPath;
+    }
+    if (car.mainImage?.path) {
+      return `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}${
+        car.mainImage.path
+      }`;
+    }
+    if (car.image) {
+      return car.image.startsWith("http")
+        ? car.image
+        : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}${
+            car.image
+          }`;
+    }
+    return "/cars/placeholder.jpg";
+  }
 
-    // Map frontend field names to backend field names
-    const fieldMapping: Record<string, string> = {
-      price: "price", // Frontend uses 'price', backend expects 'price'
-      whatsappNumber: "whatsappNumber",
-      licensePlate: "licensePlate",
-      lastTechnicalVisit: "lastTechnicalVisit",
-      lastOilChange: "lastOilChange",
-    };
+  // Helper to format WhatsApp number for display
+  private formatWhatsAppNumber(number: string): string {
+    if (!number) return "";
 
-    // Add regular fields
-    Object.entries(carData).forEach(([key, value]) => {
-      if (key === "mainImage" || key === "additionalImages") {
-        return; // Handle these separately
-      }
+    // Remove any existing formatting
+    const cleaned = number.replace(/\s/g, "");
 
-      // Map field name if needed
-      const backendFieldName = fieldMapping[key] || key;
-
-      if (key === "features" && Array.isArray(value)) {
-        value.forEach((feature, index) => {
-          formData.append(`features[${index}]`, feature);
-        });
-      } else if (value !== undefined && value !== null && value !== "") {
-        formData.append(backendFieldName, value.toString());
-      }
-    });
-
-    // Add main image
-    if (carData.mainImage) {
-      formData.append("mainImage", carData.mainImage);
+    // Format as 06 XX XX XX XX if it's 10 digits
+    if (cleaned.length === 10) {
+      return `${cleaned.substring(0, 2)} ${cleaned.substring(
+        2,
+        4
+      )} ${cleaned.substring(4, 6)} ${cleaned.substring(
+        6,
+        8
+      )} ${cleaned.substring(8, 10)}`;
     }
 
-    // Add additional images
-    if (carData.additionalImages && carData.additionalImages.length > 0) {
-      carData.additionalImages.forEach((file) => {
-        formData.append("additionalImages", file);
-      });
-    }
-
-    return formData;
+    return number;
   }
 
   // Transform backend response to frontend format
   private transformCarResponse(backendCar: any): Car {
     return {
       ...backendCar,
-      // Map any backend fields to frontend format if needed
-      image:
-        backendCar.mainImage?.path ||
-        backendCar.image ||
-        "/cars/placeholder.jpg",
+      // Ensure image paths are properly formatted
+      image: this.getImageUrl(backendCar),
+      // Format WhatsApp number for display
+      whatsappNumber: this.formatWhatsAppNumber(backendCar.whatsappNumber),
     };
   }
 
@@ -153,13 +264,18 @@ class CarService {
   async getCarsTransformed(
     filters: CarFilters = {}
   ): Promise<ApiResponse<Car[]>> {
-    const response = await this.getCars(filters);
-    if (response.data) {
-      response.data = response.data.map((car) =>
-        this.transformCarResponse(car)
-      );
+    try {
+      const response = await this.getCars(filters);
+      if (response.data) {
+        response.data = response.data.map((car) =>
+          this.transformCarResponse(car)
+        );
+      }
+      return response;
+    } catch (error) {
+      console.error("CarService.getCarsTransformed error:", error);
+      throw error;
     }
-    return response;
   }
 }
 
