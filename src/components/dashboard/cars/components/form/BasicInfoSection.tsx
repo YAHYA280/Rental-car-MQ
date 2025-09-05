@@ -1,4 +1,4 @@
-// src/components/dashboard/cars/components/form/BasicInfoSection.tsx - Updated without model and location
+// src/components/dashboard/cars/components/form/BasicInfoSection.tsx - Added model field
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -110,16 +110,6 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
     // Limit to 10 digits
     if (cleaned.length > 10) {
       cleaned = cleaned.substring(0, 10);
-    }
-
-    // Format as 06 XX XX XX XX
-    let formatted = cleaned;
-    if (cleaned.length > 2) {
-      formatted = cleaned.substring(0, 2);
-      if (cleaned.length > 2) formatted += " " + cleaned.substring(2, 4);
-      if (cleaned.length > 4) formatted += " " + cleaned.substring(4, 6);
-      if (cleaned.length > 6) formatted += " " + cleaned.substring(6, 8);
-      if (cleaned.length > 8) formatted += " " + cleaned.substring(8, 10);
     }
 
     onInputChange("whatsappNumber", cleaned); // Store unformatted for validation

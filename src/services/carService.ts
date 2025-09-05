@@ -1,17 +1,40 @@
-// src/services/carService.ts - Fixed Car API Service
-import {
-  apiService,
-  Car,
-  CarFormData,
-  CarFilters,
-  ApiResponse,
-} from "@/lib/api";
+// src/services/carService.ts - Updated Car API Service with model field
+import { ApiResponse } from "@/lib/api";
+import { CarData, CarFormData, CarFilters } from "@/components/types/car";
 
 class CarService {
+  private baseUrl =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+
   // Get all cars with filtering and pagination
-  async getCars(filters: CarFilters = {}): Promise<ApiResponse<Car[]>> {
+  async getCars(filters: CarFilters = {}): Promise<ApiResponse<CarData[]>> {
     try {
-      return await apiService.get("/vehicles", filters);
+      const queryParams = new URLSearchParams();
+
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "") {
+          queryParams.append(key, value.toString());
+        }
+      });
+
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `${this.baseUrl}/vehicles?${queryParams.toString()}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to fetch cars");
+      }
+
+      return result;
     } catch (error) {
       console.error("CarService.getCars error:", error);
       throw error;
@@ -19,9 +42,23 @@ class CarService {
   }
 
   // Get single car by ID
-  async getCar(id: string): Promise<ApiResponse<Car>> {
+  async getCar(id: string): Promise<ApiResponse<CarData>> {
     try {
-      return await apiService.get(`/vehicles/${id}`);
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${this.baseUrl}/vehicles/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to fetch car");
+      }
+
+      return result;
     } catch (error) {
       console.error("CarService.getCar error:", error);
       throw error;
@@ -31,7 +68,14 @@ class CarService {
   // Get available brands
   async getBrands(): Promise<ApiResponse<string[]>> {
     try {
-      return await apiService.get("/vehicles/brands");
+      const response = await fetch(`${this.baseUrl}/vehicles/brands`);
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to fetch brands");
+      }
+
+      return result;
     } catch (error) {
       console.error("CarService.getBrands error:", error);
       // Return fallback brands if API fails
@@ -55,22 +99,17 @@ class CarService {
   }
 
   // Create new car - This method is called from the form
-  async createCar(formData: FormData): Promise<ApiResponse<Car>> {
+  async createCar(formData: FormData): Promise<ApiResponse<CarData>> {
     try {
       const token = localStorage.getItem("token");
 
-      const response = await fetch(
-        `${
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"
-        }/vehicles`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: formData,
-        }
-      );
+      const response = await fetch(`${this.baseUrl}/vehicles`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
 
       const result = await response.json();
 
@@ -88,22 +127,20 @@ class CarService {
   }
 
   // Update car
-  async updateCar(id: string, formData: FormData): Promise<ApiResponse<Car>> {
+  async updateCar(
+    id: string,
+    formData: FormData
+  ): Promise<ApiResponse<CarData>> {
     try {
       const token = localStorage.getItem("token");
 
-      const response = await fetch(
-        `${
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"
-        }/vehicles/${id}`,
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: formData,
-        }
-      );
+      const response = await fetch(`${this.baseUrl}/vehicles/${id}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
 
       const result = await response.json();
 
@@ -123,7 +160,22 @@ class CarService {
   // Delete car
   async deleteCar(id: string): Promise<ApiResponse<void>> {
     try {
-      return await apiService.delete(`/vehicles/${id}`);
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${this.baseUrl}/vehicles/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to delete car");
+      }
+
+      return result;
     } catch (error) {
       console.error("CarService.deleteCar error:", error);
       throw error;
@@ -135,7 +187,7 @@ class CarService {
     id: string,
     mainImage?: File,
     additionalImages?: File[]
-  ): Promise<ApiResponse<Car>> {
+  ): Promise<ApiResponse<CarData>> {
     try {
       const formData = new FormData();
 
@@ -149,7 +201,22 @@ class CarService {
         });
       }
 
-      return await apiService.putFormData(`/vehicles/${id}/images`, formData);
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${this.baseUrl}/vehicles/${id}/images`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to upload images");
+      }
+
+      return result;
     } catch (error) {
       console.error("CarService.uploadCarImages error:", error);
       throw error;
@@ -160,9 +227,27 @@ class CarService {
   async removeCarImage(
     id: string,
     imageIndex: number
-  ): Promise<ApiResponse<Car>> {
+  ): Promise<ApiResponse<CarData>> {
     try {
-      return await apiService.delete(`/vehicles/${id}/images/${imageIndex}`);
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `${this.baseUrl}/vehicles/${id}/images/${imageIndex}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to remove image");
+      }
+
+      return result;
     } catch (error) {
       console.error("CarService.removeCarImage error:", error);
       throw error;
@@ -173,9 +258,25 @@ class CarService {
   async updateCarStatus(
     id: string,
     status: "active" | "maintenance" | "inactive"
-  ): Promise<ApiResponse<Car>> {
+  ): Promise<ApiResponse<CarData>> {
     try {
-      return await apiService.put(`/vehicles/${id}/status`, { status });
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${this.baseUrl}/vehicles/${id}/status`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to update car status");
+      }
+
+      return result;
     } catch (error) {
       console.error("CarService.updateCarStatus error:", error);
       throw error;
@@ -185,7 +286,21 @@ class CarService {
   // Get car statistics
   async getCarStats(): Promise<ApiResponse<any>> {
     try {
-      return await apiService.get("/vehicles/stats");
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${this.baseUrl}/vehicles/stats`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to fetch car stats");
+      }
+
+      return result;
     } catch (error) {
       console.error("CarService.getCarStats error:", error);
       throw error;
@@ -197,11 +312,23 @@ class CarService {
     startDate: string,
     endDate: string,
     location?: string
-  ): Promise<ApiResponse<Car[]>> {
+  ): Promise<ApiResponse<CarData[]>> {
     try {
       const params: any = { startDate, endDate };
       if (location) params.location = location;
-      return await apiService.get("/vehicles/availability", params);
+
+      const queryParams = new URLSearchParams(params);
+      const response = await fetch(
+        `${this.baseUrl}/vehicles/availability?${queryParams.toString()}`
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to fetch available cars");
+      }
+
+      return result;
     } catch (error) {
       console.error("CarService.getAvailableCars error:", error);
       throw error;
@@ -214,18 +341,14 @@ class CarService {
       return car.mainImage.fullPath;
     }
     if (car.mainImage?.path) {
-      return `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}${
-        car.mainImage.path
-      }`;
+      return `${this.baseUrl.replace("/api", "")}${car.mainImage.path}`;
     }
     if (car.image) {
       return car.image.startsWith("http")
         ? car.image
-        : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}${
-            car.image
-          }`;
+        : `${this.baseUrl.replace("/api", "")}${car.image}`;
     }
-    return "/cars/placeholder.jpg";
+    return "/cars/car1.jpg";
   }
 
   // Helper to format WhatsApp number for display
@@ -250,7 +373,7 @@ class CarService {
   }
 
   // Transform backend response to frontend format
-  private transformCarResponse(backendCar: any): Car {
+  private transformCarResponse(backendCar: any): CarData {
     return {
       ...backendCar,
       // Ensure image paths are properly formatted
@@ -263,7 +386,7 @@ class CarService {
   // Get cars with transformation
   async getCarsTransformed(
     filters: CarFilters = {}
-  ): Promise<ApiResponse<Car[]>> {
+  ): Promise<ApiResponse<CarData[]>> {
     try {
       const response = await this.getCars(filters);
       if (response.data) {

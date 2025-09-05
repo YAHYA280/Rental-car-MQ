@@ -1,4 +1,4 @@
-// src/components/dashboard/cars/components/CarDetailsModal.tsx - Updated with proper image display
+// src/components/dashboard/cars/components/CarDetailsModal.tsx - Fixed with unified types
 "use client";
 
 import React from "react";
@@ -14,43 +14,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Phone } from "lucide-react";
-import Image from "next/image";
 
-interface CarData {
-  id: string;
-  name: string;
-  brand: string;
-  year: number;
-  price: number;
-  image: string;
-  seats: number;
-  doors: number;
-  transmission: string;
-  fuelType: string;
-  available: boolean;
-  rating: number;
-  bookings?: number;
-  mileage?: number;
-  features?: string[];
-  description?: string;
-  licensePlate?: string;
-  caution?: number;
-  whatsappNumber?: string;
-  lastTechnicalVisit?: string;
-  lastOilChange?: string;
-  mainImage?: {
-    filename: string;
-    originalName: string;
-    path: string;
-    fullPath?: string;
-  };
-  images?: Array<{
-    filename: string;
-    originalName: string;
-    path: string;
-    fullPath?: string;
-  }>;
-}
+// Import unified types
+import { CarData } from "@/components/types/car";
 
 interface CarDetailsModalProps {
   car: CarData | null;
@@ -94,7 +60,7 @@ const CarDetailsModal: React.FC<CarDetailsModalProps> = ({
             car.image
           }`;
     }
-    return "/cars/placeholder.jpg";
+    return "/cars/car1.jpg";
   };
 
   // Format WhatsApp number for display
@@ -135,7 +101,7 @@ const CarDetailsModal: React.FC<CarDetailsModalProps> = ({
                   alt={`${car.brand} ${car.name}`}
                   className="w-full h-full object-cover"
                   onError={(e) => {
-                    e.currentTarget.src = "/cars/placeholder.jpg";
+                    e.currentTarget.src = "/cars/car1.jpg";
                   }}
                 />
               </div>
@@ -296,6 +262,27 @@ const CarDetailsModal: React.FC<CarDetailsModalProps> = ({
                 </div>
               </div>
 
+              {/* Status and Bookings Info */}
+              <div className="p-3 sm:p-4 bg-white border rounded-lg">
+                <h4 className="font-semibold text-gray-900 mb-3 text-sm sm:text-base">
+                  Status & Stats
+                </h4>
+                <div className="space-y-2">
+                  <p className="text-sm sm:text-base">
+                    <span className="text-gray-600">Status:</span>{" "}
+                    <span className="font-medium capitalize">{car.status}</span>
+                  </p>
+                  <p className="text-sm sm:text-base">
+                    <span className="text-gray-600">Total Bookings:</span>{" "}
+                    <span className="font-medium">{car.totalBookings}</span>
+                  </p>
+                  <p className="text-sm sm:text-base">
+                    <span className="text-gray-600">Rating:</span>{" "}
+                    <span className="font-medium">{car.rating}/5</span>
+                  </p>
+                </div>
+              </div>
+
               <div className="sm:col-span-2 p-3 sm:p-4 bg-white border rounded-lg">
                 <h4 className="font-semibold text-gray-900 mb-3 text-sm sm:text-base">
                   {t("cars.details.features")}
@@ -330,6 +317,26 @@ const CarDetailsModal: React.FC<CarDetailsModalProps> = ({
                   </p>
                 </div>
               )}
+
+              {/* Created/Updated info */}
+              <div className="sm:col-span-2 p-3 sm:p-4 bg-gray-50 border rounded-lg">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm text-gray-600">
+                  <div>
+                    <span className="font-medium">Created:</span>{" "}
+                    {new Date(car.createdAt).toLocaleString()}
+                  </div>
+                  <div>
+                    <span className="font-medium">Last Updated:</span>{" "}
+                    {new Date(car.updatedAt).toLocaleString()}
+                  </div>
+                  {car.createdBy && (
+                    <div className="sm:col-span-2">
+                      <span className="font-medium">Created by:</span>{" "}
+                      {car.createdBy.name} ({car.createdBy.email})
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>

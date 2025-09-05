@@ -52,18 +52,57 @@ export interface CarFormData {
   name: string;
   year: string;
   licensePlate: string;
+
   transmission: string;
   fuelType: string;
   seats: string;
   doors: string;
   mileage: string;
+
   dailyPrice: string;
   caution: string;
+
   whatsappNumber: string;
+
   lastTechnicalVisit: string;
   lastOilChange: string;
+
   features: string[];
   mainImage?: File;
   additionalImages: File[];
+
   description?: string;
+}
+
+export interface CarFilters {
+  page?: number;
+  limit?: number;
+  search?: string;
+  brand?: string | string[];
+  transmission?: string | string[];
+  fuelType?: string | string[];
+  available?: boolean;
+  minPrice?: number;
+  maxPrice?: number;
+  seats?: number | string[];
+  status?: string;
+  sort?: string;
+}
+
+// API Response structure
+export interface CarApiResponse {
+  success: boolean;
+  message?: string;
+  data?: CarData[];
+  total?: number;
+  count?: number;
+  pagination?: {
+    page: number;
+    limit: number;
+    pages: number;
+    current: number;
+    totalPages: number;
+    next?: { page: number; limit: number };
+    prev?: { page: number; limit: number };
+  };
 }

@@ -1,5 +1,8 @@
-// src/lib/api.ts - API Service Configuration
+// src/lib/api.ts - Updated API Service with unified types
 import axios, { AxiosInstance, AxiosResponse } from "axios";
+
+// Re-export types from unified location
+export * from "@/components/types/car";
 
 // Types
 export interface ApiResponse<T = any> {
@@ -18,109 +21,6 @@ export interface ApiResponse<T = any> {
     prev?: { page: number; limit: number };
   };
   errors?: any[];
-}
-
-export interface Car {
-  id: string;
-  name: string;
-  brand: string;
-  model: string;
-  year: number;
-  price: number;
-  image: string;
-  mainImage?: {
-    filename: string;
-    originalName: string;
-    path: string;
-    size: number;
-    mimetype: string;
-  };
-  images?: Array<{
-    filename: string;
-    originalName: string;
-    path: string;
-    size: number;
-    mimetype: string;
-  }>;
-  seats: number;
-  doors: number;
-  transmission: string;
-  fuelType: string;
-  available: boolean;
-  rating: number;
-  totalBookings?: number;
-  mileage?: number;
-  features?: string[];
-  description?: string;
-  licensePlate: string;
-  caution: number;
-  whatsappNumber: string;
-  lastTechnicalVisit?: string;
-  lastOilChange?: string;
-  location: string;
-  status: "active" | "maintenance" | "inactive";
-  createdAt: string;
-  updatedAt: string;
-  createdBy?: {
-    id: string;
-    name: string;
-    email: string;
-  };
-}
-
-export interface CarFormData {
-  // Basic Info
-  brand: string;
-  name: string;
-  model: string;
-  year: string;
-  licensePlate: string;
-  location: string;
-
-  // Technical Specs
-  transmission: string;
-  fuelType: string;
-  seats: string;
-  doors: string;
-  mileage?: string;
-
-  // Pricing
-  price: string; // Changed from dailyPrice to match backend
-  caution: string;
-
-  // Contact Information
-  whatsappNumber: string;
-
-  // Maintenance
-  lastTechnicalVisit?: string;
-  lastOilChange?: string;
-
-  // Features and Images
-  features: string[];
-  mainImage?: File;
-  additionalImages: File[];
-
-  // Optional fields
-  description?: string;
-  available?: boolean;
-  status?: "active" | "maintenance" | "inactive";
-}
-
-export interface CarFilters {
-  page?: number;
-  limit?: number;
-  search?: string;
-  brand?: string;
-  transmission?: string;
-  fuelType?: string;
-  available?: boolean;
-  location?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  seats?: number;
-  status?: string;
-  sort?: string;
-  order?: "ASC" | "DESC";
 }
 
 export interface User {
@@ -239,7 +139,7 @@ export interface Booking {
   createdAt: string;
   updatedAt: string;
   customer?: User;
-  vehicle?: Car;
+  vehicle?: any; // Use CarData from unified types
   createdBy?: {
     id: string;
     name: string;

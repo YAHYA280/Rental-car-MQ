@@ -1,4 +1,4 @@
-// src/components/dashboard/cars/components/CarsTable.tsx
+// src/components/dashboard/cars/components/CarsTable.tsx - Updated with model field
 "use client";
 
 import React from "react";
@@ -32,30 +32,8 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 
-interface CarData {
-  id: string;
-  name: string;
-  brand: string;
-  model: string;
-  year: number;
-  price: number;
-  image: string;
-  seats: number;
-  doors: number;
-  transmission: string;
-  fuelType: string;
-  available: boolean;
-  rating: number;
-  bookings?: number;
-  mileage?: number;
-  features?: string[];
-  description?: string;
-  licensePlate?: string;
-  caution?: number;
-  whatsappNumber?: string;
-  lastTechnicalVisit?: string;
-  lastOilChange?: string;
-}
+// Import unified types
+import { CarData } from "../../../types/car";
 
 interface CarsTableProps {
   cars: CarData[];
@@ -95,6 +73,26 @@ const CarsTable: React.FC<CarsTableProps> = ({
     }
   };
 
+  // Get proper image URL with fallback
+  const getImageUrl = (car: CarData) => {
+    if (car.mainImage?.fullPath) {
+      return car.mainImage.fullPath;
+    }
+    if (car.mainImage?.path) {
+      return `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}${
+        car.mainImage.path
+      }`;
+    }
+    if (car.image) {
+      return car.image.startsWith("http")
+        ? car.image
+        : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}${
+            car.image
+          }`;
+    }
+    return "/cars/car1.jpg";
+  };
+
   return (
     <Table>
       <TableHeader>
@@ -115,20 +113,20 @@ const CarsTable: React.FC<CarsTableProps> = ({
             <TableCell>
               <div className="flex items-center gap-3">
                 <div className="w-16 h-12 relative rounded-lg overflow-hidden">
-                  <Image
-                    src={car.image}
+                  <img
+                    src={getImageUrl(car)}
                     alt={`${car.brand} ${car.name}`}
-                    fill
-                    className="object-cover"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = "/cars/car1.jpg";
+                    }}
                   />
                 </div>
                 <div>
                   <p className="font-semibold text-gray-900">
                     {car.brand} {car.name}
                   </p>
-                  <p className="text-sm text-gray-600">
-                    {car.model} {car.year}
-                  </p>
+                  <p className="text-sm text-gray-600">{car.year}</p>
                   <p className="text-xs text-gray-500">{car.licensePlate}</p>
                 </div>
               </div>

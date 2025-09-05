@@ -303,7 +303,7 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
             car.image
           }`;
     }
-    return "/cars/placeholder.jpg";
+    return "/cars/car1.jpg";
   };
 
   return (
@@ -370,7 +370,7 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
                   alt={`${car.brand} ${car.name}`}
                   className="w-full h-full object-cover"
                   onError={(e) => {
-                    e.currentTarget.src = "/cars/placeholder.jpg";
+                    e.currentTarget.src = "/cars/car1.jpg";
                   }}
                 />
               </div>

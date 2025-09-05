@@ -1,4 +1,4 @@
-// src/components/dashboard/cars/AddCarForm.tsx - Updated interface and validation
+// src/components/dashboard/cars/AddCarForm.tsx - Updated with model field
 "use client";
 
 import React, { useState } from "react";
@@ -14,40 +14,8 @@ import MaintenanceSection from "./components/form/MaintenanceSection";
 import FeaturesSection from "./components/form/FeaturesSection";
 import ImagesSection from "./components/form/ImagesSection";
 
-// Updated interface without model and location
-export interface CarFormData {
-  // Basic Info
-  brand: string;
-  name: string;
-  year: string;
-  licensePlate: string;
-
-  // Technical Specs
-  transmission: string;
-  fuelType: string;
-  seats: string;
-  doors: string;
-  mileage: string;
-
-  // Pricing
-  dailyPrice: string;
-  caution: string;
-
-  // Contact Information
-  whatsappNumber: string;
-
-  // Maintenance
-  lastTechnicalVisit: string;
-  lastOilChange: string;
-
-  // Features and Images
-  features: string[];
-  mainImage?: File;
-  additionalImages: File[];
-
-  // Optional fields
-  description?: string;
-}
+// Import the unified types
+import { CarFormData } from "../../types/car";
 
 interface AddCarFormProps {
   onSubmit: (data: CarFormData) => Promise<void>;

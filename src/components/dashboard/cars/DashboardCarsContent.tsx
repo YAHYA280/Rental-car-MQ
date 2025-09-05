@@ -16,8 +16,11 @@ import {
 import { Plus, Search, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { carService } from "@/services/carService";
-import { Car, CarFilters } from "@/lib/api";
-import { CarData, CarFormData } from "../../types/car";
+
+// Import unified types from single source
+import { CarData, CarFormData, CarFilters } from "../../types/car";
+
+// Import components
 import AddCarForm from "./AddCarForm";
 import EditCarForm from "./EditCarForm";
 import CarStatsGrid from "./components/CarStatsGrid";
@@ -41,39 +44,6 @@ const DashboardCarsContent = () => {
   const [carToEdit, setCarToEdit] = useState<CarData | null>(null);
   const [pagination, setPagination] = useState<any>(null);
   const [total, setTotal] = useState(0);
-
-  // Transform Car API response to CarData
-  const transformToCarData = (car: Car): CarData => {
-    return {
-      id: car.id,
-      name: car.name,
-      brand: car.brand,
-      year: car.year,
-      price: car.price,
-      image: car.mainImage?.path || car.image || "/cars/placeholder.jpg",
-      mainImage: car.mainImage,
-      images: car.images,
-      seats: car.seats,
-      doors: car.doors,
-      transmission: car.transmission,
-      fuelType: car.fuelType,
-      available: car.available,
-      rating: car.rating,
-      totalBookings: car.totalBookings || 0,
-      mileage: car.mileage,
-      features: car.features || [],
-      description: car.description,
-      licensePlate: car.licensePlate,
-      caution: car.caution,
-      whatsappNumber: car.whatsappNumber,
-      status: car.status,
-      lastTechnicalVisit: car.lastTechnicalVisit,
-      lastOilChange: car.lastOilChange,
-      createdAt: car.createdAt,
-      updatedAt: car.updatedAt,
-      createdBy: car.createdBy,
-    };
-  };
 
   // Fetch cars from API
   const fetchCars = async (filters: CarFilters = {}) => {
@@ -100,8 +70,8 @@ const DashboardCarsContent = () => {
       const response = await carService.getCars(apiFilters);
 
       if (response.success && response.data) {
-        const transformedCars = response.data.map(transformToCarData);
-        setCars(transformedCars);
+        // Response.data is already CarData[] from carService
+        setCars(response.data);
         setTotal(response.total || 0);
         setPagination(response.pagination);
       } else {
@@ -163,9 +133,8 @@ const DashboardCarsContent = () => {
     setIsEditCarDialogOpen(true);
   };
 
-  // Fixed transform function for form data
+  // Transform form data to FormData for API
   const transformFormDataToAPI = (formData: CarFormData) => {
-    // Create a new FormData object for the API
     const apiFormData = new FormData();
 
     // Add all text fields
