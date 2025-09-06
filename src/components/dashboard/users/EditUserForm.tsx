@@ -1,4 +1,4 @@
-// src/components/dashboard/users/EditUserForm.tsx
+// src/components/dashboard/users/EditUserForm.tsx - FIXED: Email validation and optional fields
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -48,10 +48,39 @@ const EditUserForm: React.FC<EditUserFormProps> = ({
   }, [user]);
 
   const handleInputChange = (field: string, value: string) => {
+    // FIXED: Handle phone number formatting
+    if (field === "phone") {
+      // Remove all non-numeric characters
+      const cleaned = value.replace(/\D/g, "");
+
+      // Format as 06 XX XX XX XX if it starts with 06 or 07
+      if (
+        cleaned.length <= 10 &&
+        (cleaned.startsWith("06") || cleaned.startsWith("07"))
+      ) {
+        let formatted = cleaned;
+        if (cleaned.length > 2) {
+          formatted = cleaned.substring(0, 2);
+          if (cleaned.length > 2) formatted += " " + cleaned.substring(2, 4);
+          if (cleaned.length > 4) formatted += " " + cleaned.substring(4, 6);
+          if (cleaned.length > 6) formatted += " " + cleaned.substring(6, 8);
+          if (cleaned.length > 8) formatted += " " + cleaned.substring(8, 10);
+        }
+        value = formatted;
+      } else if (cleaned.length <= 10) {
+        // Allow typing but don't format invalid numbers
+        value = cleaned;
+      } else {
+        // Don't allow more than 10 digits
+        return;
+      }
+    }
+
     setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
+
     // Clear error when user starts typing
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: "" }));
@@ -66,14 +95,16 @@ const EditUserForm: React.FC<EditUserFormProps> = ({
   };
 
   const validateEmail = (email: string): boolean => {
+    if (!email || email.trim() === "") return true; // FIXED: Email is optional
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
   const validatePhoneNumber = (phone: string): boolean => {
-    // Morocco phone format: +212XXXXXXXXX or 212XXXXXXXXX or 0XXXXXXXXX
-    const phoneRegex = /^(\+212|212|0)[5-7]\d{8}$/;
-    return phoneRegex.test(phone.replace(/\s/g, ""));
+    // FIXED: Remove spaces and validate Moroccan phone format
+    const cleaned = phone.replace(/\s/g, "");
+    const phoneRegex = /^0[67]\d{8}$/;
+    return phoneRegex.test(cleaned);
   };
 
   const validateForm = (): boolean => {
@@ -84,11 +115,17 @@ const EditUserForm: React.FC<EditUserFormProps> = ({
       newErrors.firstName = t("users.form.validation.firstNameRequired");
     if (!formData.lastName.trim())
       newErrors.lastName = t("users.form.validation.lastNameRequired");
-    if (!formData.email.trim()) {
-      newErrors.email = t("users.form.validation.emailRequired");
-    } else if (!validateEmail(formData.email)) {
+
+    // FIXED: Email validation - only validate if provided and not empty
+    if (
+      formData.email &&
+      formData.email.trim() !== "" &&
+      !validateEmail(formData.email)
+    ) {
       newErrors.email = t("users.form.validation.emailFormat");
     }
+
+    // Phone validation
     if (!formData.phone.trim()) {
       newErrors.phone = t("users.form.validation.phoneRequired");
     } else if (!validatePhoneNumber(formData.phone)) {
@@ -108,7 +145,18 @@ const EditUserForm: React.FC<EditUserFormProps> = ({
 
     setIsSubmitting(true);
     try {
-      await onSubmit(formData);
+      // FIXED: Clean the phone number before submitting (remove spaces)
+      const cleanedFormData = {
+        ...formData,
+        phone: formData.phone.replace(/\s/g, ""),
+        // FIXED: Set empty email to undefined so backend handles it as null
+        email:
+          formData.email && formData.email.trim() !== ""
+            ? formData.email.trim()
+            : undefined,
+      };
+
+      await onSubmit(cleanedFormData);
     } catch (error) {
       console.error("Error updating user:", error);
     } finally {
@@ -165,8 +213,9 @@ const EditUserForm: React.FC<EditUserFormProps> = ({
               )}
             </div>
 
+            {/* FIXED: Email is now optional */}
             <div>
-              <Label htmlFor="email">{t("users.form.email")} *</Label>
+              <Label htmlFor="email">{t("users.form.email")} (Optional)</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
@@ -181,8 +230,12 @@ const EditUserForm: React.FC<EditUserFormProps> = ({
               {errors.email && (
                 <p className="text-red-500 text-sm mt-1">{errors.email}</p>
               )}
+              <p className="text-xs text-gray-500 mt-1">
+                Email is optional but recommended for notifications
+              </p>
             </div>
 
+            {/* FIXED: Phone with proper formatting */}
             <div>
               <Label htmlFor="phone">{t("users.form.phone")} *</Label>
               <div className="relative">
@@ -191,13 +244,16 @@ const EditUserForm: React.FC<EditUserFormProps> = ({
                   id="phone"
                   value={formData.phone}
                   onChange={(e) => handleInputChange("phone", e.target.value)}
-                  placeholder={t("users.form.placeholders.phone")}
+                  placeholder="06 XX XX XX XX"
                   className={`pl-10 ${errors.phone ? "border-red-500" : ""}`}
                 />
               </div>
               {errors.phone && (
                 <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
               )}
+              <p className="text-xs text-gray-500 mt-1">
+                Moroccan mobile number (06 or 07)
+              </p>
             </div>
           </div>
         </CardContent>
@@ -218,7 +274,8 @@ const EditUserForm: React.FC<EditUserFormProps> = ({
                 <Image
                   src={user.driverLicenseImage.dataUrl}
                   alt="Current Driver License"
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
                 />
               </div>
             </div>
@@ -239,7 +296,8 @@ const EditUserForm: React.FC<EditUserFormProps> = ({
                     <Image
                       src={URL.createObjectURL(formData.driverLicenseImage)}
                       alt="New Driver License Preview"
-                      className="w-full h-full object-cover rounded-lg border"
+                      fill
+                      className="object-cover rounded-lg border"
                     />
                     <button
                       type="button"

@@ -1,4 +1,4 @@
-// STEP 2E: Replace src/components/dashboard/users/components/UserDetailsModal.tsx
+// src/components/dashboard/users/components/UserDetailsModal.tsx - FIXED
 
 "use client";
 
@@ -76,12 +76,13 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
     return `€${amount.toLocaleString()}`;
   };
 
-  // FIXED: Get driver license image URL
+  // FIXED: Get driver license image URL - properly handle the dataUrl from BYTEA
   const getDriverLicenseImageUrl = () => {
-    if (!user?.driverLicenseImage) return null;
-
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-    return `${baseUrl}${user.driverLicenseImage.dataUrl}`;
+    // The backend should return the image as a dataUrl in the driverLicenseImage object
+    if (user?.driverLicenseImage?.dataUrl) {
+      return user.driverLicenseImage.dataUrl;
+    }
+    return null;
   };
 
   if (!user) return null;
@@ -110,7 +111,7 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                   {user.firstName} {user.lastName}
                 </h3>
                 <p className="text-gray-600 text-sm sm:text-base">
-                  {user.email}
+                  {user.email || "No email provided"}
                 </p>
                 <p className="text-xs sm:text-sm text-gray-500">
                   User ID: {user.id.slice(0, 8)}...
@@ -131,7 +132,9 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                     <span className="text-gray-600">
                       {t("users.details.email")}:
                     </span>{" "}
-                    <span className="font-medium break-all">{user.email}</span>
+                    <span className="font-medium break-all">
+                      {user.email || "Not provided"}
+                    </span>
                   </p>
                   <p className="text-sm sm:text-base">
                     <span className="text-gray-600">
@@ -237,12 +240,6 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                       {user.source}
                     </span>
                   </p>
-                  {user.referralCode && (
-                    <p className="text-sm sm:text-base">
-                      <span className="text-gray-600">Referral Code:</span>{" "}
-                      <span className="font-medium">{user.referralCode}</span>
-                    </p>
-                  )}
                 </div>
               </div>
 
@@ -251,14 +248,13 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                   <FileText className="h-4 w-4" />
                   {t("users.details.driverLicense")}
                 </h4>
-                {user.driverLicenseImage ? (
-                  <div className="w-full max-w-sm">
+                {/* FIXED: Driver license image display - Made bigger */}
+                {getDriverLicenseImageUrl() ? (
+                  <div className="w-full max-w-md">
                     <img
-                      src={
-                        getDriverLicenseImageUrl() || "/placeholder-license.jpg"
-                      }
+                      src={getDriverLicenseImageUrl()!}
                       alt="Driver License"
-                      className="w-full h-32 object-cover rounded-lg border cursor-pointer hover:opacity-90 transition-opacity"
+                      className="w-full h-48 object-cover rounded-lg border cursor-pointer hover:opacity-90 transition-opacity shadow-sm"
                       onClick={() => {
                         const imageUrl = getDriverLicenseImageUrl();
                         if (imageUrl) {
@@ -266,12 +262,10 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                         }
                       }}
                       onError={(e) => {
-                        e.currentTarget.src = "/placeholder-license.jpg";
+                        console.error("Failed to load driver license image");
+                        e.currentTarget.style.display = "none";
                       }}
                     />
-                    <p className="text-xs text-gray-500 mt-2 text-center">
-                      Click to view full size
-                    </p>
                   </div>
                 ) : (
                   <p className="text-sm text-gray-500 italic">
@@ -316,39 +310,6 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                   </div>
                 </div>
               )}
-
-              {/* Verification Status */}
-              <div className="p-3 sm:p-4 bg-white border rounded-lg">
-                <h4 className="font-semibold text-gray-900 mb-3 text-sm sm:text-base">
-                  Verification Status
-                </h4>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-gray-600">Email:</span>
-                    <Badge
-                      className={
-                        user.emailVerified
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                      }
-                    >
-                      {user.emailVerified ? "Verified" : "Not Verified"}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-gray-600">Phone:</span>
-                    <Badge
-                      className={
-                        user.phoneVerified
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                      }
-                    >
-                      {user.phoneVerified ? "Verified" : "Not Verified"}
-                    </Badge>
-                  </div>
-                </div>
-              </div>
 
               {/* Notes */}
               {user.notes && (

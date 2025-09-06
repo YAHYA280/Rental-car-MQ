@@ -1,4 +1,4 @@
-// src/components/dashboard/users/AddUserForm.tsx - FIXED: Email and driver license optional, phone formatting
+// src/components/dashboard/users/AddUserForm.tsx - FIXED: Consistent with EditUserForm improvements
 "use client";
 
 import React, { useState } from "react";
@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Upload, X, Phone, Mail, User } from "lucide-react";
 import { UserFormData } from "@/components/types";
+import Image from "next/image";
 
 interface AddUserFormProps {
   onSubmit: (data: UserFormData) => Promise<void>;
@@ -271,10 +272,11 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ onSubmit, onClose }) => {
               {formData.driverLicenseImage ? (
                 <div className="space-y-3">
                   <div className="w-48 h-32 mx-auto relative">
-                    <img
+                    <Image
                       src={URL.createObjectURL(formData.driverLicenseImage)}
                       alt="Driver License Preview"
-                      className="w-full h-full object-cover rounded-lg border"
+                      fill
+                      className="object-cover rounded-lg border"
                     />
                     <button
                       type="button"

@@ -1,8 +1,9 @@
-// src/components/dashboard/layout/DashboardHeader.tsx - Minimal Design
+// src/components/dashboard/layout/DashboardHeader.tsx - FIXED: Proper language switching
 "use client";
 
-import React from "react";
+import React, { useTransition } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useTranslations, useLocale } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -12,7 +13,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Menu, ChevronDown, User, Settings, LogOut } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Menu, ChevronDown, User, Settings, LogOut, Globe } from "lucide-react";
 
 interface DashboardHeaderProps {
   onMobileMenuOpen: () => void;
@@ -22,9 +30,27 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   onMobileMenuOpen,
 }) => {
   const { admin, logout } = useAuth();
+  const t = useTranslations("dashboard");
+  const locale = useLocale();
+  const [isPending, startTransition] = useTransition();
 
   const handleLogout = () => {
     logout();
+  };
+
+  // FIXED: Same language switching logic as main navbar
+  const handleLanguageChange = (newLocale: "en" | "fr") => {
+    if (newLocale === locale || isPending) return;
+
+    startTransition(() => {
+      // Use window.location to handle all routes consistently
+      // This avoids TypeScript typing issues with dynamic routes
+      const currentPath = window.location.pathname;
+      const pathWithoutLocale = currentPath.replace(/^\/[a-z]{2}(?=\/|$)/, "");
+      const newPath = `/${newLocale}${pathWithoutLocale}`;
+
+      window.location.href = newPath;
+    });
   };
 
   return (
@@ -43,23 +69,25 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
       {/* Right side - Language & Profile */}
       <div className="flex items-center gap-x-4 lg:gap-x-6">
-        {/* Language Selector */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-gray-500 hover:text-gray-700"
-            >
-              FR
-              <ChevronDown className="ml-1 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem>🇫🇷 Français</DropdownMenuItem>
-            <DropdownMenuItem>🇺🇸 English</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {/* FIXED: Language Selector with proper switching logic */}
+        <div className="flex items-center space-x-2">
+          <Globe className="h-4 w-4 text-gray-500" />
+          <Select
+            value={locale}
+            onValueChange={handleLanguageChange}
+            disabled={isPending}
+          >
+            <SelectTrigger className="w-20 h-8 text-sm border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">
+              <SelectValue>
+                {isPending ? "..." : locale.toUpperCase()}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="en">EN</SelectItem>
+              <SelectItem value="fr">FR</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
         {/* Separator */}
         <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-200" />
@@ -101,16 +129,16 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <User className="mr-2 h-4 w-4" />
-              Profil
+              {locale === "fr" ? "Profil" : "Profile"}
             </DropdownMenuItem>
             <DropdownMenuItem>
               <Settings className="mr-2 h-4 w-4" />
-              Paramètres
+              {locale === "fr" ? "Paramètres" : "Settings"}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout} className="text-red-600">
               <LogOut className="mr-2 h-4 w-4" />
-              Déconnexion
+              {locale === "fr" ? "Déconnexion" : "Logout"}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

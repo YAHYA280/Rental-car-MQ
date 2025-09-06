@@ -1,4 +1,4 @@
-// STEP 2F: Replace src/components/dashboard/users/components/UserStatsGrid.tsx
+// src/components/dashboard/users/components/UserStatsGrid.tsx - FIXED: Currency formatting
 
 "use client";
 
@@ -8,8 +8,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Users, UserCheck, UserPlus, TrendingUp } from "lucide-react";
 import { UserData } from "@/components/types";
 
-// FIXED: Updated interface to match backend data
-
 interface UserStatsGridProps {
   users: UserData[];
 }
@@ -17,7 +15,7 @@ interface UserStatsGridProps {
 const UserStatsGrid: React.FC<UserStatsGridProps> = ({ users }) => {
   const t = useTranslations("dashboard");
 
-  // FIXED: Calculate stats from real user data
+  // FIXED: Calculate stats from real user data with proper currency formatting
   const calculateStats = () => {
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
@@ -51,6 +49,26 @@ const UserStatsGrid: React.FC<UserStatsGridProps> = ({ users }) => {
     };
   };
 
+  // FIXED: Proper currency formatting function with NaN protection
+  const formatCurrency = (amount: number): string => {
+    // Check if amount is NaN or invalid
+    if (isNaN(amount) || amount === null || amount === undefined) {
+      return "€0";
+    }
+
+    if (amount === 0) {
+      return "€0";
+    }
+
+    // Format with proper European number formatting
+    return new Intl.NumberFormat("fr-FR", {
+      style: "currency",
+      currency: "EUR",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  };
+
   const stats = calculateStats();
 
   const statsData = [
@@ -74,7 +92,7 @@ const UserStatsGrid: React.FC<UserStatsGridProps> = ({ users }) => {
     },
     {
       title: t("stats.totalRevenue"),
-      value: `€${stats.totalRevenue.toLocaleString()}`,
+      value: formatCurrency(stats.totalRevenue), // FIXED: Use proper formatting
       icon: TrendingUp,
       color: "orange",
     },

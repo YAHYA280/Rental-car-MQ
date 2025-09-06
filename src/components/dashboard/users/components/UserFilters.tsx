@@ -1,4 +1,4 @@
-// STEP 2C: Replace src/components/dashboard/users/components/UserFilters.tsx
+// src/components/dashboard/users/components/UserFilters.tsx - FIXED: Removed blocked status
 
 "use client";
 
@@ -17,12 +17,11 @@ const UserFilters: React.FC<UserFiltersProps> = ({
 }) => {
   const t = useTranslations("dashboard");
 
-  // FIXED: Updated filters array to match backend API
+  // FIXED: Removed "blocked" filter - only show All Users, Active, and Inactive
   const filters = [
     { value: "all", label: "All Users" },
     { value: "active", label: "Active" },
     { value: "inactive", label: "Inactive" },
-    { value: "blocked", label: "Blocked" },
   ];
 
   return (
