@@ -1,4 +1,5 @@
-// src/components/dashboard/users/components/UsersTable.tsx
+// STEP 2D: Replace src/components/dashboard/users/components/UsersTable.tsx
+
 "use client";
 
 import React from "react";
@@ -30,18 +31,49 @@ import {
   Calendar,
 } from "lucide-react";
 
+// FIXED: Updated interface to match backend data
 interface UserData {
   id: string;
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
-  joinDate: string;
-  status: "active" | "inactive";
+  dateOfBirth?: string;
+  address?: string;
+  city?: string;
+  postalCode?: string;
+  country: string;
+  driverLicenseNumber?: string;
+  driverLicenseImage?: {
+    filename: string;
+    originalName: string;
+    path: string;
+    size: number;
+    mimetype: string;
+  };
+  emergencyContact?: {
+    name: string;
+    phone: string;
+    relationship: string;
+  };
+  preferences?: Record<string, any>;
+  status: "active" | "inactive" | "blocked";
   totalBookings: number;
   totalSpent: number;
-  lastBooking: string;
-  driverLicenseImage?: string;
+  averageRating?: number;
+  lastBookingDate?: string;
+  source: "website" | "admin" | "referral" | "social" | "other";
+  referralCode: string;
+  emailVerified: boolean;
+  phoneVerified: boolean;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  createdBy?: {
+    id: string;
+    name: string;
+    email: string;
+  };
 }
 
 interface UsersTableProps {
@@ -59,20 +91,49 @@ const UsersTable: React.FC<UsersTableProps> = ({
 }) => {
   const t = useTranslations("dashboard");
 
-  const getStatusBadge = (status: "active" | "inactive") => {
-    return status === "active" ? (
-      <Badge className="bg-green-100 text-green-800">
-        {t("users.statusBadges.active")}
-      </Badge>
-    ) : (
-      <Badge className="bg-gray-100 text-gray-800">
-        {t("users.statusBadges.inactive")}
-      </Badge>
-    );
+  const getStatusBadge = (status: "active" | "inactive" | "blocked") => {
+    switch (status) {
+      case "active":
+        return (
+          <Badge className="bg-green-100 text-green-800">
+            {t("users.statusBadges.active")}
+          </Badge>
+        );
+      case "inactive":
+        return (
+          <Badge className="bg-gray-100 text-gray-800">
+            {t("users.statusBadges.inactive")}
+          </Badge>
+        );
+      case "blocked":
+        return (
+          <Badge className="bg-red-100 text-red-800">
+            {t("users.statusBadges.blocked")}
+          </Badge>
+        );
+      default:
+        return <Badge className="bg-gray-100 text-gray-800">Unknown</Badge>;
+    }
   };
 
   const getInitials = (firstName: string, lastName: string) => {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+  };
+
+  // FIXED: Format date safely
+  const formatDate = (dateString: string | undefined) => {
+    if (!dateString) return "N/A";
+    try {
+      return new Date(dateString).toLocaleDateString();
+    } catch {
+      return "Invalid Date";
+    }
+  };
+
+  // FIXED: Format currency safely
+  const formatCurrency = (amount: number | undefined) => {
+    if (amount === undefined || amount === null) return "€0";
+    return `€${amount.toLocaleString()}`;
   };
 
   return (
@@ -101,7 +162,9 @@ const UsersTable: React.FC<UsersTableProps> = ({
                   <p className="font-semibold text-gray-900">
                     {user.firstName} {user.lastName}
                   </p>
-                  <p className="text-sm text-gray-600">ID: {user.id}</p>
+                  <p className="text-sm text-gray-600">
+                    ID: {user.id.slice(0, 8)}...
+                  </p>
                 </div>
               </div>
             </TableCell>
@@ -120,25 +183,27 @@ const UsersTable: React.FC<UsersTableProps> = ({
             <TableCell>
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Calendar className="h-4 w-4" />
-                {new Date(user.joinDate).toLocaleDateString()}
+                {formatDate(user.createdAt)}
               </div>
             </TableCell>
             <TableCell>
-              <p className="font-medium">{user.totalBookings}</p>
+              <p className="font-medium">{user.totalBookings || 0}</p>
               <p className="text-sm text-gray-600">
                 {t("users.table.bookingsCount")}
               </p>
             </TableCell>
             <TableCell>
-              <p className="font-semibold text-gray-900">€{user.totalSpent}</p>
+              <p className="font-semibold text-gray-900">
+                {formatCurrency(user.totalSpent)}
+              </p>
               <p className="text-sm text-gray-600">
                 {t("users.table.lifetime")}
               </p>
             </TableCell>
             <TableCell>
               <p className="text-sm text-gray-600">
-                {user.lastBooking
-                  ? new Date(user.lastBooking).toLocaleDateString()
+                {user.lastBookingDate
+                  ? formatDate(user.lastBookingDate)
                   : "No bookings"}
               </p>
             </TableCell>

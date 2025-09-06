@@ -1,4 +1,5 @@
-// src/components/dashboard/users/components/UserDetailsModal.tsx
+// STEP 2E: Replace src/components/dashboard/users/components/UserDetailsModal.tsx
+
 "use client";
 
 import React from "react";
@@ -15,18 +16,49 @@ import {
 } from "@/components/ui/dialog";
 import { Mail, Phone, Calendar, CreditCard, FileText } from "lucide-react";
 
+// FIXED: Updated interface to match backend data
 interface UserData {
   id: string;
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
-  joinDate: string;
-  status: "active" | "inactive";
+  dateOfBirth?: string;
+  address?: string;
+  city?: string;
+  postalCode?: string;
+  country: string;
+  driverLicenseNumber?: string;
+  driverLicenseImage?: {
+    filename: string;
+    originalName: string;
+    path: string;
+    size: number;
+    mimetype: string;
+  };
+  emergencyContact?: {
+    name: string;
+    phone: string;
+    relationship: string;
+  };
+  preferences?: Record<string, any>;
+  status: "active" | "inactive" | "blocked";
   totalBookings: number;
   totalSpent: number;
-  lastBooking: string;
-  driverLicenseImage?: string;
+  averageRating?: number;
+  lastBookingDate?: string;
+  source: "website" | "admin" | "referral" | "social" | "other";
+  referralCode: string;
+  emailVerified: boolean;
+  phoneVerified: boolean;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  createdBy?: {
+    id: string;
+    name: string;
+    email: string;
+  };
 }
 
 interface UserDetailsModalProps {
@@ -42,20 +74,57 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
 }) => {
   const t = useTranslations("dashboard");
 
-  const getStatusBadge = (status: "active" | "inactive") => {
-    return status === "active" ? (
-      <Badge className="bg-green-100 text-green-800">
-        {t("users.statusBadges.active")}
-      </Badge>
-    ) : (
-      <Badge className="bg-gray-100 text-gray-800">
-        {t("users.statusBadges.inactive")}
-      </Badge>
-    );
+  const getStatusBadge = (status: "active" | "inactive" | "blocked") => {
+    switch (status) {
+      case "active":
+        return (
+          <Badge className="bg-green-100 text-green-800">
+            {t("users.statusBadges.active")}
+          </Badge>
+        );
+      case "inactive":
+        return (
+          <Badge className="bg-gray-100 text-gray-800">
+            {t("users.statusBadges.inactive")}
+          </Badge>
+        );
+      case "blocked":
+        return (
+          <Badge className="bg-red-100 text-red-800">
+            {t("users.statusBadges.blocked")}
+          </Badge>
+        );
+      default:
+        return <Badge className="bg-gray-100 text-gray-800">Unknown</Badge>;
+    }
   };
 
   const getInitials = (firstName: string, lastName: string) => {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+  };
+
+  // FIXED: Safe date formatting
+  const formatDate = (dateString: string | undefined) => {
+    if (!dateString) return "Not provided";
+    try {
+      return new Date(dateString).toLocaleDateString();
+    } catch {
+      return "Invalid Date";
+    }
+  };
+
+  // FIXED: Safe currency formatting
+  const formatCurrency = (amount: number | undefined) => {
+    if (amount === undefined || amount === null) return "€0";
+    return `€${amount.toLocaleString()}`;
+  };
+
+  // FIXED: Get driver license image URL
+  const getDriverLicenseImageUrl = () => {
+    if (!user?.driverLicenseImage) return null;
+
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+    return `${baseUrl}${user.driverLicenseImage.path}`;
   };
 
   if (!user) return null;
@@ -87,7 +156,7 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                   {user.email}
                 </p>
                 <p className="text-xs sm:text-sm text-gray-500">
-                  User ID: {user.id}
+                  User ID: {user.id.slice(0, 8)}...
                 </p>
                 <div className="mt-2">{getStatusBadge(user.status)}</div>
               </div>
@@ -118,9 +187,23 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                       {t("users.details.joinDate")}:
                     </span>{" "}
                     <span className="font-medium">
-                      {new Date(user.joinDate).toLocaleDateString()}
+                      {formatDate(user.createdAt)}
                     </span>
                   </p>
+                  {user.address && (
+                    <p className="text-sm sm:text-base">
+                      <span className="text-gray-600">Address:</span>{" "}
+                      <span className="font-medium">{user.address}</span>
+                    </p>
+                  )}
+                  {user.city && (
+                    <p className="text-sm sm:text-base">
+                      <span className="text-gray-600">City:</span>{" "}
+                      <span className="font-medium">
+                        {user.city} {user.postalCode}
+                      </span>
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -137,7 +220,7 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                       </span>
                     </p>
                     <p className="text-lg sm:text-xl font-bold text-blue-600">
-                      {user.totalBookings}
+                      {user.totalBookings || 0}
                       <span className="text-sm font-normal text-gray-500 ml-1">
                         bookings
                       </span>
@@ -150,7 +233,7 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                       </span>
                     </p>
                     <p className="text-lg sm:text-xl font-bold text-green-600">
-                      €{user.totalSpent}
+                      {formatCurrency(user.totalSpent)}
                       <span className="text-sm font-normal text-gray-500 ml-1">
                         lifetime
                       </span>
@@ -171,11 +254,11 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                     </span>{" "}
                     <span
                       className={`font-medium ${
-                        user.lastBooking ? "text-gray-900" : "text-gray-500"
+                        user.lastBookingDate ? "text-gray-900" : "text-gray-500"
                       }`}
                     >
-                      {user.lastBooking
-                        ? new Date(user.lastBooking).toLocaleDateString()
+                      {user.lastBookingDate
+                        ? formatDate(user.lastBookingDate)
                         : "No bookings yet"}
                     </span>
                   </p>
@@ -184,12 +267,25 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                       {t("users.details.avgBookingValue")}:
                     </span>{" "}
                     <span className="font-medium">
-                      €
-                      {user.totalBookings > 0
-                        ? Math.round(user.totalSpent / user.totalBookings)
-                        : 0}
+                      {formatCurrency(
+                        user.totalBookings > 0
+                          ? user.totalSpent / user.totalBookings
+                          : 0
+                      )}
                     </span>
                   </p>
+                  <p className="text-sm sm:text-base">
+                    <span className="text-gray-600">Source:</span>{" "}
+                    <span className="font-medium capitalize">
+                      {user.source}
+                    </span>
+                  </p>
+                  {user.referralCode && (
+                    <p className="text-sm sm:text-base">
+                      <span className="text-gray-600">Referral Code:</span>{" "}
+                      <span className="font-medium">{user.referralCode}</span>
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -201,12 +297,20 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                 {user.driverLicenseImage ? (
                   <div className="w-full max-w-sm">
                     <img
-                      src={user.driverLicenseImage}
+                      src={
+                        getDriverLicenseImageUrl() || "/placeholder-license.jpg"
+                      }
                       alt="Driver License"
                       className="w-full h-32 object-cover rounded-lg border cursor-pointer hover:opacity-90 transition-opacity"
-                      onClick={() =>
-                        window.open(user.driverLicenseImage, "_blank")
-                      }
+                      onClick={() => {
+                        const imageUrl = getDriverLicenseImageUrl();
+                        if (imageUrl) {
+                          window.open(imageUrl, "_blank");
+                        }
+                      }}
+                      onError={(e) => {
+                        e.currentTarget.src = "/placeholder-license.jpg";
+                      }}
                     />
                     <p className="text-xs text-gray-500 mt-2 text-center">
                       Click to view full size
@@ -217,6 +321,108 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                     No driver license image uploaded
                   </p>
                 )}
+                {user.driverLicenseNumber && (
+                  <p className="text-sm mt-2">
+                    <span className="text-gray-600">License Number:</span>{" "}
+                    <span className="font-medium">
+                      {user.driverLicenseNumber}
+                    </span>
+                  </p>
+                )}
+              </div>
+
+              {/* Emergency Contact */}
+              {user.emergencyContact && (
+                <div className="p-3 sm:p-4 bg-white border rounded-lg">
+                  <h4 className="font-semibold text-gray-900 mb-3 text-sm sm:text-base">
+                    Emergency Contact
+                  </h4>
+                  <div className="space-y-2">
+                    <p className="text-sm sm:text-base">
+                      <span className="text-gray-600">Name:</span>{" "}
+                      <span className="font-medium">
+                        {user.emergencyContact.name}
+                      </span>
+                    </p>
+                    <p className="text-sm sm:text-base">
+                      <span className="text-gray-600">Phone:</span>{" "}
+                      <span className="font-medium">
+                        {user.emergencyContact.phone}
+                      </span>
+                    </p>
+                    <p className="text-sm sm:text-base">
+                      <span className="text-gray-600">Relationship:</span>{" "}
+                      <span className="font-medium">
+                        {user.emergencyContact.relationship}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Verification Status */}
+              <div className="p-3 sm:p-4 bg-white border rounded-lg">
+                <h4 className="font-semibold text-gray-900 mb-3 text-sm sm:text-base">
+                  Verification Status
+                </h4>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-600">Email:</span>
+                    <Badge
+                      className={
+                        user.emailVerified
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                      }
+                    >
+                      {user.emailVerified ? "Verified" : "Not Verified"}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-600">Phone:</span>
+                    <Badge
+                      className={
+                        user.phoneVerified
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                      }
+                    >
+                      {user.phoneVerified ? "Verified" : "Not Verified"}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+
+              {/* Notes */}
+              {user.notes && (
+                <div className="sm:col-span-2 p-3 sm:p-4 bg-white border rounded-lg">
+                  <h4 className="font-semibold text-gray-900 mb-3 text-sm sm:text-base">
+                    Notes
+                  </h4>
+                  <p className="text-gray-700 bg-gray-50 p-3 rounded-lg text-sm sm:text-base leading-relaxed">
+                    {user.notes}
+                  </p>
+                </div>
+              )}
+
+              {/* Created/Updated info */}
+              <div className="sm:col-span-2 p-3 sm:p-4 bg-gray-50 border rounded-lg">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm text-gray-600">
+                  <div>
+                    <span className="font-medium">Created:</span>{" "}
+                    {formatDate(user.createdAt)}
+                  </div>
+                  <div>
+                    <span className="font-medium">Last Updated:</span>{" "}
+                    {formatDate(user.updatedAt)}
+                  </div>
+                  {user.createdBy && (
+                    <div className="sm:col-span-2">
+                      <span className="font-medium">Created by:</span>{" "}
+                      {user.createdBy.name} ({user.createdBy.email})
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>

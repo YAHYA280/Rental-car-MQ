@@ -1,7 +1,8 @@
-// src/components/dashboard/cars/DashboardCarsContent.tsx - Updated with unified types
+// STEP 1B: Replace the entire DashboardCarsContent.tsx file
+
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -45,66 +46,76 @@ const DashboardCarsContent = () => {
   const [pagination, setPagination] = useState<any>(null);
   const [total, setTotal] = useState(0);
 
-  // Fetch cars from API
-  const fetchCars = async (filters: CarFilters = {}) => {
+  // FIXED: Add debounced search
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+
+  // FIXED: Debounce search to avoid too many API calls
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300); // 300ms delay
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // FIXED: Fetch cars function
+  const fetchCars = useCallback(async () => {
     try {
       setLoading(true);
 
       const apiFilters: CarFilters = {
         page: 1,
-        limit: 25,
-        search: searchTerm || undefined,
-        ...filters,
+        limit: 50, // Increased limit to get more results
       };
 
+      // FIXED: Add search term to API call
+      if (debouncedSearchTerm && debouncedSearchTerm.trim() !== "") {
+        apiFilters.search = debouncedSearchTerm.trim();
+        console.log("Searching for:", debouncedSearchTerm.trim());
+      }
+
+      // FIXED: Add filter to API call
       if (selectedFilter !== "all") {
         if (selectedFilter === "available") {
           apiFilters.available = true;
         } else if (selectedFilter === "rented") {
           apiFilters.available = false;
         } else {
+          // Assume it's a fuel type filter
           apiFilters.fuelType = selectedFilter;
         }
       }
 
+      console.log("API Filters being sent:", apiFilters);
+
       const response = await carService.getCars(apiFilters);
+      console.log("API Response:", response);
 
       if (response.success && response.data) {
         setCars(response.data);
-        setTotal(response.total || 0);
+        setTotal(response.total || response.data.length);
         setPagination(response.pagination);
+        console.log(`Loaded ${response.data.length} cars`);
       } else {
+        console.error("API returned unsuccessful response:", response);
         toast.error("Failed to fetch cars");
         setCars([]);
+        setTotal(0);
       }
     } catch (error: any) {
       console.error("Error fetching cars:", error);
       toast.error(error.message || "Failed to fetch cars");
       setCars([]);
+      setTotal(0);
     } finally {
       setLoading(false);
     }
-  };
+  }, [debouncedSearchTerm, selectedFilter]);
 
+  // FIXED: Trigger fetch when dependencies change
   useEffect(() => {
     fetchCars();
-  }, [searchTerm, selectedFilter]);
-
-  const filteredCars = cars.filter((car) => {
-    const matchesSearch =
-      car.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      car.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      car.licensePlate?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      car.whatsappNumber?.includes(searchTerm);
-
-    const matchesFilter =
-      selectedFilter === "all" ||
-      (selectedFilter === "available" && car.available) ||
-      (selectedFilter === "rented" && !car.available) ||
-      car.fuelType.toLowerCase() === selectedFilter;
-
-    return matchesSearch && matchesFilter;
-  });
+  }, [fetchCars]);
 
   const handleDeleteCar = async (carId: string) => {
     try {
@@ -112,7 +123,8 @@ const DashboardCarsContent = () => {
 
       if (response.success) {
         toast.success("Car deleted successfully");
-        setCars(cars.filter((car) => car.id !== carId));
+        // Refresh the list
+        await fetchCars();
         setCarToDelete(null);
       } else {
         toast.error(response.message || "Failed to delete car");
@@ -294,11 +306,15 @@ const DashboardCarsContent = () => {
     }
   };
 
+  // FIXED: Search change handler
   const handleSearchChange = (value: string) => {
+    console.log("Search input changed to:", value);
     setSearchTerm(value);
   };
 
+  // FIXED: Filter change handler
   const handleFilterChange = (filter: string) => {
+    console.log("Filter changed to:", filter);
     setSelectedFilter(filter);
   };
 
@@ -352,12 +368,23 @@ const DashboardCarsContent = () => {
                 onChange={(e) => handleSearchChange(e.target.value)}
                 className="pl-10"
               />
+              {/* Show loading indicator */}
+              {loading && debouncedSearchTerm && (
+                <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 animate-spin text-gray-400" />
+              )}
             </div>
             <CarFiltersComponent
               selectedFilter={selectedFilter}
               onFilterChange={handleFilterChange}
             />
           </div>
+          {/* FIXED: Add debug info */}
+          {process.env.NODE_ENV === "development" && (
+            <div className="mt-2 text-xs text-gray-500">
+              Debug: Search="{debouncedSearchTerm}" Filter="{selectedFilter}"
+              Total={total}
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -365,7 +392,7 @@ const DashboardCarsContent = () => {
       <Card className="border-0 shadow-md">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            {t("cars.fleetOverview")} ({total || filteredCars.length} cars)
+            {t("cars.fleetOverview")} ({total} cars)
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
           </CardTitle>
         </CardHeader>
@@ -377,18 +404,22 @@ const DashboardCarsContent = () => {
                 <p className="text-gray-600">Loading cars...</p>
               </div>
             </div>
-          ) : filteredCars.length === 0 ? (
+          ) : cars.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-600">No cars found</p>
-              {searchTerm && (
+              <p className="text-gray-600">
+                {searchTerm || selectedFilter !== "all"
+                  ? "No cars found matching your criteria"
+                  : "No cars found"}
+              </p>
+              {(searchTerm || selectedFilter !== "all") && (
                 <p className="text-sm text-gray-500 mt-2">
-                  Try adjusting your search criteria
+                  Try clearing your search or changing filters
                 </p>
               )}
             </div>
           ) : (
             <CarsTable
-              cars={filteredCars}
+              cars={cars}
               onViewDetails={handleViewCarDetails}
               onEditCar={handleEditCar}
               onDeleteCar={setCarToDelete}
@@ -397,14 +428,13 @@ const DashboardCarsContent = () => {
         </CardContent>
       </Card>
 
-      {/* Car Details Modal */}
+      {/* Modals... */}
       <CarDetailsModal
         car={selectedCar}
         onClose={() => setSelectedCar(null)}
         onEdit={handleEditCar}
       />
 
-      {/* Edit Car Modal */}
       <Dialog open={isEditCarDialogOpen} onOpenChange={setIsEditCarDialogOpen}>
         <DialogContent className="w-[min(1400px,95vw)] sm:max-w-[min(1400px,95vw)] max-h-[95vh] overflow-y-auto">
           <DialogHeader>
@@ -428,7 +458,6 @@ const DashboardCarsContent = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
       <DeleteConfirmationDialog
         isOpen={carToDelete !== null}
         onClose={() => setCarToDelete(null)}

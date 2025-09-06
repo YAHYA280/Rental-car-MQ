@@ -1,4 +1,5 @@
-// src/services/carService.ts - Updated with unified types and no mock data
+// STEP 1D: Replace src/services/carService.ts
+
 import {
   ApiResponse,
   CarData,
@@ -10,38 +11,59 @@ class CarService {
   private baseUrl =
     process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
-  // Get all cars with filtering and pagination
+  // FIXED: Get all cars with filtering and pagination
   async getCars(filters: CarFilters = {}): Promise<ApiResponse<CarData[]>> {
     try {
       const queryParams = new URLSearchParams();
 
+      // FIXED: Properly handle all filter parameters
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== "") {
-          queryParams.append(key, value.toString());
+          if (typeof value === "boolean") {
+            queryParams.append(key, value.toString());
+          } else if (Array.isArray(value)) {
+            value.forEach((v) => queryParams.append(key, v.toString()));
+          } else {
+            queryParams.append(key, value.toString());
+          }
         }
       });
 
       const token = localStorage.getItem("token");
-      const response = await fetch(
-        `${this.baseUrl}/vehicles?${queryParams.toString()}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const url = `${this.baseUrl}/vehicles?${queryParams.toString()}`;
 
-      const result = await response.json();
+      console.log("Making API request to:", url); // Debug log
+
+      const response = await fetch(url, {
+        method: "GET", // FIXED: Explicitly set method
+        headers: {
+          ...(token && { Authorization: `Bearer ${token}` }), // FIXED: Only add auth if token exists
+          "Content-Type": "application/json",
+        },
+      });
+
+      console.log("API Response status:", response.status); // Debug log
 
       if (!response.ok) {
-        throw new Error(result.message || "Failed to fetch cars");
+        const errorText = await response.text();
+        console.error("API Error Response:", errorText);
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
+
+      const result = await response.json();
+      console.log("API Result:", result); // Debug log
 
       return result;
     } catch (error) {
       console.error("CarService.getCars error:", error);
-      throw error;
+      // FIXED: Return a proper error response instead of throwing
+      return {
+        success: false,
+        message:
+          error instanceof Error ? error.message : "Failed to fetch cars",
+        data: [],
+        total: 0,
+      };
     }
   }
 
@@ -51,7 +73,7 @@ class CarService {
       const token = localStorage.getItem("token");
       const response = await fetch(`${this.baseUrl}/vehicles/${id}`, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          ...(token && { Authorization: `Bearer ${token}` }),
           "Content-Type": "application/json",
         },
       });

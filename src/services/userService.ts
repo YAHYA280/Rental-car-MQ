@@ -1,27 +1,120 @@
-// src/services/userService.ts - Updated User API Service
+// STEP 2A: Replace src/services/userService.ts
+
 import {
-  apiService,
+  ApiResponse,
   User,
   UserFormData,
   UserFilters,
-  ApiResponse,
-} from "@/lib/api";
+} from "@/components/types";
 
 class UserService {
+  private baseUrl =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+
   // Get all users with filtering and pagination
   async getUsers(filters: UserFilters = {}): Promise<ApiResponse<User[]>> {
-    return apiService.get("/customers", filters);
+    try {
+      const queryParams = new URLSearchParams();
+
+      // Handle all filter parameters
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "") {
+          if (typeof value === "boolean") {
+            queryParams.append(key, value.toString());
+          } else if (Array.isArray(value)) {
+            value.forEach((v) => queryParams.append(key, v.toString()));
+          } else {
+            queryParams.append(key, value.toString());
+          }
+        }
+      });
+
+      const token = localStorage.getItem("token");
+      const url = `${this.baseUrl}/customers?${queryParams.toString()}`;
+
+      console.log("Making API request to:", url);
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          ...(token && { Authorization: `Bearer ${token}` }),
+          "Content-Type": "application/json",
+        },
+      });
+
+      console.log("API Response status:", response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("API Error Response:", errorText);
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log("API Result:", result);
+
+      return result;
+    } catch (error) {
+      console.error("UserService.getUsers error:", error);
+      return {
+        success: false,
+        message:
+          error instanceof Error ? error.message : "Failed to fetch users",
+        data: [],
+        total: 0,
+      };
+    }
   }
 
   // Get single user by ID
   async getUser(id: string): Promise<ApiResponse<User>> {
-    return apiService.get(`/customers/${id}`);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${this.baseUrl}/customers/${id}`, {
+        headers: {
+          ...(token && { Authorization: `Bearer ${token}` }),
+          "Content-Type": "application/json",
+        },
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to fetch user");
+      }
+
+      return result;
+    } catch (error) {
+      console.error("UserService.getUser error:", error);
+      throw error;
+    }
   }
 
   // Create new user
   async createUser(userData: UserFormData): Promise<ApiResponse<User>> {
-    const formData = this.buildFormData(userData);
-    return apiService.postFormData("/customers", formData);
+    try {
+      const formData = this.buildFormData(userData);
+      const token = localStorage.getItem("token");
+
+      const response = await fetch(`${this.baseUrl}/customers`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to create user");
+      }
+
+      return result;
+    } catch (error) {
+      console.error("UserService.createUser error:", error);
+      throw error;
+    }
   }
 
   // Update user
@@ -29,13 +122,54 @@ class UserService {
     id: string,
     userData: Partial<UserFormData>
   ): Promise<ApiResponse<User>> {
-    const formData = this.buildFormData(userData);
-    return apiService.putFormData(`/customers/${id}`, formData);
+    try {
+      const formData = this.buildFormData(userData);
+      const token = localStorage.getItem("token");
+
+      const response = await fetch(`${this.baseUrl}/customers/${id}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to update user");
+      }
+
+      return result;
+    } catch (error) {
+      console.error("UserService.updateUser error:", error);
+      throw error;
+    }
   }
 
   // Delete user
   async deleteUser(id: string): Promise<ApiResponse<void>> {
-    return apiService.delete(`/customers/${id}`);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${this.baseUrl}/customers/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to delete user");
+      }
+
+      return result;
+    } catch (error) {
+      console.error("UserService.deleteUser error:", error);
+      throw error;
+    }
   }
 
   // Update user status
@@ -43,7 +177,28 @@ class UserService {
     id: string,
     status: "active" | "inactive" | "blocked"
   ): Promise<ApiResponse<User>> {
-    return apiService.put(`/customers/${id}/status`, { status });
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${this.baseUrl}/customers/${id}/status`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to update user status");
+      }
+
+      return result;
+    } catch (error) {
+      console.error("UserService.updateUserStatus error:", error);
+      throw error;
+    }
   }
 
   // Upload driver license
@@ -51,14 +206,57 @@ class UserService {
     id: string,
     file: File
   ): Promise<ApiResponse<User>> {
-    const formData = new FormData();
-    formData.append("driverLicenseImage", file);
-    return apiService.putFormData(`/customers/${id}/driver-license`, formData);
+    try {
+      const formData = new FormData();
+      formData.append("driverLicenseImage", file);
+
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `${this.baseUrl}/customers/${id}/driver-license`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to upload driver license");
+      }
+
+      return result;
+    } catch (error) {
+      console.error("UserService.uploadDriverLicense error:", error);
+      throw error;
+    }
   }
 
   // Get user statistics
   async getUserStats(): Promise<ApiResponse<any>> {
-    return apiService.get("/customers/stats");
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${this.baseUrl}/customers/stats`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to fetch user stats");
+      }
+
+      return result;
+    } catch (error) {
+      console.error("UserService.getUserStats error:", error);
+      throw error;
+    }
   }
 
   // Search users
@@ -67,7 +265,35 @@ class UserService {
     limit = 10,
     offset = 0
   ): Promise<ApiResponse<User[]>> {
-    return apiService.get("/customers/search", { q: query, limit, offset });
+    try {
+      const token = localStorage.getItem("token");
+      const params = new URLSearchParams({
+        q: query,
+        limit: limit.toString(),
+        offset: offset.toString(),
+      });
+
+      const response = await fetch(
+        `${this.baseUrl}/customers/search?${params}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to search users");
+      }
+
+      return result;
+    } catch (error) {
+      console.error("UserService.searchUsers error:", error);
+      throw error;
+    }
   }
 
   // Helper method to build FormData from UserFormData
@@ -100,7 +326,7 @@ class UserService {
   }
 
   // Transform backend response to frontend format
-  private transformUserResponse(backendUser: any): User {
+  transformUserResponse(backendUser: any): User {
     return {
       ...backendUser,
       // Ensure all required fields have default values
@@ -134,7 +360,34 @@ class UserService {
     page = 1,
     limit = 10
   ): Promise<ApiResponse<any[]>> {
-    return apiService.get(`/bookings/customer/${userId}`, { page, limit });
+    try {
+      const token = localStorage.getItem("token");
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+      });
+
+      const response = await fetch(
+        `${this.baseUrl}/bookings/customer/${userId}?${params}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to fetch user bookings");
+      }
+
+      return result;
+    } catch (error) {
+      console.error("UserService.getUserBookings error:", error);
+      throw error;
+    }
   }
 }
 

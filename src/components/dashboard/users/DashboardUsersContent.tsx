@@ -1,12 +1,12 @@
-// src/components/dashboard/users/DashboardUsersContent.tsx
+// STEP 2B: Replace src/components/dashboard/users/DashboardUsersContent.tsx
+
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -14,7 +14,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+
+// Import components
 import AddUserForm from "./AddUserForm";
 import EditUserForm from "./EditUserForm";
 import UserStatsGrid from "./components/UserStatsGrid";
@@ -23,19 +26,52 @@ import UsersTable from "./components/UsersTable";
 import UserDetailsModal from "./components/UserDetailsModal";
 import DeleteConfirmationDialog from "./components/DeleteConfirmationDialog";
 
-// Define proper types
+// Import service
+import { userService } from "@/services/userService";
+
+// FIXED: Updated UserData interface to match backend exactly
 interface UserData {
   id: string;
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
-  joinDate: string;
-  status: "active" | "inactive";
+  dateOfBirth?: string;
+  address?: string;
+  city?: string;
+  postalCode?: string;
+  country: string;
+  driverLicenseNumber?: string;
+  driverLicenseImage?: {
+    filename: string;
+    originalName: string;
+    path: string;
+    size: number;
+    mimetype: string;
+  };
+  emergencyContact?: {
+    name: string;
+    phone: string;
+    relationship: string;
+  };
+  preferences?: Record<string, any>;
+  status: "active" | "inactive" | "blocked";
   totalBookings: number;
   totalSpent: number;
-  lastBooking: string;
-  driverLicenseImage?: string;
+  averageRating?: number;
+  lastBookingDate?: string;
+  source: "website" | "admin" | "referral" | "social" | "other";
+  referralCode: string;
+  emailVerified: boolean;
+  phoneVerified: boolean;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  createdBy?: {
+    id: string;
+    name: string;
+    email: string;
+  };
 }
 
 export interface UserFormData {
@@ -43,11 +79,40 @@ export interface UserFormData {
   lastName: string;
   email: string;
   phone: string;
+  dateOfBirth?: string;
+  address?: string;
+  city?: string;
+  postalCode?: string;
+  country?: string;
+  driverLicenseNumber?: string;
   driverLicenseImage?: File;
+  emergencyContact?: {
+    name: string;
+    phone: string;
+    relationship: string;
+  };
+  preferences?: Record<string, any>;
+  status?: "active" | "inactive" | "blocked";
+  notes?: string;
+}
+
+interface UserFilters {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: string;
+  source?: string;
+  tier?: string;
+  sort?: string;
+  order?: "ASC" | "DESC";
 }
 
 const DashboardUsersContent = () => {
   const t = useTranslations("dashboard");
+
+  // State management
+  const [users, setUsers] = useState<UserData[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
@@ -55,93 +120,88 @@ const DashboardUsersContent = () => {
   const [userToDelete, setUserToDelete] = useState<string | null>(null);
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
   const [userToEdit, setUserToEdit] = useState<UserData | null>(null);
+  const [pagination, setPagination] = useState<any>(null);
+  const [total, setTotal] = useState(0);
 
-  // Mock users data - removed blocked status
-  const [users, setUsers] = useState<UserData[]>([
-    {
-      id: "1",
-      firstName: "Sarah",
-      lastName: "Johnson",
-      email: "sarah.johnson@email.com",
-      phone: "+212612345678",
-      joinDate: "2024-01-15",
-      status: "active",
-      totalBookings: 12,
-      totalSpent: 2450,
-      lastBooking: "2024-12-10",
-      driverLicenseImage: "/licenses/sarah-license.jpg",
-    },
-    {
-      id: "2",
-      firstName: "Michael",
-      lastName: "Chen",
-      email: "michael.chen@email.com",
-      phone: "+212623456789",
-      joinDate: "2024-02-20",
-      status: "active",
-      totalBookings: 8,
-      totalSpent: 1680,
-      lastBooking: "2024-12-08",
-      driverLicenseImage: "/licenses/michael-license.jpg",
-    },
-    {
-      id: "3",
-      firstName: "Emma",
-      lastName: "Davis",
-      email: "emma.davis@email.com",
-      phone: "+212634567890",
-      joinDate: "2024-03-10",
-      status: "inactive",
-      totalBookings: 3,
-      totalSpent: 420,
-      lastBooking: "2024-10-15",
-      driverLicenseImage: "/licenses/emma-license.jpg",
-    },
-    {
-      id: "4",
-      firstName: "Ahmed",
-      lastName: "Hassan",
-      email: "ahmed.hassan@email.com",
-      phone: "+212645678901",
-      joinDate: "2024-04-05",
-      status: "active",
-      totalBookings: 15,
-      totalSpent: 3200,
-      lastBooking: "2024-11-28",
-      driverLicenseImage: "/licenses/ahmed-license.jpg",
-    },
-    {
-      id: "5",
-      firstName: "Fatima",
-      lastName: "Al-Zahra",
-      email: "fatima.alzahra@email.com",
-      phone: "+212656789012",
-      joinDate: "2024-05-18",
-      status: "active",
-      totalBookings: 6,
-      totalSpent: 980,
-      lastBooking: "2024-12-05",
-      driverLicenseImage: "/licenses/fatima-license.jpg",
-    },
-  ]);
+  // Debounced search
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
 
-  // Filter users based on search and filter criteria
-  const filteredUsers = users.filter((user) => {
-    const matchesSearch =
-      user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.phone.includes(searchTerm);
+  // Debounce search to avoid too many API calls
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300);
 
-    const matchesFilter =
-      selectedFilter === "all" || user.status === selectedFilter;
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
-    return matchesSearch && matchesFilter;
-  });
+  // FIXED: Fetch users from API
+  const fetchUsers = useCallback(async () => {
+    try {
+      setLoading(true);
 
-  const handleDeleteUser = (userId: string) => {
-    setUsers(users.filter((user) => user.id !== userId));
-    setUserToDelete(null);
+      const apiFilters: UserFilters = {
+        page: 1,
+        limit: 50,
+      };
+
+      // Add search term to API call
+      if (debouncedSearchTerm && debouncedSearchTerm.trim() !== "") {
+        apiFilters.search = debouncedSearchTerm.trim();
+        console.log("Searching for:", debouncedSearchTerm.trim());
+      }
+
+      // Add filter to API call
+      if (selectedFilter !== "all") {
+        apiFilters.status = selectedFilter;
+      }
+
+      console.log("API Filters being sent:", apiFilters);
+
+      const response = await userService.getUsers(apiFilters);
+      console.log("API Response:", response);
+
+      if (response.success && response.data) {
+        setUsers(response.data);
+        setTotal(response.total || response.data.length);
+        setPagination(response.pagination);
+        console.log(`Loaded ${response.data.length} users`);
+      } else {
+        console.error("API returned unsuccessful response:", response);
+        toast.error("Failed to fetch users");
+        setUsers([]);
+        setTotal(0);
+      }
+    } catch (error: any) {
+      console.error("Error fetching users:", error);
+      toast.error(error.message || "Failed to fetch users");
+      setUsers([]);
+      setTotal(0);
+    } finally {
+      setLoading(false);
+    }
+  }, [debouncedSearchTerm, selectedFilter]);
+
+  // Trigger fetch when dependencies change
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+  const handleDeleteUser = async (userId: string) => {
+    try {
+      const response = await userService.deleteUser(userId);
+
+      if (response.success) {
+        toast.success("User deleted successfully");
+        await fetchUsers();
+        setUserToDelete(null);
+      } else {
+        toast.error(response.message || "Failed to delete user");
+      }
+    } catch (error: any) {
+      console.error("Error deleting user:", error);
+      toast.error(error.message || "Failed to delete user");
+    }
   };
 
   const handleViewUserDetails = (user: UserData) => {
@@ -155,27 +215,21 @@ const DashboardUsersContent = () => {
 
   const handleAddUser = async (formData: UserFormData): Promise<void> => {
     try {
-      const newUserData: UserData = {
-        id: `user-${Date.now()}`,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        phone: formData.phone,
-        joinDate: new Date().toISOString().split("T")[0],
-        status: "active",
-        totalBookings: 0,
-        totalSpent: 0,
-        lastBooking: "",
-        driverLicenseImage: formData.driverLicenseImage
-          ? "/licenses/placeholder-license.jpg"
-          : undefined,
-      };
+      console.log("Submitting user data:", formData);
 
-      setUsers((prevUsers) => [...prevUsers, newUserData]);
-      setIsAddUserDialogOpen(false);
-      console.log("User added successfully:", newUserData);
-    } catch (error) {
-      console.error("Error adding user:", error);
+      const response = await userService.createUser(formData);
+
+      if (response.success) {
+        toast.success("User created successfully");
+        setIsAddUserDialogOpen(false);
+        await fetchUsers();
+      } else {
+        throw new Error(response.message || "Failed to create user");
+      }
+    } catch (error: any) {
+      console.error("Error creating user:", error);
+      toast.error(error.message || "Failed to create user");
+      throw error;
     }
   };
 
@@ -183,29 +237,33 @@ const DashboardUsersContent = () => {
     try {
       if (!userToEdit) return;
 
-      const updatedUserData: UserData = {
-        ...userToEdit,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        phone: formData.phone,
-        driverLicenseImage: formData.driverLicenseImage
-          ? "/licenses/updated-license.jpg"
-          : userToEdit.driverLicenseImage,
-      };
+      console.log("Updating user data:", formData);
 
-      setUsers((prevUsers) =>
-        prevUsers.map((user) =>
-          user.id === userToEdit.id ? updatedUserData : user
-        )
-      );
+      const response = await userService.updateUser(userToEdit.id, formData);
 
-      setIsEditUserDialogOpen(false);
-      setUserToEdit(null);
-      console.log("User updated successfully:", updatedUserData);
-    } catch (error) {
+      if (response.success) {
+        toast.success("User updated successfully");
+        setIsEditUserDialogOpen(false);
+        setUserToEdit(null);
+        await fetchUsers();
+      } else {
+        throw new Error(response.message || "Failed to update user");
+      }
+    } catch (error: any) {
       console.error("Error updating user:", error);
+      toast.error(error.message || "Failed to update user");
+      throw error;
     }
+  };
+
+  const handleSearchChange = (value: string) => {
+    console.log("Search input changed to:", value);
+    setSearchTerm(value);
+  };
+
+  const handleFilterChange = (filter: string) => {
+    console.log("Filter changed to:", filter);
+    setSelectedFilter(filter);
   };
 
   return (
@@ -258,32 +316,65 @@ const DashboardUsersContent = () => {
               <Input
                 placeholder={t("common.searchUsers")}
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
                 className="pl-10"
               />
+              {loading && debouncedSearchTerm && (
+                <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 animate-spin text-gray-400" />
+              )}
             </div>
             <UserFilters
               selectedFilter={selectedFilter}
-              onFilterChange={setSelectedFilter}
+              onFilterChange={handleFilterChange}
             />
           </div>
+          {/* Debug info */}
+          {process.env.NODE_ENV === "development" && (
+            <div className="mt-2 text-xs text-gray-500">
+              Debug: Search="{debouncedSearchTerm}" Filter="{selectedFilter}"
+              Total={total}
+            </div>
+          )}
         </CardContent>
       </Card>
 
       {/* Users Table */}
       <Card className="border-0 shadow-md">
         <CardHeader>
-          <CardTitle>
-            {t("users.customerDirectory")} ({filteredUsers.length} users)
+          <CardTitle className="flex items-center gap-2">
+            {t("users.customerDirectory")} ({total} users)
+            {loading && <Loader2 className="h-4 w-4 animate-spin" />}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <UsersTable
-            users={filteredUsers}
-            onViewDetails={handleViewUserDetails}
-            onEditUser={handleEditUser}
-            onDeleteUser={setUserToDelete}
-          />
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-carbookers-red-600" />
+                <p className="text-gray-600">Loading users...</p>
+              </div>
+            </div>
+          ) : users.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-600">
+                {searchTerm || selectedFilter !== "all"
+                  ? "No users found matching your criteria"
+                  : "No users found"}
+              </p>
+              {(searchTerm || selectedFilter !== "all") && (
+                <p className="text-sm text-gray-500 mt-2">
+                  Try clearing your search or changing filters
+                </p>
+              )}
+            </div>
+          ) : (
+            <UsersTable
+              users={users}
+              onViewDetails={handleViewUserDetails}
+              onEditUser={handleEditUser}
+              onDeleteUser={setUserToDelete}
+            />
+          )}
         </CardContent>
       </Card>
 

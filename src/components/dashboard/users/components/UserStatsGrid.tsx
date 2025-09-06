@@ -1,4 +1,5 @@
-// src/components/dashboard/users/components/UserStatsGrid.tsx
+// STEP 2F: Replace src/components/dashboard/users/components/UserStatsGrid.tsx
+
 "use client";
 
 import React from "react";
@@ -6,12 +7,49 @@ import { useTranslations } from "next-intl";
 import { Card, CardContent } from "@/components/ui/card";
 import { Users, UserCheck, UserPlus, TrendingUp } from "lucide-react";
 
+// FIXED: Updated interface to match backend data
 interface UserData {
   id: string;
-  status: "active" | "inactive";
-  joinDate: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  dateOfBirth?: string;
+  address?: string;
+  city?: string;
+  postalCode?: string;
+  country: string;
+  driverLicenseNumber?: string;
+  driverLicenseImage?: {
+    filename: string;
+    originalName: string;
+    path: string;
+    size: number;
+    mimetype: string;
+  };
+  emergencyContact?: {
+    name: string;
+    phone: string;
+    relationship: string;
+  };
+  preferences?: Record<string, any>;
+  status: "active" | "inactive" | "blocked";
+  totalBookings: number;
   totalSpent: number;
-  [key: string]: any;
+  averageRating?: number;
+  lastBookingDate?: string;
+  source: "website" | "admin" | "referral" | "social" | "other";
+  referralCode: string;
+  emailVerified: boolean;
+  phoneVerified: boolean;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  createdBy?: {
+    id: string;
+    name: string;
+    email: string;
+  };
 }
 
 interface UserStatsGridProps {
@@ -21,42 +59,64 @@ interface UserStatsGridProps {
 const UserStatsGrid: React.FC<UserStatsGridProps> = ({ users }) => {
   const t = useTranslations("dashboard");
 
-  // Calculate new users this month
-  const currentMonth = new Date().getMonth();
-  const currentYear = new Date().getFullYear();
-  const newThisMonth = users.filter((user) => {
-    const joinDate = new Date(user.joinDate);
-    return (
-      joinDate.getMonth() === currentMonth &&
-      joinDate.getFullYear() === currentYear
-    );
-  }).length;
+  // FIXED: Calculate stats from real user data
+  const calculateStats = () => {
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
 
-  // Calculate total revenue from all users
-  const totalRevenue = users.reduce((sum, user) => sum + user.totalSpent, 0);
+    // Calculate new users this month
+    const newThisMonth = users.filter((user) => {
+      try {
+        const joinDate = new Date(user.createdAt);
+        return (
+          joinDate.getMonth() === currentMonth &&
+          joinDate.getFullYear() === currentYear
+        );
+      } catch {
+        return false;
+      }
+    }).length;
 
-  const stats = [
+    // Calculate total revenue from all users
+    const totalRevenue = users.reduce((sum, user) => {
+      return sum + (user.totalSpent || 0);
+    }, 0);
+
+    // Count active users
+    const activeUsers = users.filter((user) => user.status === "active").length;
+
+    return {
+      totalUsers: users.length,
+      activeUsers,
+      newThisMonth,
+      totalRevenue,
+    };
+  };
+
+  const stats = calculateStats();
+
+  const statsData = [
     {
       title: t("stats.totalUsers"),
-      value: users.length.toString(),
+      value: stats.totalUsers.toString(),
       icon: Users,
       color: "blue",
     },
     {
       title: t("stats.activeUsers"),
-      value: users.filter((user) => user.status === "active").length.toString(),
+      value: stats.activeUsers.toString(),
       icon: UserCheck,
       color: "green",
     },
     {
       title: t("stats.newThisMonth"),
-      value: newThisMonth.toString(),
+      value: stats.newThisMonth.toString(),
       icon: UserPlus,
       color: "purple",
     },
     {
       title: t("stats.totalRevenue"),
-      value: `€${totalRevenue.toLocaleString()}`,
+      value: `€${stats.totalRevenue.toLocaleString()}`,
       icon: TrendingUp,
       color: "orange",
     },
@@ -64,7 +124,7 @@ const UserStatsGrid: React.FC<UserStatsGridProps> = ({ users }) => {
 
   return (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-      {stats.map((stat) => (
+      {statsData.map((stat) => (
         <Card key={stat.title} className="border-0 shadow-md">
           <CardContent className="p-6">
             <div className="flex items-center">

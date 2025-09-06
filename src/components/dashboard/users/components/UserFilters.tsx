@@ -1,4 +1,5 @@
-// src/components/dashboard/users/components/UserFilters.tsx
+// STEP 2C: Replace src/components/dashboard/users/components/UserFilters.tsx
+
 "use client";
 
 import React from "react";
@@ -16,20 +17,30 @@ const UserFilters: React.FC<UserFiltersProps> = ({
 }) => {
   const t = useTranslations("dashboard");
 
+  // FIXED: Updated filters array to match backend API
   const filters = [
-    { value: "all", label: t("users.allUsers") },
-    { value: "active", label: t("users.active") },
-    { value: "inactive", label: t("users.inactive") },
+    { value: "all", label: "All Users" },
+    { value: "active", label: "Active" },
+    { value: "inactive", label: "Inactive" },
+    { value: "blocked", label: "Blocked" },
   ];
 
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-2 flex-wrap">
       {filters.map((filter) => (
         <Button
           key={filter.value}
           variant={selectedFilter === filter.value ? "default" : "outline"}
           size="sm"
-          onClick={() => onFilterChange(filter.value)}
+          onClick={() => {
+            console.log("User filter button clicked:", filter.value); // Debug log
+            onFilterChange(filter.value);
+          }}
+          className={
+            selectedFilter === filter.value
+              ? "bg-carbookers-red-600 hover:bg-carbookers-red-700"
+              : ""
+          }
         >
           {filter.label}
         </Button>
