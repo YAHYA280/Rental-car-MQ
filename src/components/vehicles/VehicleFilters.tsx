@@ -1,7 +1,7 @@
-// src/components/vehicles/VehicleFilters.tsx - Updated with full translation support
+// src/components/vehicles/VehicleFilters.tsx - Fixed TypeScript errors
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
   Select,
@@ -15,18 +15,31 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Grid, List, X, Search } from "lucide-react";
-import {
-  VehicleFilters as Filters,
-  SearchParams,
-  BRANDS,
-  TRANSMISSIONS,
-  FUEL_TYPES,
-  SEAT_COUNTS,
-} from "@/components/types/vehicle";
+import { carService } from "@/services/carService"; // Added carService for brands
+
+// Updated interface to match backend structure
+interface VehicleFiltersType {
+  brand: string[];
+  transmission: string[];
+  fuelType: string[];
+  priceRange: [number, number];
+  seats: string[];
+  minRating: number;
+}
+
+interface SearchParams {
+  pickupLocation: string;
+  dropoffLocation: string;
+  pickupDate: string;
+  pickupTime: string;
+  returnDate: string;
+  returnTime: string;
+  differentDropoff: boolean;
+}
 
 interface VehicleFiltersProps {
-  filters: Filters;
-  onFiltersChange: (filters: Filters) => void;
+  filters: VehicleFiltersType;
+  onFiltersChange: (filters: VehicleFiltersType) => void;
   searchParams: SearchParams;
   onSearchParamsChange: (params: SearchParams) => void;
   viewMode: "grid" | "list";
@@ -57,8 +70,65 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
   const tFilters = useTranslations("filters");
   const tCommon = useTranslations("common");
 
+  // State for dynamic brands from backend
+  const [availableBrands, setAvailableBrands] = useState<string[]>([]);
+  const [loadingBrands, setLoadingBrands] = useState(true);
+
+  // Backend constants (these should match your backend enums)
+  const TRANSMISSIONS = ["manual", "automatic"];
+  const FUEL_TYPES = ["petrol", "diesel", "electric", "hybrid"];
+  const SEAT_COUNTS = ["2", "4", "5", "7", "8"];
+
+  // Fetch available brands from backend
+  useEffect(() => {
+    const fetchBrands = async () => {
+      try {
+        setLoadingBrands(true);
+        const response = await carService.getBrands();
+        if (response.success && response.data) {
+          setAvailableBrands(response.data);
+        } else {
+          // Fallback to static brands if API fails
+          setAvailableBrands([
+            "Cupra",
+            "Dacia",
+            "Hyundai",
+            "KIA",
+            "Mercedes",
+            "Opel",
+            "Peugeot",
+            "Porsche",
+            "Renault",
+            "SEAT",
+            "Volkswagen",
+          ]);
+        }
+      } catch (error) {
+        console.error("Error fetching brands:", error);
+        // Fallback brands
+        setAvailableBrands([
+          "Cupra",
+          "Dacia",
+          "Hyundai",
+          "KIA",
+          "Mercedes",
+          "Opel",
+          "Peugeot",
+          "Porsche",
+          "Renault",
+          "SEAT",
+          "Volkswagen",
+        ]);
+      } finally {
+        setLoadingBrands(false);
+      }
+    };
+
+    fetchBrands();
+  }, []);
+
   const updateFilter = (
-    key: keyof Filters,
+    key: keyof VehicleFiltersType,
     value: string | string[] | number | number[]
   ) => {
     onFiltersChange({
@@ -75,9 +145,20 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
       filters.seats.length > 0 ||
       filters.minRating > 0 ||
       filters.priceRange[0] > 0 ||
-      filters.priceRange[1] < 300
+      filters.priceRange[1] < 1500
     );
   };
+
+  // FIXED: Create empty search params with all required properties
+  const clearSearchParams = (): SearchParams => ({
+    pickupLocation: "",
+    dropoffLocation: "",
+    pickupDate: "",
+    pickupTime: "",
+    returnDate: "",
+    returnTime: "",
+    differentDropoff: false,
+  });
 
   return (
     <div className="space-y-6">
@@ -93,7 +174,7 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => onSearchParamsChange({})}
+                onClick={() => onSearchParamsChange(clearSearchParams())}
                 className="text-carbookers-red-600 hover:text-carbookers-red-800"
               >
                 <X className="h-4 w-4" />
@@ -138,8 +219,6 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
       {/* Main Filter Controls */}
       <Card className="border-gray-200">
         <CardContent className="p-4 lg:p-6">
-          {/* Mobile-First Layout */}
-
           {/* Top Section: Results count and Clear Filters */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <div className="flex items-center gap-4">
@@ -204,7 +283,7 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
                 </SelectContent>
               </Select>
 
-              {/* Show Results Count - Hide on mobile */}
+              {/* Show Results Count */}
               <Select
                 value={showResults.toString()}
                 onValueChange={(value) => onShowResultsChange(Number(value))}
@@ -223,7 +302,7 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
 
           {/* Filter Controls - Mobile-First Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-            {/* Brand Filter */}
+            {/* Brand Filter - Dynamic from backend */}
             <div>
               <Label className="text-xs sm:text-sm font-medium mb-2 block">
                 {tFilters("brand")}
@@ -233,13 +312,18 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
                 onValueChange={(value) =>
                   updateFilter("brand", value === "all" ? [] : [value])
                 }
+                disabled={loadingBrands}
               >
                 <SelectTrigger className="text-xs sm:text-sm">
-                  <SelectValue placeholder={tFilters("allBrands")} />
+                  <SelectValue
+                    placeholder={
+                      loadingBrands ? "Loading..." : tFilters("allBrands")
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">{tFilters("allBrands")}</SelectItem>
-                  {BRANDS.map((brand) => (
+                  {availableBrands.map((brand) => (
                     <SelectItem key={brand} value={brand}>
                       {brand}
                     </SelectItem>

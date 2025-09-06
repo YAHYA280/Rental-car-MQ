@@ -1,4 +1,4 @@
-// src/components/vehicles/VehicleCard.tsx - Updated with full translation support
+// src/components/vehicles/VehicleCard.tsx - Updated to use backend data with unified types
 "use client";
 
 import React, { useState, useMemo } from "react";
@@ -22,12 +22,12 @@ import {
   ToggleLeft,
   ToggleRight,
 } from "lucide-react";
-import { Vehicle } from "@/components/types/vehicle";
+import { CarData } from "@/components/types"; // Updated to use unified types
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 
 interface VehicleCardProps {
-  vehicle: Vehicle;
+  vehicle: CarData; // Updated to use CarData instead of Vehicle
   viewMode: "grid" | "list";
   onFavorite?: (vehicleId: string) => void;
   isFavorite?: boolean;
@@ -106,24 +106,42 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
     };
   };
 
+  // Updated to handle backend fuel type format
   const getFuelIcon = (fuelType: string) => {
-    switch (fuelType) {
-      case "Electric":
+    switch (fuelType.toLowerCase()) {
+      case "electric":
         return <Zap className="h-4 w-4" />;
-      case "Petrol":
-      case "Diesel":
-      case "Hybrid":
+      case "petrol":
+      case "diesel":
+      case "hybrid":
       default:
         return <Fuel className="h-4 w-4" />;
     }
   };
 
+  // Updated to handle backend transmission format
   const getTransmissionIcon = (transmission: string) => {
-    return transmission === "Manual" ? (
+    return transmission.toLowerCase() === "manual" ? (
       <Settings className="h-4 w-4" />
     ) : (
       <Car className="h-4 w-4" />
     );
+  };
+
+  // Get proper image URL using unified types
+  const getImageUrl = () => {
+    // Priority: mainImage dataUrl > image field > fallback
+    if (vehicle.mainImage?.dataUrl) {
+      return vehicle.mainImage.dataUrl;
+    }
+    if (vehicle.image) {
+      return vehicle.image.startsWith("http")
+        ? vehicle.image
+        : vehicle.image.startsWith("data:")
+        ? vehicle.image
+        : `/cars/car1.jpg`; // Updated fallback path
+    }
+    return "/cars/car1.jpg";
   };
 
   // Price display component
@@ -179,11 +197,14 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
           <div className="md:w-1/3 relative overflow-hidden">
             <div className="aspect-video md:aspect-square relative">
               <Image
-                src={vehicle.image}
+                src={getImageUrl()}
                 alt={`${vehicle.brand} ${vehicle.name}`}
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-300"
                 sizes="(max-width: 768px) 100vw, 33vw"
+                onError={(e) => {
+                  e.currentTarget.src = "/cars/car1.jpg";
+                }}
               />
 
               {/* Brand Badge */}
@@ -222,12 +243,10 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
                 <h3 className="text-xl font-bold text-gray-900 mb-1">
                   {vehicle.brand} {vehicle.name}
                 </h3>
-                <p className="text-gray-600 text-sm">
-                  {vehicle.model} {vehicle.year}
-                </p>
+                <p className="text-gray-600 text-sm">{vehicle.year}</p>
                 <div className="flex items-center gap-1 text-sm text-gray-500 mt-1">
                   <MapPin className="h-3 w-3" />
-                  {vehicle.location}
+                  Tangier {/* Default location for now */}
                 </div>
               </div>
               <PriceDisplay />
@@ -266,7 +285,7 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
               <div className="flex flex-wrap gap-2">
                 {vehicle.features.slice(0, 3).map((feature, idx) => (
                   <Badge key={idx} variant="outline" className="text-xs">
-                    {feature}
+                    {tFilters(`vehicleFeatures.${feature}`) || feature}
                   </Badge>
                 ))}
                 {vehicle.features.length > 3 && (
@@ -288,12 +307,19 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
                   {t("viewDetails")}
                 </Button>
               </Link>
-              <Link href={getDetailPageUrl()}>
+              <a
+                href={`https://wa.me/${vehicle.whatsappNumber?.replace(
+                  /\s/g,
+                  ""
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <Button className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2">
                   <MessageCircle className="h-4 w-4" />
                   {t("whatsappBooking")}
                 </Button>
-              </Link>
+              </a>
             </div>
           </div>
         </div>
@@ -308,11 +334,14 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
         {/* Car Image */}
         <div className="aspect-[4/3] relative overflow-hidden">
           <Image
-            src={vehicle.image}
+            src={getImageUrl()}
             alt={`${vehicle.brand} ${vehicle.name}`}
             fill
             className="object-cover group-hover:scale-110 transition-transform duration-500"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            onError={(e) => {
+              e.currentTarget.src = "/cars/car1.jpg";
+            }}
           />
 
           {/* Overlay gradient */}
@@ -354,12 +383,10 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
             <h3 className="text-lg font-bold text-gray-900 mb-1">
               {vehicle.brand} {vehicle.name}
             </h3>
-            <p className="text-gray-600 text-sm">
-              {vehicle.model} {vehicle.year}
-            </p>
+            <p className="text-gray-600 text-sm">{vehicle.year}</p>
             <div className="flex items-center gap-1 text-sm text-gray-500 mt-1">
               <MapPin className="h-3 w-3" />
-              {vehicle.location}
+              Tangier {/* Default location for now */}
             </div>
           </div>
           <PriceDisplay />
@@ -398,7 +425,7 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
           <div className="flex flex-wrap gap-1">
             {vehicle.features.slice(0, 2).map((feature, idx) => (
               <Badge key={idx} variant="outline" className="text-xs">
-                {feature}
+                {tFilters(`vehicleFeatures.${feature}`) || feature}
               </Badge>
             ))}
             {vehicle.features.length > 2 && (
@@ -420,12 +447,16 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
               {t("viewDetails")}
             </Button>
           </Link>
-          <Link href={getDetailPageUrl()}>
+          <a
+            href={`https://wa.me/${vehicle.whatsappNumber?.replace(/\s/g, "")}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <Button className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold flex items-center gap-2">
               <MessageCircle className="h-4 w-4" />
               {t("whatsappBooking")}
             </Button>
-          </Link>
+          </a>
         </div>
       </CardContent>
     </Card>

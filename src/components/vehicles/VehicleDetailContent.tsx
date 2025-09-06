@@ -1,7 +1,7 @@
-// src/components/vehicles/VehicleDetailContent.tsx - Content component with useSearchParams
+// src/components/vehicles/VehicleDetailContent.tsx - Updated to fetch from backend
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { format } from "date-fns";
@@ -49,11 +49,14 @@ import {
   ToggleLeft,
   ToggleRight,
   AlertTriangle,
+  Loader2,
 } from "lucide-react";
-import { vehiclesData } from "@/components/data/vehicles";
+import { CarData } from "@/components/types"; // Updated to use unified types
+import { carService } from "@/services/carService"; // Added carService
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { DateRange } from "react-day-picker";
+import { toast } from "sonner";
 
 interface VehicleDetailContentProps {
   vehicleId: string;
@@ -69,11 +72,11 @@ const VehicleDetailContent: React.FC<VehicleDetailContentProps> = ({
   const currentLocale = useLocale();
   const searchParams = useSearchParams();
 
-  // Find the vehicle
-  const vehicle = useMemo(
-    () => vehiclesData.find((v) => v.id === vehicleId),
-    [vehicleId]
-  );
+  // State for vehicle data
+  const [vehicle, setVehicle] = useState<CarData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [relatedVehicles, setRelatedVehicles] = useState<CarData[]>([]);
 
   // State for rental details form
   const [rentalDetails, setRentalDetails] = useState({
@@ -98,10 +101,65 @@ const VehicleDetailContent: React.FC<VehicleDetailContentProps> = ({
     return undefined;
   });
 
-  // State
+  // Other state
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
   const [showTotalPrice, setShowTotalPrice] = useState(false);
+
+  // Fetch vehicle data from backend
+  useEffect(() => {
+    const fetchVehicle = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        console.log("Fetching vehicle with ID:", vehicleId);
+
+        const response = await carService.getCar(vehicleId);
+
+        if (response.success && response.data) {
+          setVehicle(response.data);
+          console.log("Vehicle loaded:", response.data);
+
+          // Fetch related vehicles (same brand)
+          if (response.data.brand) {
+            fetchRelatedVehicles(response.data.brand, vehicleId);
+          }
+        } else {
+          throw new Error(response.message || "Vehicle not found");
+        }
+      } catch (err: any) {
+        console.error("Error fetching vehicle:", err);
+        setError(err.message || "Failed to load vehicle");
+        toast.error("Failed to load vehicle details");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (vehicleId) {
+      fetchVehicle();
+    }
+  }, [vehicleId]);
+
+  // Fetch related vehicles
+  const fetchRelatedVehicles = async (brand: string, excludeId: string) => {
+    try {
+      const response = await carService.getCars({
+        brand: [brand],
+        limit: 3,
+      });
+
+      if (response.success && response.data) {
+        // Filter out current vehicle
+        const related = response.data.filter((car) => car.id !== excludeId);
+        setRelatedVehicles(related.slice(0, 3));
+      }
+    } catch (err) {
+      console.error("Error fetching related vehicles:", err);
+      // Don't show error for related vehicles, just log it
+    }
+  };
 
   // Calculate rental period and validation
   const rentalInfo = useMemo(() => {
@@ -142,31 +200,6 @@ const VehicleDetailContent: React.FC<VehicleDetailContentProps> = ({
     return { value: `${hour}:00`, label: `${hour}:00` };
   });
 
-  if (!vehicle) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <div className="container mx-auto px-4 py-20 text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            {t("notFound")}
-          </h1>
-          <Link href="/vehicles">
-            <Button className="bg-carbookers-red-600 hover:bg-carbookers-red-700 text-white">
-              {t("backToVehicles")}
-            </Button>
-          </Link>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
-
-  const images = vehicle.images || [
-    vehicle.image,
-    vehicle.image,
-    vehicle.image,
-  ];
-
   // Handle rental details form changes
   const handleRentalDetailChange = (field: string, value: string | boolean) => {
     setRentalDetails((prev) => ({
@@ -199,10 +232,12 @@ const VehicleDetailContent: React.FC<VehicleDetailContentProps> = ({
 
   // WhatsApp booking function with proper translations
   const handleWhatsAppBooking = () => {
+    if (!vehicle) return;
+
     const messageContent =
       currentLocale === "fr"
         ? {
-            intro: `Bonjour! Je souhaiterais réserver le ${vehicle.brand} ${vehicle.name} (${vehicle.model} ${vehicle.year}).`,
+            intro: `Bonjour! Je souhaiterais réserver le ${vehicle.brand} ${vehicle.name} (${vehicle.year}).`,
             rentalDetails: "Détails de la Location:",
             pickupDate: `Date de Prise: ${rentalDetails.pickupDate} à ${rentalDetails.pickupTime}`,
             returnDate: `Date de Retour: ${rentalDetails.returnDate} à ${rentalDetails.returnTime}`,
@@ -219,7 +254,7 @@ const VehicleDetailContent: React.FC<VehicleDetailContentProps> = ({
               "Veuillez confirmer la disponibilité et fournir le tarif final. Merci!",
           }
         : {
-            intro: `Hello! I would like to book the ${vehicle.brand} ${vehicle.name} (${vehicle.model} ${vehicle.year}).`,
+            intro: `Hello! I would like to book the ${vehicle.brand} ${vehicle.name} (${vehicle.year}).`,
             rentalDetails: "Rental Details:",
             pickupDate: `Pickup Date: ${rentalDetails.pickupDate} at ${rentalDetails.pickupTime}`,
             returnDate: `Return Date: ${rentalDetails.returnDate} at ${rentalDetails.returnTime}`,
@@ -255,42 +290,136 @@ ${vehicle.features
 
 ${messageContent.confirmRequest}`;
 
-    const phoneNumber = "+212612077309";
+    const phoneNumber =
+      vehicle.whatsappNumber?.replace(/\s/g, "") || "+212612077309";
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
       message
     )}`;
     window.open(whatsappUrl, "_blank");
   };
 
+  // Updated to handle backend fuel type format
   const getFuelIcon = (fuelType: string) => {
-    switch (fuelType) {
-      case "Electric":
+    switch (fuelType.toLowerCase()) {
+      case "electric":
         return <Zap className="h-5 w-5" />;
       default:
         return <Fuel className="h-5 w-5" />;
     }
   };
 
+  // Updated to handle backend transmission format
   const getTransmissionIcon = (transmission: string) => {
-    return transmission === "Manual" ? (
+    return transmission.toLowerCase() === "manual" ? (
       <Settings className="h-5 w-5" />
     ) : (
       <Car className="h-5 w-5" />
     );
   };
 
+  // Get proper image URL using unified types
+  const getImageUrl = (car: CarData) => {
+    // Priority: mainImage dataUrl > image field > fallback
+    if (car.mainImage?.dataUrl) {
+      return car.mainImage.dataUrl;
+    }
+    if (car.image) {
+      return car.image.startsWith("http")
+        ? car.image
+        : car.image.startsWith("data:")
+        ? car.image
+        : "/cars/car1.jpg";
+    }
+    return "/cars/car1.jpg";
+  };
+
+  // Get available images for gallery
+  const getAvailableImages = () => {
+    if (!vehicle) return ["/cars/car1.jpg"];
+
+    const images = [];
+
+    // Add main image
+    if (vehicle.mainImage?.dataUrl) {
+      images.push(vehicle.mainImage.dataUrl);
+    } else if (vehicle.image) {
+      images.push(vehicle.image);
+    }
+
+    // Add additional images
+    if (vehicle.images && vehicle.images.length > 0) {
+      vehicle.images.forEach((img) => {
+        if (img.dataUrl) {
+          images.push(img.dataUrl);
+        }
+      });
+    }
+
+    // If no images, return fallback
+    return images.length > 0 ? images : ["/cars/car1.jpg"];
+  };
+
   const nextImage = () => {
+    const images = getAvailableImages();
     setCurrentImageIndex((prev) => (prev + 1) % images.length);
   };
 
   const prevImage = () => {
+    const images = getAvailableImages();
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
   };
 
-  // Related vehicles
-  const relatedVehicles = vehiclesData
-    .filter((v) => v.id !== vehicleId && v.brand === vehicle.brand)
-    .slice(0, 3);
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <main className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center py-20">
+            <div className="text-center">
+              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-carbookers-red-600" />
+              <p className="text-gray-600">Loading vehicle details...</p>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Error state
+  if (error || !vehicle) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <main className="container mx-auto px-4 py-8">
+          <div className="text-center py-20">
+            <div className="text-6xl mb-4">🚗</div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">
+              {error || t("notFound")}
+            </h1>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Link href="/vehicles">
+                <Button className="bg-carbookers-red-600 hover:bg-carbookers-red-700 text-white">
+                  {t("backToVehicles")}
+                </Button>
+              </Link>
+              <Button
+                onClick={() => window.location.reload()}
+                variant="outline"
+                className="border-gray-300"
+              >
+                Try Again
+              </Button>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  const images = getAvailableImages();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -324,6 +453,9 @@ ${messageContent.confirmRequest}`;
                       fill
                       className="object-cover"
                       priority
+                      onError={(e) => {
+                        e.currentTarget.src = "/cars/car1.jpg";
+                      }}
                     />
 
                     {/* Navigation buttons */}
@@ -386,7 +518,7 @@ ${messageContent.confirmRequest}`;
                             {vehicle.rating}
                           </span>
                           <span className="text-gray-500 text-sm">
-                            ({vehicle.bookings} {tVehicle("bookings")})
+                            ({vehicle.totalBookings} {tVehicle("bookings")})
                           </span>
                         </div>
                       </div>
@@ -394,11 +526,11 @@ ${messageContent.confirmRequest}`;
                         {vehicle.brand} {vehicle.name}
                       </h1>
                       <p className="text-lg text-gray-600 mb-2">
-                        {vehicle.model} {vehicle.year}
+                        {vehicle.year}
                       </p>
                       <div className="flex items-center gap-2 text-gray-500">
                         <MapPin className="h-4 w-4" />
-                        <span>{vehicle.location}</span>
+                        <span>Tangier</span> {/* Default location */}
                       </div>
                     </div>
                     <div className="flex gap-2">
@@ -427,11 +559,13 @@ ${messageContent.confirmRequest}`;
                   </div>
 
                   {/* Description */}
-                  <div className="mb-6">
-                    <p className="text-gray-700 leading-relaxed">
-                      {vehicle.description}
-                    </p>
-                  </div>
+                  {vehicle.description && (
+                    <div className="mb-6">
+                      <p className="text-gray-700 leading-relaxed">
+                        {vehicle.description}
+                      </p>
+                    </div>
+                  )}
 
                   {/* Vehicle Specifications */}
                   <div className="mb-6">
@@ -499,7 +633,9 @@ ${messageContent.confirmRequest}`;
                       {vehicle.features.map((feature, idx) => (
                         <div key={idx} className="flex items-center gap-2">
                           <CheckCircle className="h-4 w-4 text-green-600" />
-                          <span className="text-gray-700">{feature}</span>
+                          <span className="text-gray-700">
+                            {tFilters(`vehicleFeatures.${feature}`) || feature}
+                          </span>
                         </div>
                       ))}
                     </div>
@@ -565,10 +701,13 @@ ${messageContent.confirmRequest}`;
                           <Card className="hover:shadow-md transition-shadow cursor-pointer">
                             <div className="aspect-[4/3] relative overflow-hidden rounded-t-lg">
                               <Image
-                                src={relatedVehicle.image}
+                                src={getImageUrl(relatedVehicle)}
                                 alt={`${relatedVehicle.brand} ${relatedVehicle.name}`}
                                 fill
                                 className="object-cover hover:scale-105 transition-transform duration-300"
+                                onError={(e) => {
+                                  e.currentTarget.src = "/cars/car1.jpg";
+                                }}
                               />
                             </div>
                             <div className="p-3">
@@ -576,7 +715,7 @@ ${messageContent.confirmRequest}`;
                                 {relatedVehicle.brand} {relatedVehicle.name}
                               </h4>
                               <p className="text-xs text-gray-600 mb-1">
-                                {relatedVehicle.model} {relatedVehicle.year}
+                                {relatedVehicle.year}
                               </p>
                               <div className="flex justify-between items-center">
                                 <div className="flex items-center gap-1">
@@ -928,7 +1067,11 @@ ${messageContent.confirmRequest}`;
                       <Button
                         variant="outline"
                         className="w-full border-gray-300 hover:bg-gray-50 flex items-center gap-2 py-3"
-                        onClick={() => window.open("tel:+212612077309")}
+                        onClick={() =>
+                          window.open(
+                            `tel:${vehicle.whatsappNumber || "+212612077309"}`
+                          )
+                        }
                       >
                         <Phone className="h-4 w-4" />
                         {tVehicle("callNow")}
@@ -943,7 +1086,7 @@ ${messageContent.confirmRequest}`;
                         {tVehicle("needHelp")}
                       </p>
                       <p className="font-semibold text-carbookers-red-600">
-                        +212612077309
+                        {vehicle.whatsappNumber || "+212612077309"}
                       </p>
                       <p className="text-sm text-gray-500 mt-1">
                         {currentLocale === "fr"
@@ -964,14 +1107,16 @@ ${messageContent.confirmRequest}`;
                     {tVehicle("vehicleStats")}
                   </h3>
                   <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-600">
-                        {tVehicle("mileage")}
-                      </span>
-                      <span className="font-semibold">
-                        {vehicle.mileage?.toLocaleString()} km
-                      </span>
-                    </div>
+                    {vehicle.mileage && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600">
+                          {tVehicle("mileage")}
+                        </span>
+                        <span className="font-semibold">
+                          {vehicle.mileage.toLocaleString()} km
+                        </span>
+                      </div>
+                    )}
                     <div className="flex justify-between items-center">
                       <span className="text-gray-600">
                         {tVehicle("availability")}
@@ -986,13 +1131,21 @@ ${messageContent.confirmRequest}`;
                       <span className="text-gray-600">
                         {tVehicle("totalBookings")}
                       </span>
-                      <span className="font-semibold">{vehicle.bookings}</span>
+                      <span className="font-semibold">
+                        {vehicle.totalBookings}
+                      </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-600">
-                        {tVehicle("airConditioning")}
+                      <span className="text-gray-600">License Plate</span>
+                      <span className="font-semibold">
+                        {vehicle.licensePlate}
                       </span>
-                      <CheckCircle className="h-5 w-5 text-green-600" />
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Status</span>
+                      <Badge className="bg-blue-100 text-blue-800 capitalize">
+                        {vehicle.status}
+                      </Badge>
                     </div>
                   </div>
                 </CardContent>
