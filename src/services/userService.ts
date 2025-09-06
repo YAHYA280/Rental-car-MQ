@@ -1,10 +1,10 @@
-// STEP 2A: Replace src/services/userService.ts
+// src/services/userService.ts - FIXED: Updated for BYTEA storage and optional fields
 
 import {
   ApiResponse,
-  User,
+  UserData,
   UserFormData,
-  UserFilters,
+  UserFiltersType,
 } from "@/components/types";
 
 class UserService {
@@ -12,7 +12,9 @@ class UserService {
     process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
   // Get all users with filtering and pagination
-  async getUsers(filters: UserFilters = {}): Promise<ApiResponse<User[]>> {
+  async getUsers(
+    filters: UserFiltersType = {}
+  ): Promise<ApiResponse<UserData[]>> {
     try {
       const queryParams = new URLSearchParams();
 
@@ -67,7 +69,7 @@ class UserService {
   }
 
   // Get single user by ID
-  async getUser(id: string): Promise<ApiResponse<User>> {
+  async getUser(id: string): Promise<ApiResponse<UserData>> {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(`${this.baseUrl}/customers/${id}`, {
@@ -90,16 +92,19 @@ class UserService {
     }
   }
 
-  // Create new user
-  async createUser(userData: UserFormData): Promise<ApiResponse<User>> {
+  // FIXED: Create new user with proper FormData handling
+  async createUser(userData: UserFormData): Promise<ApiResponse<UserData>> {
     try {
       const formData = this.buildFormData(userData);
       const token = localStorage.getItem("token");
+
+      console.log("Creating user with data:", userData);
 
       const response = await fetch(`${this.baseUrl}/customers`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
+          // Don't set Content-Type for FormData - browser will set it with boundary
         },
         body: formData,
       });
@@ -117,19 +122,22 @@ class UserService {
     }
   }
 
-  // Update user
+  // FIXED: Update user with proper FormData handling
   async updateUser(
     id: string,
     userData: Partial<UserFormData>
-  ): Promise<ApiResponse<User>> {
+  ): Promise<ApiResponse<UserData>> {
     try {
       const formData = this.buildFormData(userData);
       const token = localStorage.getItem("token");
+
+      console.log("Updating user with data:", userData);
 
       const response = await fetch(`${this.baseUrl}/customers/${id}`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
+          // Don't set Content-Type for FormData - browser will set it with boundary
         },
         body: formData,
       });
@@ -176,7 +184,7 @@ class UserService {
   async updateUserStatus(
     id: string,
     status: "active" | "inactive" | "blocked"
-  ): Promise<ApiResponse<User>> {
+  ): Promise<ApiResponse<UserData>> {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(`${this.baseUrl}/customers/${id}/status`, {
@@ -205,7 +213,7 @@ class UserService {
   async uploadDriverLicense(
     id: string,
     file: File
-  ): Promise<ApiResponse<User>> {
+  ): Promise<ApiResponse<UserData>> {
     try {
       const formData = new FormData();
       formData.append("driverLicenseImage", file);
@@ -264,7 +272,7 @@ class UserService {
     query: string,
     limit = 10,
     offset = 0
-  ): Promise<ApiResponse<User[]>> {
+  ): Promise<ApiResponse<UserData[]>> {
     try {
       const token = localStorage.getItem("token");
       const params = new URLSearchParams({
@@ -296,9 +304,11 @@ class UserService {
     }
   }
 
-  // Helper method to build FormData from UserFormData
+  // FIXED: Helper method to build FormData from UserFormData with proper optional handling
   private buildFormData(userData: Partial<UserFormData>): FormData {
     const formData = new FormData();
+
+    console.log("Building FormData from:", userData);
 
     // Add regular fields
     Object.entries(userData).forEach(([key, value]) => {
@@ -312,22 +322,45 @@ class UserService {
       } else if (key === "preferences" && value && typeof value === "object") {
         // Backend expects JSON string for nested objects
         formData.append(key, JSON.stringify(value));
+      } else if (key === "email") {
+        // FIXED: Handle optional email properly
+        if (value && typeof value === "string" && value.trim() !== "") {
+          formData.append(key, value.trim());
+        }
+        // Don't append empty or undefined email - let backend handle as null
       } else if (value !== undefined && value !== null && value !== "") {
         formData.append(key, value.toString());
       }
     });
 
-    // Add driver license image
-    if (userData.driverLicenseImage) {
+    // FIXED: Add driver license image only if provided
+    if (
+      userData.driverLicenseImage &&
+      userData.driverLicenseImage instanceof File
+    ) {
       formData.append("driverLicenseImage", userData.driverLicenseImage);
+      console.log(
+        "Added driver license image to FormData:",
+        userData.driverLicenseImage.name
+      );
+    }
+
+    // Debug log what's in FormData
+    console.log("FormData entries:");
+    for (let [key, value] of formData.entries()) {
+      if (value instanceof File) {
+        console.log(`${key}: File(${value.name}, ${value.size} bytes)`);
+      } else {
+        console.log(`${key}: ${value}`);
+      }
     }
 
     return formData;
   }
 
-  // Transform backend response to frontend format
-  transformUserResponse(backendUser: any): User {
-    return {
+  // FIXED: Transform backend response to frontend format with BYTEA handling
+  transformUserResponse(backendUser: any): UserData {
+    const transformed: UserData = {
       ...backendUser,
       // Ensure all required fields have default values
       country: backendUser.country || "MA",
@@ -339,12 +372,45 @@ class UserService {
       phoneVerified: backendUser.phoneVerified || false,
       status: backendUser.status || "active",
     };
+
+    // FIXED: Handle driver license image from BYTEA
+    if (backendUser.driverLicenseImage?.dataUrl) {
+      transformed.driverLicenseImage = {
+        dataUrl: backendUser.driverLicenseImage.dataUrl,
+        mimetype: backendUser.driverLicenseImage.mimetype,
+        name: backendUser.driverLicenseImage.name || "driver-license",
+      };
+    }
+
+    // FIXED: Add formatted phone number
+    if (backendUser.phoneFormatted) {
+      transformed.phoneFormatted = backendUser.phoneFormatted;
+    } else if (backendUser.phone) {
+      // Format phone number if not already formatted
+      const cleaned = backendUser.phone.replace(/\s/g, "");
+      if (
+        cleaned.length === 10 &&
+        (cleaned.startsWith("06") || cleaned.startsWith("07"))
+      ) {
+        transformed.phoneFormatted = `${cleaned.substring(
+          0,
+          2
+        )} ${cleaned.substring(2, 4)} ${cleaned.substring(
+          4,
+          6
+        )} ${cleaned.substring(6, 8)} ${cleaned.substring(8, 10)}`;
+      } else {
+        transformed.phoneFormatted = backendUser.phone;
+      }
+    }
+
+    return transformed;
   }
 
   // Get users with transformation
   async getUsersTransformed(
-    filters: UserFilters = {}
-  ): Promise<ApiResponse<User[]>> {
+    filters: UserFiltersType = {}
+  ): Promise<ApiResponse<UserData[]>> {
     const response = await this.getUsers(filters);
     if (response.data) {
       response.data = response.data.map((user) =>
@@ -388,6 +454,38 @@ class UserService {
       console.error("UserService.getUserBookings error:", error);
       throw error;
     }
+  }
+
+  // FIXED: Helper to get driver license image URL
+  getDriverLicenseImageUrl(user: UserData): string | null {
+    if (user.driverLicenseImage?.dataUrl) {
+      return user.driverLicenseImage.dataUrl;
+    }
+    return null;
+  }
+
+  // FIXED: Helper to format phone number for display
+  formatPhoneForDisplay(phone: string): string {
+    if (!phone) return "";
+    const cleaned = phone.replace(/\s/g, "");
+    if (
+      cleaned.length === 10 &&
+      (cleaned.startsWith("06") || cleaned.startsWith("07"))
+    ) {
+      return `${cleaned.substring(0, 2)} ${cleaned.substring(
+        2,
+        4
+      )} ${cleaned.substring(4, 6)} ${cleaned.substring(
+        6,
+        8
+      )} ${cleaned.substring(8, 10)}`;
+    }
+    return phone;
+  }
+
+  // FIXED: Helper to clean phone number for API
+  cleanPhoneForApi(phone: string): string {
+    return phone.replace(/\s/g, "");
   }
 }
 

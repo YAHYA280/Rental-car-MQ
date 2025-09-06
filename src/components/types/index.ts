@@ -100,11 +100,11 @@ export interface ApiResponse<T = any> {
 }
 
 // User/Customer types
-export interface User {
+export interface UserData {
   id: string;
   firstName: string;
   lastName: string;
-  email: string;
+  email?: string; // FIXED: Email is now optional
   phone: string;
   dateOfBirth?: string;
   address?: string;
@@ -112,13 +112,16 @@ export interface User {
   postalCode?: string;
   country: string;
   driverLicenseNumber?: string;
+  // FIXED: Driver license image structure for BYTEA storage
   driverLicenseImage?: {
-    filename: string;
-    originalName: string;
-    path: string;
-    size: number;
-    mimetype: string;
+    dataUrl?: string;
+    mimetype?: string;
+    name?: string;
   };
+  // FIXED: Also support legacy structure for backward compatibility
+  driverLicenseImageData?: ArrayBuffer;
+  driverLicenseImageMimetype?: string;
+  driverLicenseImageName?: string;
   emergencyContact?: {
     name: string;
     phone: string;
@@ -137,6 +140,7 @@ export interface User {
   notes?: string;
   createdAt: string;
   updatedAt: string;
+  phoneFormatted?: string; // FIXED: Added formatted phone for display
   createdBy?: {
     id: string;
     name: string;
@@ -147,7 +151,7 @@ export interface User {
 export interface UserFormData {
   firstName: string;
   lastName: string;
-  email: string;
+  email?: string; // FIXED: Email is now optional
   phone: string;
   dateOfBirth?: string;
   address?: string;
@@ -155,7 +159,7 @@ export interface UserFormData {
   postalCode?: string;
   country?: string;
   driverLicenseNumber?: string;
-  driverLicenseImage?: File;
+  driverLicenseImage?: File; // FIXED: Driver license is optional
   emergencyContact?: {
     name: string;
     phone: string;
@@ -166,7 +170,7 @@ export interface UserFormData {
   notes?: string;
 }
 
-export interface UserFilters {
+export interface UserFiltersType {
   page?: number;
   limit?: number;
   search?: string;
@@ -216,7 +220,7 @@ export interface Booking {
   customerFeedback?: string;
   createdAt: string;
   updatedAt: string;
-  customer?: User;
+  customer?: UserData;
   vehicle?: CarData;
   createdBy?: {
     id: string;
@@ -299,7 +303,7 @@ export const isCarData = (obj: any): obj is CarData => {
   return obj && typeof obj.id === "string" && typeof obj.name === "string";
 };
 
-export const isUser = (obj: any): obj is User => {
+export const isUser = (obj: any): obj is UserData => {
   return obj && typeof obj.id === "string" && typeof obj.email === "string";
 };
 

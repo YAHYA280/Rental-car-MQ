@@ -9,28 +9,9 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Upload, X, Phone, Mail, User } from "lucide-react";
 
-// Types
-interface UserData {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  joinDate: string;
-  status: "active" | "inactive";
-  totalBookings: number;
-  totalSpent: number;
-  lastBooking: string;
-  driverLicenseImage?: string;
-}
+import Image from "next/image";
 
-interface UserFormData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  driverLicenseImage?: File;
-}
+import { UserData, UserFormData } from "@/components/types";
 
 interface EditUserFormProps {
   user: UserData;
@@ -230,12 +211,12 @@ const EditUserForm: React.FC<EditUserFormProps> = ({
           </h3>
 
           {/* Current Driver License Display */}
-          {user.driverLicenseImage && (
+          {user.driverLicenseImage?.dataUrl && (
             <div className="mb-4">
               <Label className="text-base">Current Driver License</Label>
               <div className="w-full max-w-md h-48 relative rounded-lg overflow-hidden border mt-2">
-                <img
-                  src={user.driverLicenseImage}
+                <Image
+                  src={user.driverLicenseImage.dataUrl}
                   alt="Current Driver License"
                   className="w-full h-full object-cover"
                 />
@@ -255,7 +236,7 @@ const EditUserForm: React.FC<EditUserFormProps> = ({
               {formData.driverLicenseImage ? (
                 <div className="space-y-3">
                   <div className="w-48 h-32 mx-auto relative">
-                    <img
+                    <Image
                       src={URL.createObjectURL(formData.driverLicenseImage)}
                       alt="New Driver License Preview"
                       className="w-full h-full object-cover rounded-lg border"

@@ -16,50 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Mail, Phone, Calendar, CreditCard, FileText } from "lucide-react";
 
-// FIXED: Updated interface to match backend data
-interface UserData {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  dateOfBirth?: string;
-  address?: string;
-  city?: string;
-  postalCode?: string;
-  country: string;
-  driverLicenseNumber?: string;
-  driverLicenseImage?: {
-    filename: string;
-    originalName: string;
-    path: string;
-    size: number;
-    mimetype: string;
-  };
-  emergencyContact?: {
-    name: string;
-    phone: string;
-    relationship: string;
-  };
-  preferences?: Record<string, any>;
-  status: "active" | "inactive" | "blocked";
-  totalBookings: number;
-  totalSpent: number;
-  averageRating?: number;
-  lastBookingDate?: string;
-  source: "website" | "admin" | "referral" | "social" | "other";
-  referralCode: string;
-  emailVerified: boolean;
-  phoneVerified: boolean;
-  notes?: string;
-  createdAt: string;
-  updatedAt: string;
-  createdBy?: {
-    id: string;
-    name: string;
-    email: string;
-  };
-}
+import { UserData } from "@/components/types";
 
 interface UserDetailsModalProps {
   user: UserData | null;
@@ -124,7 +81,7 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
     if (!user?.driverLicenseImage) return null;
 
     const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-    return `${baseUrl}${user.driverLicenseImage.path}`;
+    return `${baseUrl}${user.driverLicenseImage.dataUrl}`;
   };
 
   if (!user) return null;

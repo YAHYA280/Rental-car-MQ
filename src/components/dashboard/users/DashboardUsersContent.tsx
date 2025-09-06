@@ -25,87 +25,12 @@ import UserFilters from "./components/UserFilters";
 import UsersTable from "./components/UsersTable";
 import UserDetailsModal from "./components/UserDetailsModal";
 import DeleteConfirmationDialog from "./components/DeleteConfirmationDialog";
+import { UserFormData, UserData, UserFiltersType } from "@/components/types";
 
 // Import service
 import { userService } from "@/services/userService";
 
 // FIXED: Updated UserData interface to match backend exactly
-interface UserData {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  dateOfBirth?: string;
-  address?: string;
-  city?: string;
-  postalCode?: string;
-  country: string;
-  driverLicenseNumber?: string;
-  driverLicenseImage?: {
-    filename: string;
-    originalName: string;
-    path: string;
-    size: number;
-    mimetype: string;
-  };
-  emergencyContact?: {
-    name: string;
-    phone: string;
-    relationship: string;
-  };
-  preferences?: Record<string, any>;
-  status: "active" | "inactive" | "blocked";
-  totalBookings: number;
-  totalSpent: number;
-  averageRating?: number;
-  lastBookingDate?: string;
-  source: "website" | "admin" | "referral" | "social" | "other";
-  referralCode: string;
-  emailVerified: boolean;
-  phoneVerified: boolean;
-  notes?: string;
-  createdAt: string;
-  updatedAt: string;
-  createdBy?: {
-    id: string;
-    name: string;
-    email: string;
-  };
-}
-
-export interface UserFormData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  dateOfBirth?: string;
-  address?: string;
-  city?: string;
-  postalCode?: string;
-  country?: string;
-  driverLicenseNumber?: string;
-  driverLicenseImage?: File;
-  emergencyContact?: {
-    name: string;
-    phone: string;
-    relationship: string;
-  };
-  preferences?: Record<string, any>;
-  status?: "active" | "inactive" | "blocked";
-  notes?: string;
-}
-
-interface UserFilters {
-  page?: number;
-  limit?: number;
-  search?: string;
-  status?: string;
-  source?: string;
-  tier?: string;
-  sort?: string;
-  order?: "ASC" | "DESC";
-}
 
 const DashboardUsersContent = () => {
   const t = useTranslations("dashboard");
@@ -140,7 +65,7 @@ const DashboardUsersContent = () => {
     try {
       setLoading(true);
 
-      const apiFilters: UserFilters = {
+      const apiFilters: UserFiltersType = {
         page: 1,
         limit: 50,
       };

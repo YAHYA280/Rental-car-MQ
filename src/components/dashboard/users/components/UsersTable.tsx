@@ -30,51 +30,8 @@ import {
   Mail,
   Calendar,
 } from "lucide-react";
-
+import { UserData } from "@/components/types";
 // FIXED: Updated interface to match backend data
-interface UserData {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  dateOfBirth?: string;
-  address?: string;
-  city?: string;
-  postalCode?: string;
-  country: string;
-  driverLicenseNumber?: string;
-  driverLicenseImage?: {
-    filename: string;
-    originalName: string;
-    path: string;
-    size: number;
-    mimetype: string;
-  };
-  emergencyContact?: {
-    name: string;
-    phone: string;
-    relationship: string;
-  };
-  preferences?: Record<string, any>;
-  status: "active" | "inactive" | "blocked";
-  totalBookings: number;
-  totalSpent: number;
-  averageRating?: number;
-  lastBookingDate?: string;
-  source: "website" | "admin" | "referral" | "social" | "other";
-  referralCode: string;
-  emailVerified: boolean;
-  phoneVerified: boolean;
-  notes?: string;
-  createdAt: string;
-  updatedAt: string;
-  createdBy?: {
-    id: string;
-    name: string;
-    email: string;
-  };
-}
 
 interface UsersTableProps {
   users: UserData[];
