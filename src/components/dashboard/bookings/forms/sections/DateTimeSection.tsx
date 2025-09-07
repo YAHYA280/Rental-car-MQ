@@ -22,7 +22,7 @@ import {
 import { Calendar as CalendarIcon, Clock, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { FormValidationState } from "../../types/bookingTypes";
+import { FormValidationState } from "@/components/types";
 
 interface DateTimeSectionProps {
   pickupDate: Date | undefined;

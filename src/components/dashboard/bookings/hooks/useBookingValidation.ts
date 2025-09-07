@@ -1,18 +1,18 @@
-// src/components/dashboard/bookings/hooks/useBookingValidation.ts
+// src/components/dashboard/bookings/hooks/useBookingValidation.ts - Updated with unified types
 "use client";
 
 import { useState, useCallback } from "react";
 import {
-  BookingFormData,
+  AdminBookingFormData,
   CarData,
   UserData,
   BookingData,
-  FormValidationState,
-} from "../types/bookingTypes";
+} from "@/components/types";
+import { FormValidationState } from "@/components/types";
 
 interface UseBookingValidationReturn {
   errors: FormValidationState;
-  validateForm: (formData: BookingFormData) => boolean;
+  validateForm: (formData: AdminBookingFormData) => boolean;
   clearError: (field: string) => void;
   clearAllErrors: () => void;
 }
@@ -40,14 +40,14 @@ export const useBookingValidation = (
 
   // Check if vehicle is available for the given period
   const isVehicleAvailable = useCallback(
-    (carId: string, pickupDate: string, returnDate: string): boolean => {
+    (vehicleId: string, pickupDate: string, returnDate: string): boolean => {
       const conflictingBookings = existingBookings.filter(
         (booking) =>
-          booking.car.id === carId &&
+          booking.vehicleId === vehicleId &&
           (booking.status === "confirmed" || booking.status === "active") &&
           !(
-            new Date(returnDate) <= new Date(booking.dates.pickup) ||
-            new Date(pickupDate) >= new Date(booking.dates.return)
+            new Date(returnDate) <= new Date(booking.pickupDate) ||
+            new Date(pickupDate) >= new Date(booking.returnDate)
           )
       );
       return conflictingBookings.length === 0;
@@ -81,7 +81,7 @@ export const useBookingValidation = (
 
   // Main validation function
   const validateForm = useCallback(
-    (formData: BookingFormData): boolean => {
+    (formData: AdminBookingFormData): boolean => {
       const newErrors: FormValidationState = {};
 
       // Required field validation
@@ -89,8 +89,8 @@ export const useBookingValidation = (
         newErrors.customerId = "Customer selection is required";
       }
 
-      if (!formData.carId?.trim()) {
-        newErrors.carId = "Vehicle selection is required";
+      if (!formData.vehicleId?.trim()) {
+        newErrors.vehicleId = "Vehicle selection is required";
       }
 
       if (!formData.pickupDate?.trim()) {
@@ -128,12 +128,12 @@ export const useBookingValidation = (
       }
 
       // Vehicle validation
-      if (formData.carId) {
-        const vehicle = cars.find((car) => car.id === formData.carId);
+      if (formData.vehicleId) {
+        const vehicle = cars.find((car) => car.id === formData.vehicleId);
         if (!vehicle) {
-          newErrors.carId = "Selected vehicle not found";
+          newErrors.vehicleId = "Selected vehicle not found";
         } else if (!vehicle.available) {
-          newErrors.carId = "Selected vehicle is not available";
+          newErrors.vehicleId = "Selected vehicle is not available";
         }
       }
 
@@ -208,38 +208,42 @@ export const useBookingValidation = (
         newErrors.returnLocation = "Invalid return location selected";
       }
 
-      // Availability validation
-      if (formData.carId && formData.pickupDate && formData.returnDate) {
+      // Availability validation - only if we have existing bookings data
+      if (
+        existingBookings.length > 0 &&
+        formData.vehicleId &&
+        formData.pickupDate &&
+        formData.returnDate
+      ) {
         if (
           !isVehicleAvailable(
-            formData.carId,
+            formData.vehicleId,
             formData.pickupDate,
             formData.returnDate
           )
         ) {
           const conflictingBookings = existingBookings.filter(
             (booking) =>
-              booking.car.id === formData.carId &&
+              booking.vehicleId === formData.vehicleId &&
               (booking.status === "confirmed" || booking.status === "active") &&
               !(
-                new Date(formData.returnDate) <=
-                  new Date(booking.dates.pickup) ||
-                new Date(formData.pickupDate) >= new Date(booking.dates.return)
+                new Date(formData.returnDate) <= new Date(booking.pickupDate) ||
+                new Date(formData.pickupDate) >= new Date(booking.returnDate)
               )
           );
 
           const conflictDetails = conflictingBookings
             .map(
               (booking) =>
-                `${booking.id} (${new Date(
-                  booking.dates.pickup
+                `${booking.bookingNumber} (${new Date(
+                  booking.pickupDate
                 ).toLocaleDateString()} - ${new Date(
-                  booking.dates.return
+                  booking.returnDate
                 ).toLocaleDateString()})`
             )
             .join(", ");
 
-          newErrors.carId = `Vehicle not available for selected dates. Conflicting bookings: ${conflictDetails}`;
+          newErrors.vehicleId = `Vehicle not available for selected dates. Conflicting bookings: ${conflictDetails}`;
         }
       }
 

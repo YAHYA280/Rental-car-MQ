@@ -269,6 +269,19 @@ export interface AdminBookingFormData {
   returnLocation: string;
 }
 
+// General booking form data (for validation and components)
+export interface BookingFormData {
+  customerId: string;
+  vehicleId: string;
+  pickupDate: string;
+  returnDate: string;
+  pickupTime: string;
+  returnTime: string;
+  pickupLocation: string;
+  returnLocation: string;
+  notes?: string; // Optional for flexibility
+}
+
 export interface BookingFilters {
   page?: number;
   limit?: number;
@@ -295,6 +308,30 @@ export interface BookingStats {
   averageBookingValue: number;
   monthlyRevenue: number;
 }
+
+// Booking-specific utility types
+export interface ValidationError {
+  field: string;
+  message: string;
+}
+
+export interface ValidationResult {
+  isValid: boolean;
+  errors: ValidationError[];
+  warnings?: string[];
+}
+
+// Utility type for form validation
+export interface FormValidationState {
+  [key: string]: string;
+}
+
+// Event handler types
+export type BookingActionHandler = (bookingId: string) => void | Promise<void>;
+export type BookingFormSubmitHandler = (
+  formData: AdminBookingFormData
+) => Promise<void>;
+export type BookingSelectHandler = (booking: BookingData) => void;
 
 // Constants
 export const BRANDS = [

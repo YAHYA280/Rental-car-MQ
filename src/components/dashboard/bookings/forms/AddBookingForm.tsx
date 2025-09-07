@@ -1,22 +1,16 @@
-// src/components/dashboard/bookings/forms/AddBookingForm.tsx
+// src/components/dashboard/bookings/forms/AddBookingForm.tsx - Updated with real backend
 "use client";
 
 import React, { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
-import {
-  BookingFormData,
-  CarData,
-  UserData,
-  BookingData,
-} from "../types/bookingTypes";
+import { AdminBookingFormData, CarData, UserData } from "@/components/types";
 
 // Import form sections
 import CustomerSelectionSection from "./sections/CustomerSelectionSection";
 import VehicleSelectionSection from "./sections/VehicleSelectionSection";
 import DateTimeSection from "./sections/DateTimeSection";
 import LocationsSection from "./sections/LocationsSection";
-import NotesSection from "./sections/NotesSection";
 import BookingSummary from "./sections/BookingSummary";
 
 // Import validation hook
@@ -25,50 +19,47 @@ import { useBookingValidation } from "../hooks/useBookingValidation";
 interface AddBookingFormProps {
   cars: CarData[];
   users: UserData[];
-  existingBookings: BookingData[];
-  onSubmit: (data: BookingFormData) => Promise<void>;
+  onSubmit: (data: AdminBookingFormData) => Promise<void>;
   onClose: () => void;
 }
 
 const AddBookingForm: React.FC<AddBookingFormProps> = ({
   cars,
   users,
-  existingBookings,
   onSubmit,
   onClose,
 }) => {
   const t = useTranslations("dashboard");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Form state
-  const [formData, setFormData] = useState<BookingFormData>({
+  // Form state - using AdminBookingFormData structure
+  const [formData, setFormData] = useState<AdminBookingFormData>({
     customerId: "",
-    carId: "",
+    vehicleId: "",
     pickupDate: "",
     returnDate: "",
     pickupTime: "",
     returnTime: "",
     pickupLocation: "",
     returnLocation: "",
-    notes: "", // Ensure notes is always a string, not undefined
   });
 
   // Date states for calendar components
   const [pickupDate, setPickupDate] = useState<Date | undefined>();
   const [returnDate, setReturnDate] = useState<Date | undefined>();
 
-  // Use validation hook
+  // Use validation hook (without existingBookings for now)
   const { errors, validateForm, clearError } = useBookingValidation(
     cars,
     users,
-    existingBookings
+    [] // We'll handle availability check in the backend
   );
 
   // Get selected entities
   const selectedCustomer = users.find(
     (user) => user.id === formData.customerId
   );
-  const selectedCar = cars.find((car) => car.id === formData.carId);
+  const selectedCar = cars.find((car) => car.id === formData.vehicleId);
 
   // Calculate booking details
   const calculateDays = (): number => {
@@ -84,7 +75,10 @@ const AddBookingForm: React.FC<AddBookingFormProps> = ({
   const totalAmount = selectedCar ? selectedCar.price * days : 0;
 
   // Handle input changes
-  const handleInputChange = (field: keyof BookingFormData, value: string) => {
+  const handleInputChange = (
+    field: keyof AdminBookingFormData,
+    value: string
+  ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     clearError(field);
   };
@@ -120,14 +114,13 @@ const AddBookingForm: React.FC<AddBookingFormProps> = ({
       // Reset form on success
       setFormData({
         customerId: "",
-        carId: "",
+        vehicleId: "",
         pickupDate: "",
         returnDate: "",
         pickupTime: "",
         returnTime: "",
         pickupLocation: "",
         returnLocation: "",
-        notes: "", // Ensure notes is always a string
       });
       setPickupDate(undefined);
       setReturnDate(undefined);
@@ -156,11 +149,13 @@ const AddBookingForm: React.FC<AddBookingFormProps> = ({
 
           {/* Vehicle Selection */}
           <VehicleSelectionSection
-            cars={cars.filter((car) => car.available)}
-            selectedCarId={formData.carId}
+            cars={cars.filter(
+              (car) => car.available && car.status === "active"
+            )}
+            selectedCarId={formData.vehicleId}
             selectedCar={selectedCar}
-            onCarChange={(carId) => handleInputChange("carId", carId)}
-            error={errors.carId}
+            onCarChange={(carId) => handleInputChange("vehicleId", carId)}
+            error={errors.vehicleId}
           />
 
           {/* Date and Time Selection */}
@@ -201,12 +196,6 @@ const AddBookingForm: React.FC<AddBookingFormProps> = ({
               totalAmount={totalAmount}
             />
           )}
-
-          {/* Notes Section */}
-          <NotesSection
-            notes={formData.notes || ""} // Ensure we pass a string, not undefined
-            onNotesChange={(notes) => handleInputChange("notes", notes || "")}
-          />
         </div>
       </div>
 

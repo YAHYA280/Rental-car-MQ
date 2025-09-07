@@ -1,4 +1,4 @@
-// src/components/dashboard/bookings/components/BookingDetailsModal.tsx
+// src/components/dashboard/bookings/components/BookingDetailsModal.tsx - Updated with real backend data
 "use client";
 
 import React from "react";
@@ -14,7 +14,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Mail, Phone, Calendar, MapPin, Car, User } from "lucide-react";
-import { BookingData, BookingActionHandler } from "../types/bookingTypes";
+import {
+  BookingData,
+  BookingActionHandler,
+  formatBookingStatus,
+  getStatusColor,
+} from "@/components/types";
 
 interface BookingDetailsModalProps {
   booking: BookingData | null;
@@ -32,33 +37,48 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
   const t = useTranslations("dashboard");
 
   const getStatusBadge = (status: string, source: string) => {
-    const statusConfig = {
-      confirmed: "bg-blue-100 text-blue-800",
-      pending: "bg-yellow-100 text-yellow-800",
-      active: "bg-green-100 text-green-800",
-      completed: "bg-gray-100 text-gray-800",
-      cancelled: "bg-red-100 text-red-800",
-    };
-
-    const statusClass =
-      statusConfig[status as keyof typeof statusConfig] ||
-      "bg-gray-100 text-gray-800";
+    const statusClass = getStatusColor(status);
+    const statusText = formatBookingStatus(status);
 
     return (
       <div className="flex gap-2 flex-wrap">
-        <Badge className={statusClass}>{t(`bookings.${status}`)}</Badge>
+        <Badge className={statusClass}>{statusText}</Badge>
         {source === "website" && (
           <Badge variant="outline" className="text-xs">
             Website
           </Badge>
         )}
         {source === "admin" && (
-          <Badge variant="outline" className="text-xs">
+          <Badge
+            variant="outline"
+            className="text-xs bg-blue-50 text-blue-700 border-blue-200"
+          >
             Admin Created
           </Badge>
         )}
       </div>
     );
+  };
+
+  // Format customer name
+  const getCustomerName = (booking: BookingData): string => {
+    if (booking.customer) {
+      return `${booking.customer.firstName} ${booking.customer.lastName}`;
+    }
+    return "Unknown Customer";
+  };
+
+  // Format vehicle name
+  const getVehicleName = (booking: BookingData): string => {
+    if (booking.vehicle) {
+      return `${booking.vehicle.brand} ${booking.vehicle.name}`;
+    }
+    return "Unknown Vehicle";
+  };
+
+  // Format date
+  const formatDate = (dateString: string): string => {
+    return new Date(dateString).toLocaleDateString();
   };
 
   if (!booking) return null;
@@ -69,10 +89,10 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
         <DialogHeader className="flex-shrink-0 pb-4 border-b">
           <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl">
             <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
-            {t("bookings.details.title")}
+            Booking Details
           </DialogTitle>
           <DialogDescription className="text-sm sm:text-base">
-            {t("bookings.details.description")}
+            View complete booking information and manage booking status
           </DialogDescription>
         </DialogHeader>
 
@@ -82,11 +102,10 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
             <div className="flex flex-col items-start justify-between p-3 sm:p-4 bg-gray-50 rounded-lg gap-3">
               <div className="w-full">
                 <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
-                  Booking {booking.id}
+                  Booking {booking.bookingNumber}
                 </h3>
                 <p className="text-gray-600 text-sm sm:text-base">
-                  {t("bookings.details.createdOn")}{" "}
-                  {new Date(booking.createdAt).toLocaleDateString()}
+                  Created on {formatDate(booking.createdAt)}
                 </p>
               </div>
               {getStatusBadge(booking.status, booking.source)}
@@ -98,49 +117,51 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
               <div className="space-y-3 sm:space-y-4">
                 <h4 className="font-semibold text-gray-900 flex items-center gap-2 text-base sm:text-lg">
                   <User className="h-4 w-4 sm:h-5 sm:w-5" />
-                  {t("bookings.details.customerInformation")}
+                  Customer Information
                 </h4>
                 <div className="bg-white border-2 rounded-xl p-4 sm:p-6 space-y-4">
                   <div className="flex items-center gap-3 sm:gap-4">
                     <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-carbookers-red-600 flex items-center justify-center text-white font-bold text-sm sm:text-lg">
-                      {booking.customer.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
+                      {booking.customer?.firstName?.charAt(0) || "?"}
+                      {booking.customer?.lastName?.charAt(0) || ""}
                     </div>
                     <div>
                       <p className="font-semibold text-gray-900 text-base sm:text-lg">
-                        {booking.customer.name}
+                        {getCustomerName(booking)}
                       </p>
                       <p className="text-xs sm:text-sm text-gray-500">
-                        Customer ID: {booking.customer.id}
+                        Customer ID: {booking.customerId}
                       </p>
                     </div>
                   </div>
 
                   <div className="space-y-3">
-                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                      <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 flex-shrink-0" />
-                      <div className="min-w-0 flex-1">
-                        <span className="text-xs sm:text-sm text-gray-600 block">
-                          Email:
-                        </span>
-                        <span className="font-medium text-gray-900 break-all text-sm sm:text-base">
-                          {booking.customer.email}
-                        </span>
+                    {booking.customer?.email && (
+                      <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                        <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 flex-shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <span className="text-xs sm:text-sm text-gray-600 block">
+                            Email:
+                          </span>
+                          <span className="font-medium text-gray-900 break-all text-sm sm:text-base">
+                            {booking.customer.email}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                      <Phone className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 flex-shrink-0" />
-                      <div className="min-w-0 flex-1">
-                        <span className="text-xs sm:text-sm text-gray-600 block">
-                          Phone:
-                        </span>
-                        <span className="font-medium text-gray-900 text-sm sm:text-base">
-                          {booking.customer.phone}
-                        </span>
+                    )}
+                    {booking.customer?.phone && (
+                      <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                        <Phone className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 flex-shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <span className="text-xs sm:text-sm text-gray-600 block">
+                            Phone:
+                          </span>
+                          <span className="font-medium text-gray-900 text-sm sm:text-base">
+                            {booking.customer.phone}
+                          </span>
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -149,7 +170,7 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
               <div className="space-y-3 sm:space-y-4">
                 <h4 className="font-semibold text-gray-900 flex items-center gap-2 text-base sm:text-lg">
                   <Car className="h-4 w-4 sm:h-5 sm:w-5" />
-                  {t("bookings.details.vehicleInformation")}
+                  Vehicle Information
                 </h4>
                 <div className="bg-white border-2 rounded-xl p-4 sm:p-6 space-y-4">
                   <div className="flex items-center gap-3 sm:gap-4">
@@ -158,10 +179,10 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
                     </div>
                     <div>
                       <p className="font-semibold text-gray-900 text-base sm:text-lg">
-                        {booking.car.name}
+                        {getVehicleName(booking)}
                       </p>
                       <p className="text-xs sm:text-sm text-gray-500">
-                        {booking.car.model} {booking.car.year}
+                        {booking.vehicle?.year || "Unknown Year"}
                       </p>
                     </div>
                   </div>
@@ -172,7 +193,7 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
                         License Plate:
                       </span>
                       <span className="font-semibold text-gray-900 text-sm sm:text-base">
-                        {booking.car.licensePlate}
+                        {booking.vehicle?.licensePlate || "N/A"}
                       </span>
                     </div>
                     <div className="p-3 bg-gray-50 rounded-lg">
@@ -188,16 +209,16 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
                         Rental Days:
                       </span>
                       <span className="font-semibold text-gray-900 text-sm sm:text-base">
-                        {booking.days} days
+                        {booking.totalDays} days
                       </span>
                     </div>
-                    {booking.car.whatsappNumber && (
+                    {booking.vehicle?.whatsappNumber && (
                       <div className="p-3 bg-green-50 rounded-lg">
                         <span className="text-xs sm:text-sm text-gray-600 block">
                           WhatsApp:
                         </span>
                         <a
-                          href={`https://wa.me/${booking.car.whatsappNumber?.replace(
+                          href={`https://wa.me/${booking.vehicle.whatsappNumber.replace(
                             /[^0-9]/g,
                             ""
                           )}`}
@@ -206,7 +227,7 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
                           className="text-green-600 hover:underline font-semibold flex items-center gap-1 text-sm sm:text-base"
                         >
                           <Phone className="h-3 w-3 sm:h-4 sm:w-4" />
-                          {booking.car.whatsappNumber}
+                          {booking.vehicle.whatsappNumber}
                         </a>
                       </div>
                     )}
@@ -218,7 +239,7 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
               <div className="space-y-3 sm:space-y-4">
                 <h4 className="font-semibold text-gray-900 flex items-center gap-2 text-base sm:text-lg">
                   <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
-                  {t("bookings.details.rentalPeriod")}
+                  Rental Period
                 </h4>
                 <div className="bg-white border-2 rounded-xl p-4 sm:p-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -230,10 +251,10 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
                         </span>
                       </div>
                       <p className="font-bold text-gray-900 text-base sm:text-lg">
-                        {new Date(booking.dates.pickup).toLocaleDateString()}
+                        {formatDate(booking.pickupDate)}
                       </p>
                       <p className="text-xs sm:text-sm text-gray-600">
-                        at {booking.dates.pickupTime}
+                        at {booking.pickupTime}
                       </p>
                     </div>
                     <div className="p-3 sm:p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -244,10 +265,10 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
                         </span>
                       </div>
                       <p className="font-bold text-gray-900 text-base sm:text-lg">
-                        {new Date(booking.dates.return).toLocaleDateString()}
+                        {formatDate(booking.returnDate)}
                       </p>
                       <p className="text-xs sm:text-sm text-gray-600">
-                        at {booking.dates.returnTime}
+                        at {booking.returnTime}
                       </p>
                     </div>
                   </div>
@@ -257,7 +278,7 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
                         Total Duration:
                       </span>
                       <span className="font-bold text-lg sm:text-xl text-blue-600">
-                        {booking.days} day(s)
+                        {booking.totalDays} day(s)
                       </span>
                     </div>
                   </div>
@@ -268,7 +289,7 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
               <div className="space-y-3 sm:space-y-4">
                 <h4 className="font-semibold text-gray-900 flex items-center gap-2 text-base sm:text-lg">
                   <MapPin className="h-4 w-4 sm:h-5 sm:w-5" />
-                  {t("bookings.details.locations")}
+                  Locations
                 </h4>
                 <div className="bg-white border-2 rounded-xl p-4 sm:p-6 space-y-4">
                   <div className="space-y-3">
@@ -280,7 +301,7 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
                         </span>
                       </div>
                       <p className="font-semibold text-gray-900 text-sm sm:text-base">
-                        {booking.locations.pickup}
+                        {booking.pickupLocation}
                       </p>
                     </div>
 
@@ -292,12 +313,12 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
                         </span>
                       </div>
                       <p className="font-semibold text-gray-900 text-sm sm:text-base">
-                        {booking.locations.return}
+                        {booking.returnLocation}
                       </p>
                     </div>
                   </div>
 
-                  {booking.locations.pickup !== booking.locations.return && (
+                  {booking.pickupLocation !== booking.returnLocation && (
                     <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
                       <p className="text-xs sm:text-sm text-amber-800 font-medium">
                         ⚠ Different pickup and return locations
@@ -308,30 +329,16 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
               </div>
             </div>
 
-            {/* Notes Section */}
-            {booking.notes && (
-              <div className="space-y-3 sm:space-y-4">
-                <h4 className="font-semibold text-gray-900 text-base sm:text-lg">
-                  Internal Notes
-                </h4>
-                <div className="bg-amber-50 border-2 border-amber-200 rounded-xl p-4 sm:p-6">
-                  <p className="text-gray-800 whitespace-pre-wrap leading-relaxed text-sm sm:text-base">
-                    {booking.notes}
-                  </p>
-                </div>
-              </div>
-            )}
-
             {/* Total Amount Section */}
             <div className="border-t-2 pt-4 sm:pt-6">
               <div className="bg-gradient-to-r from-gray-50 to-blue-50 border-2 border-gray-200 rounded-xl p-4 sm:p-6">
                 <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center sm:gap-4">
                   <div>
                     <span className="text-lg sm:text-xl font-semibold text-gray-900 block">
-                      {t("bookings.details.totalAmount")}
+                      Total Amount
                     </span>
                     <p className="text-xs sm:text-sm text-gray-600">
-                      {booking.days} days × €{booking.dailyRate} per day
+                      {booking.totalDays} days × €{booking.dailyRate} per day
                     </p>
                   </div>
                   <div className="text-left sm:text-right">
@@ -339,8 +346,8 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
                       €{booking.totalAmount.toLocaleString()}
                     </span>
                     <p className="text-xs sm:text-sm text-gray-500">
-                      (€{Math.round(booking.totalAmount / booking.days)}/day
-                      avg)
+                      (€{Math.round(booking.totalAmount / booking.totalDays)}
+                      /day avg)
                     </p>
                   </div>
                 </div>
@@ -356,7 +363,7 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
             disabled={isLoading}
             className="w-full sm:w-auto"
           >
-            {t("bookings.details.close")}
+            Close
           </Button>
 
           {booking.status === "pending" && onConfirm && (
@@ -365,9 +372,7 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
               onClick={() => onConfirm(booking.id)}
               disabled={isLoading}
             >
-              {isLoading
-                ? "Confirming..."
-                : t("bookings.details.confirmBooking")}
+              {isLoading ? "Confirming..." : "Confirm Booking"}
             </Button>
           )}
         </DialogFooter>

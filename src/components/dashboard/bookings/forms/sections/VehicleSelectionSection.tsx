@@ -1,4 +1,4 @@
-// src/components/dashboard/bookings/forms/sections/VehicleSelectionSection.tsx
+// src/components/dashboard/bookings/forms/sections/VehicleSelectionSection.tsx - Updated with unified types
 "use client";
 
 import React from "react";
@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Car, Users, Calendar, Phone, CreditCard } from "lucide-react";
-import { CarData } from "../../types/bookingTypes";
+import { CarData } from "@/components/types";
 
 interface VehicleSelectionSectionProps {
   cars: CarData[];
@@ -43,7 +43,7 @@ const VehicleSelectionSection: React.FC<VehicleSelectionSectionProps> = ({
 
   // Get transmission icon
   const getTransmissionIcon = (transmission: string) => {
-    return transmission === "Automatic" ? "🔄" : "⚙️";
+    return transmission === "automatic" ? "🔄" : "⚙️";
   };
 
   // Get fuel type icon
@@ -125,9 +125,9 @@ const VehicleSelectionSection: React.FC<VehicleSelectionSectionProps> = ({
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-blue-700">Model:</span>
+                    <span className="text-sm text-blue-700">Year:</span>
                     <span className="font-medium text-blue-800">
-                      {selectedCar.model} ({selectedCar.year})
+                      {selectedCar.year}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
@@ -194,13 +194,18 @@ const VehicleSelectionSection: React.FC<VehicleSelectionSectionProps> = ({
                   <div className="flex items-center gap-3 text-blue-700">
                     <span className="flex items-center gap-1">
                       <Users className="h-3 w-3" />
-                      Vehicle Type
+                      Vehicle Info
                     </span>
                   </div>
                   <div className="flex items-center gap-3 text-blue-800">
-                    <span>{getTransmissionIcon("Automatic")} Auto</span>
-                    <span>{getFuelIcon("petrol")} Petrol</span>
-                    <span>👥 5 seats</span>
+                    <span>
+                      {getTransmissionIcon(selectedCar.transmission)}{" "}
+                      {selectedCar.transmission}
+                    </span>
+                    <span>
+                      {getFuelIcon(selectedCar.fuelType)} {selectedCar.fuelType}
+                    </span>
+                    <span>👥 {selectedCar.seats} seats</span>
                   </div>
                 </div>
               </div>

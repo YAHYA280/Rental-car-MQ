@@ -1,4 +1,4 @@
-// src/components/dashboard/bookings/components/BookingCancelDialog.tsx
+// src/components/dashboard/bookings/components/BookingCancelDialog.tsx - Updated with unified types
 "use client";
 
 import React from "react";
@@ -13,7 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { AlertTriangle } from "lucide-react";
-import { BookingActionHandler } from "../types/bookingTypes";
+import { BookingActionHandler } from "@/components/types";
 
 interface BookingCancelDialogProps {
   bookingId: string | null;
@@ -44,10 +44,11 @@ const BookingCancelDialog: React.FC<BookingCancelDialogProps> = ({
             <AlertTriangle className="h-6 w-6 text-red-600" />
           </div>
           <DialogTitle className="text-lg">
-            {t("bookings.cancelConfirmation.title")}
+            Cancel Booking Confirmation
           </DialogTitle>
           <DialogDescription className="text-gray-600">
-            {t("bookings.cancelConfirmation.description")}
+            Are you sure you want to cancel this booking? This action cannot be
+            undone.
           </DialogDescription>
         </DialogHeader>
 
@@ -66,7 +67,7 @@ const BookingCancelDialog: React.FC<BookingCancelDialogProps> = ({
             disabled={isLoading}
             className="flex-1"
           >
-            {t("bookings.cancelConfirmation.keepBooking")}
+            Keep Booking
           </Button>
           <Button
             variant="destructive"
@@ -74,9 +75,7 @@ const BookingCancelDialog: React.FC<BookingCancelDialogProps> = ({
             disabled={isLoading}
             className="flex-1"
           >
-            {isLoading
-              ? "Cancelling..."
-              : t("bookings.cancelConfirmation.cancelBooking")}
+            {isLoading ? "Cancelling..." : "Cancel Booking"}
           </Button>
         </DialogFooter>
       </DialogContent>

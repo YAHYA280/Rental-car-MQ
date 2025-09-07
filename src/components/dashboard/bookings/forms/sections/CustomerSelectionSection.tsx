@@ -1,4 +1,4 @@
-// src/components/dashboard/bookings/forms/sections/CustomerSelectionSection.tsx
+// src/components/dashboard/bookings/forms/sections/CustomerSelectionSection.tsx - Updated with unified types
 "use client";
 
 import React from "react";
@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { User, Mail, Phone } from "lucide-react";
-import { UserData } from "../../types/bookingTypes";
+import { UserData } from "@/components/types";
 
 interface CustomerSelectionSectionProps {
   users: UserData[];
@@ -67,7 +67,9 @@ const CustomerSelectionSection: React.FC<CustomerSelectionSectionProps> = ({
                         <p className="font-medium text-sm">
                           {user.firstName} {user.lastName}
                         </p>
-                        <p className="text-xs text-gray-500">{user.email}</p>
+                        <p className="text-xs text-gray-500">
+                          {user.email || "No email provided"}
+                        </p>
                       </div>
                     </div>
                   </SelectItem>
@@ -94,7 +96,9 @@ const CustomerSelectionSection: React.FC<CustomerSelectionSectionProps> = ({
                 <div className="flex items-center gap-2 text-sm">
                   <Mail className="h-4 w-4 text-gray-400" />
                   <span className="text-gray-600">Email:</span>
-                  <span className="font-medium">{selectedCustomer.email}</span>
+                  <span className="font-medium">
+                    {selectedCustomer.email || "No email provided"}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <Phone className="h-4 w-4 text-gray-400" />

@@ -23,7 +23,7 @@ import {
   AlertCircle,
   ArrowRight,
 } from "lucide-react";
-import { FormValidationState } from "../../types/bookingTypes";
+import { FormValidationState } from "@/components/types";
 
 interface LocationsSectionProps {
   pickupLocation: string;
