@@ -1,4 +1,4 @@
-// src/components/dashboard/bookings/hooks/useBookingValidation.ts - Updated with unified types
+// src/components/dashboard/bookings/hooks/useBookingValidation.ts - FIXED
 "use client";
 
 import { useState, useCallback } from "react";
@@ -79,41 +79,43 @@ export const useBookingValidation = (
     return hours * 60 + minutes;
   }, []);
 
-  // Main validation function
+  // FIXED: Main validation function
   const validateForm = useCallback(
     (formData: AdminBookingFormData): boolean => {
       const newErrors: FormValidationState = {};
 
-      // Required field validation
-      if (!formData.customerId?.trim()) {
+      console.log("Validating form data:", formData);
+
+      // FIXED: Required field validation with proper checks
+      if (!formData.customerId || formData.customerId.trim() === "") {
         newErrors.customerId = "Customer selection is required";
       }
 
-      if (!formData.vehicleId?.trim()) {
+      if (!formData.vehicleId || formData.vehicleId.trim() === "") {
         newErrors.vehicleId = "Vehicle selection is required";
       }
 
-      if (!formData.pickupDate?.trim()) {
+      if (!formData.pickupDate || formData.pickupDate.trim() === "") {
         newErrors.pickupDate = "Pickup date is required";
       }
 
-      if (!formData.returnDate?.trim()) {
+      if (!formData.returnDate || formData.returnDate.trim() === "") {
         newErrors.returnDate = "Return date is required";
       }
 
-      if (!formData.pickupTime?.trim()) {
+      if (!formData.pickupTime || formData.pickupTime.trim() === "") {
         newErrors.pickupTime = "Pickup time is required";
       }
 
-      if (!formData.returnTime?.trim()) {
+      if (!formData.returnTime || formData.returnTime.trim() === "") {
         newErrors.returnTime = "Return time is required";
       }
 
-      if (!formData.pickupLocation?.trim()) {
+      if (!formData.pickupLocation || formData.pickupLocation.trim() === "") {
         newErrors.pickupLocation = "Pickup location is required";
       }
 
-      if (!formData.returnLocation?.trim()) {
+      if (!formData.returnLocation || formData.returnLocation.trim() === "") {
         newErrors.returnLocation = "Return location is required";
       }
 
@@ -143,11 +145,6 @@ export const useBookingValidation = (
         const returnDate = new Date(formData.returnDate);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-
-        // Check if pickup date is in the past
-        if (pickupDate < today) {
-          newErrors.pickupDate = "Pickup date cannot be in the past";
-        }
 
         // Check if return date is after pickup date
         if (returnDate <= pickupDate) {
@@ -246,6 +243,9 @@ export const useBookingValidation = (
           newErrors.vehicleId = `Vehicle not available for selected dates. Conflicting bookings: ${conflictDetails}`;
         }
       }
+
+      console.log("Validation errors:", newErrors);
+      console.log("Form is valid:", Object.keys(newErrors).length === 0);
 
       setErrors(newErrors);
       return Object.keys(newErrors).length === 0;
