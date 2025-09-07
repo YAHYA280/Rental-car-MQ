@@ -542,6 +542,45 @@ class BookingService {
 
     return { isValid: true };
   }
+
+  // Get vehicle calendar data (blocked dates)
+  async getVehicleCalendar(
+    vehicleId: string,
+    startDate?: string,
+    endDate?: string
+  ): Promise<ApiResponse<any>> {
+    try {
+      const params = new URLSearchParams();
+      if (startDate) params.append("startDate", startDate);
+      if (endDate) params.append("endDate", endDate);
+
+      const queryString = params.toString();
+      const url = `${this.baseUrl}/bookings/calendar/${vehicleId}${
+        queryString ? `?${queryString}` : ""
+      }`;
+
+      console.log("Fetching vehicle calendar from:", url);
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to fetch vehicle calendar");
+      }
+
+      console.log("Vehicle calendar data:", result);
+      return result;
+    } catch (error) {
+      console.error("BookingService.getVehicleCalendar error:", error);
+      throw error;
+    }
+  }
 }
 
 export const bookingService = new BookingService();
