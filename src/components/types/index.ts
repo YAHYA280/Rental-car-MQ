@@ -1,4 +1,4 @@
-// src/types/index.ts - Unified types for the entire application
+// src/types/index.ts - Updated types including booking system
 export interface CarData {
   id: string;
   name: string;
@@ -104,7 +104,7 @@ export interface UserData {
   id: string;
   firstName: string;
   lastName: string;
-  email?: string; // FIXED: Email is now optional
+  email?: string; // Email is optional
   phone: string;
   dateOfBirth?: string;
   address?: string;
@@ -112,13 +112,13 @@ export interface UserData {
   postalCode?: string;
   country: string;
   driverLicenseNumber?: string;
-  // FIXED: Driver license image structure for BYTEA storage
+  // Driver license image structure for BYTEA storage
   driverLicenseImage?: {
     dataUrl?: string;
     mimetype?: string;
     name?: string;
   };
-  // FIXED: Also support legacy structure for backward compatibility
+  // Also support legacy structure for backward compatibility
   driverLicenseImageData?: ArrayBuffer;
   driverLicenseImageMimetype?: string;
   driverLicenseImageName?: string;
@@ -140,7 +140,7 @@ export interface UserData {
   notes?: string;
   createdAt: string;
   updatedAt: string;
-  phoneFormatted?: string; // FIXED: Added formatted phone for display
+  phoneFormatted?: string; // Added formatted phone for display
   createdBy?: {
     id: string;
     name: string;
@@ -151,7 +151,7 @@ export interface UserData {
 export interface UserFormData {
   firstName: string;
   lastName: string;
-  email?: string; // FIXED: Email is now optional
+  email?: string; // Email is optional
   phone: string;
   dateOfBirth?: string;
   address?: string;
@@ -159,7 +159,7 @@ export interface UserFormData {
   postalCode?: string;
   country?: string;
   driverLicenseNumber?: string;
-  driverLicenseImage?: File; // FIXED: Driver license is optional
+  driverLicenseImage?: File; // Driver license is optional
   emergencyContact?: {
     name: string;
     phone: string;
@@ -181,8 +181,8 @@ export interface UserFiltersType {
   order?: "ASC" | "DESC";
 }
 
-// Booking types
-export interface Booking {
+// Booking types - Updated for real backend integration
+export interface BookingData {
   id: string;
   bookingNumber: string;
   customerId: string;
@@ -193,40 +193,107 @@ export interface Booking {
   returnTime: string;
   pickupLocation: string;
   returnLocation: string;
-  pickupAddress?: string;
-  returnAddress?: string;
   dailyRate: number;
   totalDays: number;
-  subtotal: number;
-  discountAmount: number;
-  discountType?: string;
-  discountCode?: string;
-  taxAmount: number;
   totalAmount: number;
-  cautionAmount: number;
   status: "pending" | "confirmed" | "active" | "completed" | "cancelled";
-  source: "website" | "admin" | "phone" | "mobile-app";
-  paymentStatus: "pending" | "partial" | "paid" | "refunded";
-  paymentMethod?: string;
-  paidAmount: number;
-  pickupCondition?: any;
-  returnCondition?: any;
-  additionalServices: string[];
-  additionalServicesTotal: number;
-  specialRequirements?: string;
-  customerNotes?: string;
-  adminNotes?: string;
-  customerRating?: number;
-  customerFeedback?: string;
+  source: "website" | "admin";
   createdAt: string;
   updatedAt: string;
-  customer?: UserData;
-  vehicle?: CarData;
+
+  // Optional relations
+  customer?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email?: string;
+    phone: string;
+  };
+  vehicle?: {
+    id: string;
+    name: string;
+    brand: string;
+    year: number;
+    licensePlate: string;
+    whatsappNumber?: string;
+  };
   createdBy?: {
     id: string;
     name: string;
     email: string;
   };
+  confirmedBy?: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  cancelledBy?: {
+    id: string;
+    name: string;
+    email: string;
+  };
+
+  // Timestamps
+  confirmedAt?: string;
+  cancelledAt?: string;
+  cancellationReason?: string;
+}
+
+// Website booking form data (includes customer info)
+export interface WebsiteBookingFormData {
+  // Customer information
+  firstName: string;
+  lastName: string;
+  phone: string;
+  email?: string;
+
+  // Booking details
+  vehicleId: string;
+  pickupDate: string;
+  returnDate: string;
+  pickupTime: string;
+  returnTime: string;
+  pickupLocation: string;
+  returnLocation: string;
+}
+
+// Admin booking form data (uses existing customer)
+export interface AdminBookingFormData {
+  customerId: string;
+  vehicleId: string;
+  pickupDate: string;
+  returnDate: string;
+  pickupTime: string;
+  returnTime: string;
+  pickupLocation: string;
+  returnLocation: string;
+}
+
+export interface BookingFilters {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: string | string[];
+  source?: string | string[];
+  customerId?: string;
+  vehicleId?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  sort?: string;
+  order?: "ASC" | "DESC";
+}
+
+// Booking statistics
+export interface BookingStats {
+  totalBookings: number;
+  pendingBookings: number;
+  confirmedBookings: number;
+  activeBookings: number;
+  completedBookings: number;
+  cancelledBookings: number;
+  totalRevenue: number;
+  averageBookingValue: number;
+  monthlyRevenue: number;
 }
 
 // Constants
@@ -272,6 +339,17 @@ export const BOOKING_STATUS = [
   "cancelled",
 ] as const;
 
+export const BOOKING_SOURCES = ["website", "admin"] as const;
+
+// Pickup/Return locations
+export const PICKUP_LOCATIONS = [
+  "Tangier Airport",
+  "Tangier City Center",
+  "Tangier Port",
+  "Hotel Pickup",
+  "Custom Location",
+] as const;
+
 // Form validation helpers
 export const isValidLicensePlate = (plate: string): boolean => {
   const plateRegex = /^\d{5}[A-Z]$/;
@@ -298,16 +376,59 @@ export const formatWhatsAppNumber = (number: string): string => {
   return number;
 };
 
+// Booking helpers
+export const calculateBookingDays = (
+  pickupDate: string,
+  returnDate: string
+): number => {
+  const pickup = new Date(pickupDate);
+  const returnD = new Date(returnDate);
+  const diffTime = Math.abs(returnD.getTime() - pickup.getTime());
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return Math.max(1, diffDays);
+};
+
+export const calculateBookingTotal = (
+  dailyRate: number,
+  days: number
+): number => {
+  return dailyRate * days;
+};
+
+export const formatBookingStatus = (status: string): string => {
+  const statusMap = {
+    pending: "Pending Approval",
+    confirmed: "Confirmed",
+    active: "Vehicle Out",
+    completed: "Completed",
+    cancelled: "Cancelled",
+  };
+  return statusMap[status as keyof typeof statusMap] || status;
+};
+
+export const getStatusColor = (status: string): string => {
+  const colorMap = {
+    pending: "bg-yellow-100 text-yellow-800",
+    confirmed: "bg-blue-100 text-blue-800",
+    active: "bg-green-100 text-green-800",
+    completed: "bg-gray-100 text-gray-800",
+    cancelled: "bg-red-100 text-red-800",
+  };
+  return (
+    colorMap[status as keyof typeof colorMap] || "bg-gray-100 text-gray-800"
+  );
+};
+
 // Type guards
 export const isCarData = (obj: any): obj is CarData => {
   return obj && typeof obj.id === "string" && typeof obj.name === "string";
 };
 
 export const isUser = (obj: any): obj is UserData => {
-  return obj && typeof obj.id === "string" && typeof obj.email === "string";
+  return obj && typeof obj.id === "string" && typeof obj.firstName === "string";
 };
 
-export const isBooking = (obj: any): obj is Booking => {
+export const isBooking = (obj: any): obj is BookingData => {
   return (
     obj && typeof obj.id === "string" && typeof obj.bookingNumber === "string"
   );
