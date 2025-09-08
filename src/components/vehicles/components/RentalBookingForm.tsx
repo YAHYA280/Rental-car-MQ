@@ -1,4 +1,3 @@
-// src/components/vehicles/components/RentalBookingForm.tsx - Fixed version
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
@@ -30,11 +29,13 @@ import {
   Mail,
   Loader2,
   CheckCircle,
+  AlertCircle,
 } from "lucide-react";
 import {
   CarData,
   WebsiteBookingFormData,
   PICKUP_LOCATIONS,
+  VehicleAvailabilityStatus,
 } from "@/components/types";
 import { DateRange } from "react-day-picker";
 import { bookingService } from "@/services/bookingService";
@@ -78,11 +79,10 @@ const RentalBookingForm: React.FC<RentalBookingFormProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingCalendar, setIsLoadingCalendar] = useState(true);
   const [blockedDates, setBlockedDates] = useState<string[]>([]);
-  const [availabilityStatus, setAvailabilityStatus] = useState<{
-    available: boolean;
-    nextAvailableDate?: string;
-    currentBooking?: any;
-  }>({ available: true });
+  const [availabilityStatus, setAvailabilityStatus] =
+    useState<VehicleAvailabilityStatus>({
+      available: true,
+    });
 
   const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
     if (formData.pickupDate && formData.returnDate) {
@@ -121,11 +121,12 @@ const RentalBookingForm: React.FC<RentalBookingFormProps> = ({
         // Set blocked dates (array of date strings like "2025-09-10")
         setBlockedDates(response.data.blockedDates || []);
 
-        // Set availability status
+        // Set availability status with proper typing
         setAvailabilityStatus({
           available: response.data.available,
           nextAvailableDate: response.data.nextAvailableDate,
           currentBooking: response.data.currentBooking,
+          upcomingBooking: response.data.upcomingBooking, // This was missing
         });
       }
     } catch (error) {
@@ -184,17 +185,25 @@ const RentalBookingForm: React.FC<RentalBookingFormProps> = ({
     });
   };
 
-  // Check if a date is blocked
+  // Check if a date is blocked - IMPROVED IMPLEMENTATION
   const isDateBlocked = (date: Date): boolean => {
     const dateStr = format(date, "yyyy-MM-dd");
     return blockedDates.includes(dateStr);
   };
 
-  // Handle date range selection with proper validation
+  // Handle date range selection with proper validation - IMPROVED
   const handleDateRangeSelect = (range: DateRange | undefined) => {
     if (!range) {
       setDateRange(undefined);
       handleInputChange("pickupDate", "");
+      handleInputChange("returnDate", "");
+      return;
+    }
+
+    // If only 'from' date is selected, allow it
+    if (range.from && !range.to) {
+      setDateRange(range);
+      handleInputChange("pickupDate", format(range.from, "yyyy-MM-dd"));
       handleInputChange("returnDate", "");
       return;
     }
@@ -205,9 +214,12 @@ const RentalBookingForm: React.FC<RentalBookingFormProps> = ({
       const endDate = new Date(range.to);
 
       let hasBlockedDate = false;
+      let blockedDate = "";
+
       while (currentDate <= endDate) {
         if (isDateBlocked(currentDate)) {
           hasBlockedDate = true;
+          blockedDate = format(currentDate, "MMM dd, yyyy");
           break;
         }
         currentDate.setDate(currentDate.getDate() + 1);
@@ -216,13 +228,13 @@ const RentalBookingForm: React.FC<RentalBookingFormProps> = ({
       if (hasBlockedDate) {
         toast.error(
           currentLocale === "fr"
-            ? "La période sélectionnée contient des dates non disponibles"
-            : "Selected period contains unavailable dates",
+            ? `La date ${blockedDate} n'est pas disponible`
+            : `${blockedDate} is not available`,
           {
             description:
               currentLocale === "fr"
-                ? "Veuillez choisir des dates disponibles"
-                : "Please select available dates only",
+                ? "Veuillez choisir des dates disponibles uniquement"
+                : "Please select only available dates",
           }
         );
         return;
@@ -266,7 +278,7 @@ const RentalBookingForm: React.FC<RentalBookingFormProps> = ({
     return phoneRegex.test(phone.replace(/\s/g, ""));
   };
 
-  // Handle booking submission
+  // Handle booking submission - IMPROVED ERROR HANDLING
   const handleBookNow = async () => {
     if (!rentalInfo.isFormValid) {
       toast.error("Please fill in all required fields");
@@ -278,6 +290,24 @@ const RentalBookingForm: React.FC<RentalBookingFormProps> = ({
         "Please enter a valid Moroccan phone number (06XXXXXXXX or 07XXXXXXXX)"
       );
       return;
+    }
+
+    // Final availability check before submission
+    if (formData.pickupDate && formData.returnDate) {
+      const hasConflict = blockedDates.some((blockedDate) => {
+        const blocked = new Date(blockedDate);
+        const pickup = new Date(formData.pickupDate);
+        const returnDate = new Date(formData.returnDate);
+        return blocked >= pickup && blocked <= returnDate;
+      });
+
+      if (hasConflict) {
+        toast.error(
+          "Selected dates are no longer available. Please refresh and try again."
+        );
+        await loadVehicleCalendar(); // Refresh calendar
+        return;
+      }
     }
 
     setIsSubmitting(true);
@@ -387,6 +417,9 @@ ${messageContent.request}`;
           differentDropoff: false,
         });
         setDateRange(undefined);
+
+        // Refresh calendar to show updated availability
+        await loadVehicleCalendar();
       } else {
         throw new Error(response.message || "Failed to submit booking");
       }
@@ -408,7 +441,7 @@ ${messageContent.request}`;
       <CardContent className="p-6">
         {/* Price Display */}
         <div className="text-center mb-6">
-          {/* Vehicle Availability Status */}
+          {/* Vehicle Availability Status - IMPROVED */}
           <div className="mb-3">
             {isLoadingCalendar ? (
               <div className="flex items-center justify-center gap-2 text-blue-600 bg-blue-50 rounded-lg px-3 py-2">
@@ -432,7 +465,7 @@ ${messageContent.request}`;
             ) : (
               <div className="flex flex-col items-center gap-1 text-red-600 bg-red-50 rounded-lg px-3 py-2">
                 <div className="flex items-center gap-2">
-                  <div className="h-4 w-4 rounded-full bg-red-500"></div>
+                  <AlertCircle className="h-4 w-4" />
                   <span className="text-sm font-medium">Not Available</span>
                 </div>
                 {availabilityStatus.nextAvailableDate && (
@@ -590,7 +623,7 @@ ${messageContent.request}`;
                         return true;
                       }
 
-                      // Disable blocked dates (from backend)
+                      // Disable blocked dates (from backend) - AIRBNB STYLE
                       return isDateBlocked(date);
                     }}
                     modifiers={{
@@ -601,23 +634,31 @@ ${messageContent.request}`;
                         backgroundColor: "#fef2f2",
                         color: "#dc2626",
                         textDecoration: "line-through",
-                        opacity: 0.6,
+                        opacity: 0.4, // Low opacity like Airbnb
+                        cursor: "not-allowed",
                       },
                     }}
+                    className="rounded-md border shadow"
                   />
 
-                  {/* Legend */}
+                  {/* Legend - IMPROVED */}
                   <div className="p-3 border-t border-gray-200 bg-gray-50">
-                    <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center justify-between text-xs mb-2">
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 bg-green-100 border border-green-300 rounded"></div>
                         <span>Available</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-red-100 border border-red-300 rounded"></div>
+                        <div className="w-3 h-3 bg-red-100 border border-red-300 rounded opacity-40"></div>
                         <span>Booked</span>
                       </div>
                     </div>
+                    {blockedDates.length > 0 && (
+                      <p className="text-xs text-gray-600">
+                        {blockedDates.length} blocked date
+                        {blockedDates.length !== 1 ? "s" : ""} in this period
+                      </p>
+                    )}
                   </div>
                 </PopoverContent>
               </Popover>

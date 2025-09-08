@@ -470,3 +470,23 @@ export const isBooking = (obj: any): obj is BookingData => {
     obj && typeof obj.id === "string" && typeof obj.bookingNumber === "string"
   );
 };
+export interface VehicleAvailabilityStatus {
+  available: boolean;
+  nextAvailableDate?: string;
+  currentBooking?: {
+    id: string;
+    bookingNumber: string;
+    pickupDate: string;
+    returnDate: string;
+    status: string;
+    customerName: string;
+  };
+  upcomingBooking?: {
+    id: string;
+    bookingNumber: string;
+    pickupDate: string;
+    returnDate: string;
+    status: string;
+    customerName: string;
+  };
+}

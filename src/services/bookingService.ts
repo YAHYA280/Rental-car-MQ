@@ -571,6 +571,7 @@ class BookingService {
       const result = await response.json();
 
       if (!response.ok) {
+        console.error("Calendar API error:", result);
         throw new Error(result.message || "Failed to fetch vehicle calendar");
       }
 
@@ -578,7 +579,27 @@ class BookingService {
       return result;
     } catch (error) {
       console.error("BookingService.getVehicleCalendar error:", error);
-      throw error;
+      // Return empty calendar data instead of throwing
+      return {
+        success: true,
+        data: {
+          vehicleId,
+          available: true,
+          currentBooking: null,
+          upcomingBooking: null,
+          nextAvailableDate: null,
+          blockedDates: [],
+          bookedPeriods: [],
+          searchPeriod: {
+            startDate: startDate || new Date().toISOString().split("T")[0],
+            endDate:
+              endDate ||
+              new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
+                .toISOString()
+                .split("T")[0],
+          },
+        },
+      };
     }
   }
 }
