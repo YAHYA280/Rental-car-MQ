@@ -299,22 +299,28 @@ export const useBookings = (
 
   const getBookingStats = useCallback(async () => {
     try {
+      console.log("Fetching booking stats..."); // Debug log
       const response = await bookingService.getBookingStats();
+      console.log("Stats API response:", response); // Debug log
 
       if (response.success && response.data) {
-        // Transform backend stats to match frontend expectations
+        // SIMPLIFIED: Transform backend stats to match frontend expectations
         const transformedStats: BookingStats = {
+          // Required stats (the 4 you want)
           totalBookings: response.data.overview?.totalBookings || 0,
           pendingBookings: response.data.overview?.pendingBookings || 0,
-          confirmedBookings: response.data.overview?.confirmedBookings || 0,
           activeBookings: response.data.overview?.activeBookings || 0,
-          completedBookings: response.data.overview?.completedBookings || 0,
-          cancelledBookings: response.data.overview?.cancelledBookings || 0,
           totalRevenue: response.data.overview?.totalRevenue || 0,
-          averageBookingValue: response.data.overview?.averageBookingValue || 0,
-          monthlyRevenue: response.data.overview?.totalRevenue || 0, // Calculate current month revenue
+
+          // Optional stats (set to 0 since we don't need them)
+          confirmedBookings: 0,
+          completedBookings: 0,
+          cancelledBookings: 0,
+          averageBookingValue: 0,
+          monthlyRevenue: 0,
         };
 
+        console.log("Transformed stats:", transformedStats); // Debug log
         setStats(transformedStats);
       } else {
         throw new Error(response.message || "Failed to fetch booking stats");

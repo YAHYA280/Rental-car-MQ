@@ -1,19 +1,10 @@
-// src/components/dashboard/bookings/components/BookingStatsGrid.tsx - Updated for real backend
+// src/components/dashboard/bookings/components/BookingStatsGrid.tsx - SIMPLIFIED VERSION
 "use client";
 
 import React from "react";
 import { useTranslations } from "next-intl";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Calendar,
-  Car,
-  Clock,
-  DollarSign,
-  CheckCircle,
-  XCircle,
-  TrendingUp,
-  Users,
-} from "lucide-react";
+import { Calendar, Clock, Car, DollarSign } from "lucide-react";
 import { BookingStats } from "@/components/types";
 
 interface BookingStatsGridProps {
@@ -42,6 +33,7 @@ const BookingStatsGrid: React.FC<BookingStatsGridProps> = ({
 
   const currentStats = stats || defaultStats;
 
+  // SIMPLIFIED: Only show the 4 stats you requested
   const statsConfig = [
     {
       title: "Total Bookings",
@@ -75,61 +67,12 @@ const BookingStatsGrid: React.FC<BookingStatsGridProps> = ({
       description: "All time earnings",
       key: "totalRevenue",
     },
-    {
-      title: "Confirmed Bookings",
-      value: currentStats.confirmedBookings.toString(),
-      icon: CheckCircle,
-      color: "blue",
-      description: "Ready for pickup",
-      key: "confirmedBookings",
-    },
-    {
-      title: "Completed Bookings",
-      value: currentStats.completedBookings.toString(),
-      icon: Users,
-      color: "green",
-      description: "Successfully completed",
-      key: "completedBookings",
-    },
-    {
-      title: "Cancelled Bookings",
-      value: currentStats.cancelledBookings.toString(),
-      icon: XCircle,
-      color: "red",
-      description: "Cancelled bookings",
-      key: "cancelledBookings",
-    },
-    {
-      title: "Average Booking Value",
-      value: `€${Math.round(
-        currentStats.averageBookingValue || 0
-      ).toLocaleString()}`,
-      icon: TrendingUp,
-      color: "indigo",
-      description: "Per booking average",
-      key: "averageBookingValue",
-    },
   ];
-
-  // Calculate additional metrics
-  const completionRate =
-    currentStats.totalBookings > 0
-      ? Math.round(
-          (currentStats.completedBookings / currentStats.totalBookings) * 100
-        )
-      : 0;
-
-  const cancellationRate =
-    currentStats.totalBookings > 0
-      ? Math.round(
-          (currentStats.cancelledBookings / currentStats.totalBookings) * 100
-        )
-      : 0;
 
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {[1, 2, 3, 4, 5, 6, 7, 8].map((index) => (
+        {statsConfig.map((_, index) => (
           <Card key={index} className="border-0 shadow-md">
             <CardContent className="p-6">
               <div className="flex items-center">
@@ -151,10 +94,34 @@ const BookingStatsGrid: React.FC<BookingStatsGridProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Main Stats Grid */}
+      {/* SIMPLIFIED: Main Stats Grid - Only 4 Cards */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {statsConfig.map((stat) => {
           const IconComponent = stat.icon;
+
+          // FIXED: Use static Tailwind classes to avoid dynamic class generation issues
+          let bgColorClass = "bg-gray-100";
+          let textColorClass = "text-gray-600";
+
+          switch (stat.color) {
+            case "blue":
+              bgColorClass = "bg-blue-100";
+              textColorClass = "text-blue-600";
+              break;
+            case "yellow":
+              bgColorClass = "bg-yellow-100";
+              textColorClass = "text-yellow-600";
+              break;
+            case "green":
+              bgColorClass = "bg-green-100";
+              textColorClass = "text-green-600";
+              break;
+            case "purple":
+              bgColorClass = "bg-purple-100";
+              textColorClass = "text-purple-600";
+              break;
+          }
+
           return (
             <Card
               key={stat.key}
@@ -173,11 +140,9 @@ const BookingStatsGrid: React.FC<BookingStatsGridProps> = ({
                   </div>
                   <div className="ml-4">
                     <div
-                      className={`w-12 h-12 bg-${stat.color}-100 rounded-lg flex items-center justify-center`}
+                      className={`w-12 h-12 ${bgColorClass} rounded-lg flex items-center justify-center`}
                     >
-                      <IconComponent
-                        className={`h-6 w-6 text-${stat.color}-600`}
-                      />
+                      <IconComponent className={`h-6 w-6 ${textColorClass}`} />
                     </div>
                   </div>
                 </div>
@@ -187,101 +152,7 @@ const BookingStatsGrid: React.FC<BookingStatsGridProps> = ({
         })}
       </div>
 
-      {/* Additional Metrics */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {/* Completion Rate */}
-        <Card className="border-0 shadow-md">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">
-                Completion Rate
-              </h3>
-              <CheckCircle className="h-5 w-5 text-green-600" />
-            </div>
-            <div className="flex items-center">
-              <div className="flex-1">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-2xl font-bold text-green-600">
-                    {completionRate}%
-                  </span>
-                  <span className="text-sm text-gray-500">
-                    {currentStats.completedBookings} /{" "}
-                    {currentStats.totalBookings}
-                  </span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className="bg-green-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${completionRate}%` }}
-                  />
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Cancellation Rate */}
-        <Card className="border-0 shadow-md">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">
-                Cancellation Rate
-              </h3>
-              <XCircle className="h-5 w-5 text-red-600" />
-            </div>
-            <div className="flex items-center">
-              <div className="flex-1">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-2xl font-bold text-red-600">
-                    {cancellationRate}%
-                  </span>
-                  <span className="text-sm text-gray-500">
-                    {currentStats.cancelledBookings} /{" "}
-                    {currentStats.totalBookings}
-                  </span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className="bg-red-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${cancellationRate}%` }}
-                  />
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Revenue per Day */}
-        <Card className="border-0 shadow-md">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">
-                Monthly Revenue
-              </h3>
-              <TrendingUp className="h-5 w-5 text-purple-600" />
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-2xl font-bold text-purple-600">
-                  €{currentStats.monthlyRevenue.toLocaleString()}
-                </span>
-              </div>
-              <div className="text-sm text-gray-500">This month's earnings</div>
-              {currentStats.totalRevenue > 0 && (
-                <div className="text-xs text-gray-400">
-                  {Math.round(
-                    (currentStats.monthlyRevenue / currentStats.totalRevenue) *
-                      100
-                  )}
-                  % of total revenue
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Quick Summary */}
+      {/* OPTIONAL: Simple Summary Card */}
       {currentStats.totalBookings > 0 && (
         <Card className="border-0 shadow-md bg-gradient-to-r from-blue-50 to-indigo-50">
           <CardContent className="p-6">
@@ -290,17 +161,11 @@ const BookingStatsGrid: React.FC<BookingStatsGridProps> = ({
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Quick Summary
                 </h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                   <div>
                     <span className="text-gray-600">Pending:</span>
                     <span className="ml-1 font-semibold text-yellow-600">
                       {currentStats.pendingBookings}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-gray-600">Confirmed:</span>
-                    <span className="ml-1 font-semibold text-blue-600">
-                      {currentStats.confirmedBookings}
                     </span>
                   </div>
                   <div>
@@ -310,21 +175,19 @@ const BookingStatsGrid: React.FC<BookingStatsGridProps> = ({
                     </span>
                   </div>
                   <div>
-                    <span className="text-gray-600">Completed:</span>
-                    <span className="ml-1 font-semibold text-gray-600">
-                      {currentStats.completedBookings}
+                    <span className="text-gray-600">Revenue:</span>
+                    <span className="ml-1 font-semibold text-purple-600">
+                      €{currentStats.totalRevenue.toLocaleString()}
                     </span>
                   </div>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-sm text-gray-600">Active Status</div>
+                <div className="text-sm text-gray-600">Total Bookings</div>
                 <div className="text-2xl font-bold text-indigo-600">
-                  {currentStats.pendingBookings +
-                    currentStats.confirmedBookings +
-                    currentStats.activeBookings}
+                  {currentStats.totalBookings}
                 </div>
-                <div className="text-xs text-gray-500">needs attention</div>
+                <div className="text-xs text-gray-500">all time</div>
               </div>
             </div>
           </CardContent>
