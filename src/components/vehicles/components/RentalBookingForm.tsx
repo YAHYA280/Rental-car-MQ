@@ -208,7 +208,7 @@ const RentalBookingForm: React.FC<RentalBookingFormProps> = ({
     }
 
     const totalAmount = vehicle.price * Math.max(rentalDays, 1);
-    const cautionAmount = vehicle.caution || 0;
+    const cautionAmount = Number(vehicle.caution) || 0;
 
     const isFormValid = Boolean(
       formData.firstName.trim() &&
@@ -942,7 +942,10 @@ ${messageContent.request}`;
                         Total at Pickup:
                       </span>
                       <span className="font-bold text-xl text-green-900">
-                        €{rentalInfo.totalAmount + rentalInfo.cautionAmount}
+                        €
+                        {Number(
+                          rentalInfo.totalAmount + rentalInfo.cautionAmount
+                        ).toFixed(2)}
                       </span>
                     </div>
                     <p className="text-xs text-green-700 mt-1">

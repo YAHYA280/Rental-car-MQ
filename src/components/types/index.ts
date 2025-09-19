@@ -4,10 +4,10 @@ export interface CarData {
   name: string;
   brand: string;
   year: number;
+  model: string;
   price: number;
   seats: number;
   doors: number;
-  model: string;
   transmission: string;
   fuelType: string;
   available: boolean;
@@ -65,7 +65,6 @@ export interface CarFormData {
   additionalImages: File[];
   description?: string;
 }
-
 export interface CarFilters {
   page?: number;
   limit?: number;

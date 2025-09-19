@@ -20,7 +20,7 @@ import {
   AlertCircle,
   Info,
 } from "lucide-react";
-import { UserData, CarData } from "../../../../types";
+import { UserData, CarData } from "@/components/types";
 
 interface BookingSummaryProps {
   customer: UserData;
@@ -61,7 +61,7 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
   const discount = 0;
   const taxes = Math.round(subtotal * 0.1); // 10% tax example
   const finalTotal = subtotal - discount + taxes;
-  const cautionAmount = car.caution || 0;
+  const cautionAmount = Number(car.caution) || 0; // FIXED: Convert to number
 
   // Calculate time excess info
   const getTimeExcessInfo = () => {
@@ -291,7 +291,7 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
                 </span>
               </div>
 
-              {/* Security Deposit/Caution */}
+              {/* Security Deposit/Caution - Separate section */}
               <div className="bg-amber-50 border border-amber-200 rounded p-3 mt-3">
                 <div className="flex justify-between items-center mb-2">
                   <span className="font-semibold text-amber-900 flex items-center gap-2">
@@ -306,28 +306,6 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
                   Refundable deposit required at vehicle pickup. Covers
                   potential damages, fuel, and traffic violations.
                 </p>
-              </div>
-
-              {/* Total at Pickup */}
-              <div className="bg-blue-50 border border-blue-200 rounded p-3 mt-3">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="font-bold text-blue-900">
-                    Total at Pickup:
-                  </span>
-                  <span className="font-bold text-2xl text-blue-900">
-                    €{totalAmount + cautionAmount}
-                  </span>
-                </div>
-                <div className="text-xs text-blue-700 space-y-1">
-                  <div className="flex justify-between">
-                    <span>Rental amount:</span>
-                    <span>€{totalAmount}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Security deposit:</span>
-                    <span>€{cautionAmount}</span>
-                  </div>
-                </div>
               </div>
 
               {/* Per day average */}
