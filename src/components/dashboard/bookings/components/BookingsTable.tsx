@@ -1,4 +1,4 @@
-// src/components/dashboard/bookings/components/BookingsTable.tsx - Updated for real backend
+// src/components/dashboard/bookings/components/BookingsTable.tsx - Updated with Contract Download
 "use client";
 
 import React from "react";
@@ -33,12 +33,16 @@ import {
   CheckCircle,
   Calendar,
   User,
+  FileText,
 } from "lucide-react";
 import {
   BookingData,
   getStatusColor,
   formatBookingStatus,
 } from "@/components/types";
+
+// Import the ContractDownload component
+import ContractDownload from "../ContractDownload";
 
 interface BookingsTableProps {
   bookings: BookingData[];
@@ -144,6 +148,7 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
             <TableHead>Locations</TableHead>
             <TableHead>Amount</TableHead>
             <TableHead>Status</TableHead>
+            <TableHead>Contract</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -291,6 +296,15 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
                 {getStatusBadge(booking.status, booking.source)}
               </TableCell>
 
+              {/* Contract Download Column - NEW */}
+              <TableCell>
+                <ContractDownload
+                  bookingId={booking.id}
+                  bookingNumber={booking.bookingNumber}
+                  status={booking.status}
+                />
+              </TableCell>
+
               {/* Actions */}
               <TableCell>
                 <DropdownMenu>
@@ -353,6 +367,28 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
                         >
                           <X className="mr-2 h-4 w-4" />
                           Cancel Booking
+                        </DropdownMenuItem>
+                      </>
+                    )}
+
+                    {/* Download Contract - For confirmed/active bookings */}
+                    {(booking.status === "confirmed" ||
+                      booking.status === "active") && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                          <a
+                            href={`${
+                              process.env.NEXT_PUBLIC_API_URL ||
+                              "http://localhost:5000/api"
+                            }/bookings/${booking.id}/contract`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center"
+                          >
+                            <FileText className="mr-2 h-4 w-4" />
+                            Download Contract
+                          </a>
                         </DropdownMenuItem>
                       </>
                     )}
