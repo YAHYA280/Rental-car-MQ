@@ -63,14 +63,46 @@ const AddBookingForm: React.FC<AddBookingFormProps> = ({
 
   // Calculate booking details
   const calculateDays = (): number => {
-    if (pickupDate && returnDate) {
-      const diffTime = Math.abs(returnDate.getTime() - pickupDate.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      return Math.max(1, diffDays);
+    if (
+      pickupDate &&
+      returnDate &&
+      formData.pickupTime &&
+      formData.returnTime
+    ) {
+      // Calculate basic day difference
+      const pickupDateObj = new Date(pickupDate.toDateString());
+      const returnDateObj = new Date(returnDate.toDateString());
+      const basicDays = Math.ceil(
+        (returnDateObj.getTime() - pickupDateObj.getTime()) /
+          (1000 * 60 * 60 * 24)
+      );
+
+      // Apply your specific time logic
+      const pickupTime = formData.pickupTime;
+      const returnTime = formData.returnTime;
+
+      // Convert times to minutes for easier comparison
+      const [pickupHour, pickupMin] = pickupTime.split(":").map(Number);
+      const [returnHour, returnMin] = returnTime.split(":").map(Number);
+
+      const pickupMinutes = pickupHour * 60 + pickupMin;
+      const returnMinutes = returnHour * 60 + returnMin;
+
+      // Your logic: if return time is more than 1 hour after pickup time, add 1 day
+      const timeDifference = returnMinutes - pickupMinutes;
+      const oneHourInMinutes = 60;
+
+      let rentalDays = basicDays;
+
+      // If return time exceeds pickup time by more than 1 hour, add extra day
+      if (timeDifference > oneHourInMinutes) {
+        rentalDays += 1;
+      }
+
+      return Math.max(1, rentalDays);
     }
     return 0;
   };
-
   const days = calculateDays();
   const totalAmount = selectedCar ? selectedCar.price * days : 0;
 
@@ -194,6 +226,10 @@ const AddBookingForm: React.FC<AddBookingFormProps> = ({
               car={selectedCar}
               days={days}
               totalAmount={totalAmount}
+              pickupTime={formData.pickupTime}
+              returnTime={formData.returnTime}
+              pickupDate={formData.pickupDate}
+              returnDate={formData.returnDate}
             />
           )}
         </div>

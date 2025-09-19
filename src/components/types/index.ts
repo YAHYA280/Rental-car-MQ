@@ -7,6 +7,7 @@ export interface CarData {
   price: number;
   seats: number;
   doors: number;
+  model: string;
   transmission: string;
   fuelType: string;
   available: boolean;

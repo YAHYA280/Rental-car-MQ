@@ -1,10 +1,11 @@
+// src/components/dashboard/cars/AddCarForm.tsx - With built-in Toaster
 "use client";
 
 import React, { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
-import { toast } from "sonner";
+import { toast, Toaster } from "sonner";
 import { AlertTriangle, CheckCircle } from "lucide-react";
 
 // Import form section components
@@ -402,10 +403,14 @@ const AddCarForm: React.FC<AddCarFormProps> = ({ onSubmit, onClose }) => {
       await onSubmit(formData);
 
       // Show success toast
-      toast.success("Car Added Successfully!", {
+      toast.success("Car Added Successfully! 🚗", {
         description: `${formData.brand} ${formData.name} has been added to your fleet`,
         icon: <CheckCircle className="h-4 w-4" />,
         duration: 5000,
+        action: {
+          label: "View Cars",
+          onClick: () => console.log("Navigate to cars list"),
+        },
       });
 
       // Reset form on success
@@ -436,11 +441,15 @@ const AddCarForm: React.FC<AddCarFormProps> = ({ onSubmit, onClose }) => {
       console.error("Error submitting form:", error);
 
       // Show error toast with specific message
-      toast.error("Failed to Add Car", {
+      toast.error("Failed to Add Car ❌", {
         description:
           error?.message || "An unexpected error occurred. Please try again.",
         icon: <AlertTriangle className="h-4 w-4" />,
         duration: 6000,
+        action: {
+          label: "Retry",
+          onClick: () => handleSubmit(e),
+        },
       });
     } finally {
       setIsSubmitting(false);
@@ -448,99 +457,125 @@ const AddCarForm: React.FC<AddCarFormProps> = ({ onSubmit, onClose }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        {/* Left Column */}
-        <div className="space-y-4 sm:space-y-6">
-          <BasicInfoSection
-            formData={{
-              brand: formData.brand,
-              name: formData.name,
-              year: formData.year,
-              licensePlate: formData.licensePlate,
-              whatsappNumber: formData.whatsappNumber,
-            }}
-            errors={errors}
-            touchedFields={touchedFields}
-            onInputChange={handleInputChange}
-          />
+    <>
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+          {/* Left Column */}
+          <div className="space-y-4 sm:space-y-6">
+            <BasicInfoSection
+              formData={{
+                brand: formData.brand,
+                name: formData.name,
+                year: formData.year,
+                licensePlate: formData.licensePlate,
+                whatsappNumber: formData.whatsappNumber,
+              }}
+              errors={errors}
+              touchedFields={touchedFields}
+              onInputChange={handleInputChange}
+            />
 
-          <TechnicalSpecsSection
-            formData={{
-              transmission: formData.transmission,
-              fuelType: formData.fuelType,
-              seats: formData.seats,
-              doors: formData.doors,
-              mileage: formData.mileage,
-            }}
-            errors={errors}
-            touchedFields={touchedFields}
-            onInputChange={handleInputChange}
-          />
+            <TechnicalSpecsSection
+              formData={{
+                transmission: formData.transmission,
+                fuelType: formData.fuelType,
+                seats: formData.seats,
+                doors: formData.doors,
+                mileage: formData.mileage,
+              }}
+              errors={errors}
+              touchedFields={touchedFields}
+              onInputChange={handleInputChange}
+            />
 
-          <PricingSection
-            formData={{
-              dailyPrice: formData.dailyPrice,
-              caution: formData.caution,
-            }}
-            errors={errors}
-            touchedFields={touchedFields}
-            onInputChange={handleInputChange}
-          />
+            <PricingSection
+              formData={{
+                dailyPrice: formData.dailyPrice,
+                caution: formData.caution,
+              }}
+              errors={errors}
+              touchedFields={touchedFields}
+              onInputChange={handleInputChange}
+            />
+          </div>
+
+          {/* Right Column */}
+          <div className="space-y-4 sm:space-y-6">
+            <MaintenanceSection
+              technicalVisitDate={technicalVisitDate}
+              oilChangeDate={oilChangeDate}
+              onDateChange={handleDateChange}
+            />
+
+            <FeaturesSection
+              selectedFeatures={formData.features}
+              onToggleFeature={toggleFeature}
+            />
+
+            <ImagesSection
+              mainImage={formData.mainImage}
+              additionalImages={formData.additionalImages}
+              errors={errors}
+              touchedFields={touchedFields}
+              onMainImageChange={handleMainImageChange}
+              onAdditionalImagesChange={handleAdditionalImagesChange}
+              onRemoveAdditionalImage={removeAdditionalImage}
+            />
+          </div>
         </div>
 
-        {/* Right Column */}
-        <div className="space-y-4 sm:space-y-6">
-          <MaintenanceSection
-            technicalVisitDate={technicalVisitDate}
-            oilChangeDate={oilChangeDate}
-            onDateChange={handleDateChange}
-          />
-
-          <FeaturesSection
-            selectedFeatures={formData.features}
-            onToggleFeature={toggleFeature}
-          />
-
-          <ImagesSection
-            mainImage={formData.mainImage}
-            additionalImages={formData.additionalImages}
-            errors={errors}
-            touchedFields={touchedFields}
-            onMainImageChange={handleMainImageChange}
-            onAdditionalImagesChange={handleAdditionalImagesChange}
-            onRemoveAdditionalImage={removeAdditionalImage}
-          />
+        {/* Form Actions */}
+        <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 sm:pt-6 border-t">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClose}
+            disabled={isSubmitting}
+            className="w-full sm:w-auto order-2 sm:order-1"
+          >
+            {t("common.cancel")}
+          </Button>
+          <Button
+            type="submit"
+            className="bg-carbookers-red-600 hover:bg-carbookers-red-700 w-full sm:w-auto order-1 sm:order-2"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                {t("common.loading")}
+              </>
+            ) : (
+              t("cars.form.submit")
+            )}
+          </Button>
         </div>
-      </div>
+      </form>
 
-      {/* Form Actions */}
-      <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 sm:pt-6 border-t">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onClose}
-          disabled={isSubmitting}
-          className="w-full sm:w-auto order-2 sm:order-1"
-        >
-          {t("common.cancel")}
-        </Button>
-        <Button
-          type="submit"
-          className="bg-carbookers-red-600 hover:bg-carbookers-red-700 w-full sm:w-auto order-1 sm:order-2"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? (
-            <>
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-              {t("common.loading")}
-            </>
-          ) : (
-            t("cars.form.submit")
-          )}
-        </Button>
-      </div>
-    </form>
+      {/* Built-in Toaster - This ensures toasts appear! */}
+      <Toaster
+        position="top-right"
+        richColors
+        duration={4000}
+        closeButton
+        expand={false}
+        visibleToasts={5}
+        toastOptions={{
+          style: {
+            background: "white",
+            border: "1px solid #e5e7eb",
+            color: "#374151",
+            fontSize: "14px",
+          },
+          className: "font-sans",
+          descriptionClassName: "text-gray-600",
+          actionButtonStyle: {
+            background: "#dc2626",
+            color: "white",
+          },
+        }}
+      />
+    </>
   );
 };
 

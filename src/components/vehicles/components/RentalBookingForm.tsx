@@ -30,6 +30,8 @@ import {
   Loader2,
   CheckCircle,
   AlertCircle,
+  Clock,
+  Info,
 } from "lucide-react";
 import {
   CarData,
@@ -73,6 +75,8 @@ const RentalBookingForm: React.FC<RentalBookingFormProps> = ({
     returnLocation: initialDetails.dropoffLocation || "",
     pickupDate: initialDetails.pickupDate || "",
     returnDate: initialDetails.returnDate || "",
+    pickupTime: initialDetails.pickupTime || "10:00",
+    returnTime: initialDetails.returnTime || "10:00",
     differentDropoff: initialDetails.differentDropoff || false,
   });
 
@@ -104,7 +108,6 @@ const RentalBookingForm: React.FC<RentalBookingFormProps> = ({
     try {
       setIsLoadingCalendar(true);
 
-      // Get next 90 days of calendar data
       const today = new Date();
       const endDate = new Date();
       endDate.setDate(today.getDate() + 90);
@@ -116,17 +119,12 @@ const RentalBookingForm: React.FC<RentalBookingFormProps> = ({
       );
 
       if (response.success && response.data) {
-        console.log("Calendar data received:", response.data);
-
-        // Set blocked dates (array of date strings like "2025-09-10")
         setBlockedDates(response.data.blockedDates || []);
-
-        // Set availability status with proper typing
         setAvailabilityStatus({
           available: response.data.available,
           nextAvailableDate: response.data.nextAvailableDate,
           currentBooking: response.data.currentBooking,
-          upcomingBooking: response.data.upcomingBooking, // This was missing
+          upcomingBooking: response.data.upcomingBooking,
         });
       }
     } catch (error) {
@@ -137,20 +135,80 @@ const RentalBookingForm: React.FC<RentalBookingFormProps> = ({
     }
   };
 
-  // Calculate rental info
+  // Generate time slots (business hours: 8:00 AM - 8:30 PM)
+  const timeSlots = useMemo(() => {
+    const slots = [];
+    for (let hour = 8; hour <= 20; hour++) {
+      for (let minute = 0; minute < 60; minute += 30) {
+        const timeString = `${hour.toString().padStart(2, "0")}:${minute
+          .toString()
+          .padStart(2, "0")}`;
+        slots.push(timeString);
+      }
+    }
+    return slots;
+  }, []);
+
+  // UPDATED: Calculate rental info with your specific time logic
   const rentalInfo = useMemo(() => {
     let rentalDays = 0;
     let isValidPeriod = false;
+    let timeExceededMessage = "";
 
-    if (formData.pickupDate && formData.returnDate) {
-      const pickupDateObj = new Date(formData.pickupDate);
-      const returnDateObj = new Date(formData.returnDate);
-      const timeDiff = returnDateObj.getTime() - pickupDateObj.getTime();
-      rentalDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+    if (
+      formData.pickupDate &&
+      formData.returnDate &&
+      formData.pickupTime &&
+      formData.returnTime
+    ) {
+      const pickupDateTime = new Date(
+        `${formData.pickupDate}T${formData.pickupTime}:00`
+      );
+      const returnDateTime = new Date(
+        `${formData.returnDate}T${formData.returnTime}:00`
+      );
+
+      // Calculate basic day difference
+      const pickupDateOnly = new Date(formData.pickupDate);
+      const returnDateOnly = new Date(formData.returnDate);
+      const basicDays = Math.ceil(
+        (returnDateOnly.getTime() - pickupDateOnly.getTime()) /
+          (1000 * 60 * 60 * 24)
+      );
+
+      // Apply your specific time logic
+      const pickupTime = formData.pickupTime;
+      const returnTime = formData.returnTime;
+
+      // Convert times to minutes for easier comparison
+      const pickupMinutes =
+        parseInt(pickupTime.split(":")[0]) * 60 +
+        parseInt(pickupTime.split(":")[1]);
+      const returnMinutes =
+        parseInt(returnTime.split(":")[0]) * 60 +
+        parseInt(returnTime.split(":")[1]);
+
+      // Your logic: if return time is more than 1 hour after pickup time on the last day, add 1 day
+      const timeDifference = returnMinutes - pickupMinutes;
+      const oneHourInMinutes = 60;
+
+      rentalDays = basicDays;
+
+      // If return time exceeds pickup time by more than 1 hour, add extra day
+      if (timeDifference > oneHourInMinutes) {
+        rentalDays += 1;
+        const excessHours = Math.floor(
+          (timeDifference - oneHourInMinutes) / 60
+        );
+        const excessMinutes = (timeDifference - oneHourInMinutes) % 60;
+        timeExceededMessage = `+1 day added (return time exceeds pickup time by ${excessHours}h ${excessMinutes}m)`;
+      }
+
       isValidPeriod = rentalDays >= 1;
     }
 
-    const totalPrice = vehicle.price * Math.max(rentalDays, 1);
+    const totalAmount = vehicle.price * Math.max(rentalDays, 1);
+    const cautionAmount = vehicle.caution || 0;
 
     const isFormValid = Boolean(
       formData.firstName.trim() &&
@@ -159,17 +217,21 @@ const RentalBookingForm: React.FC<RentalBookingFormProps> = ({
         formData.pickupLocation &&
         formData.pickupDate &&
         formData.returnDate &&
+        formData.pickupTime &&
+        formData.returnTime &&
         isValidPeriod &&
         (!formData.differentDropoff || formData.returnLocation)
     );
 
     return {
       rentalDays,
-      totalPrice,
+      totalAmount,
+      cautionAmount,
       hasValidDates: isValidPeriod,
       isFormValid,
+      timeExceededMessage,
     };
-  }, [formData, vehicle.price]);
+  }, [formData, vehicle.price, vehicle.caution]);
 
   // Handle form field changes
   const handleInputChange = (field: string, value: string | boolean) => {
@@ -185,13 +247,13 @@ const RentalBookingForm: React.FC<RentalBookingFormProps> = ({
     });
   };
 
-  // Check if a date is blocked - IMPROVED IMPLEMENTATION
+  // Check if a date is blocked
   const isDateBlocked = (date: Date): boolean => {
     const dateStr = format(date, "yyyy-MM-dd");
     return blockedDates.includes(dateStr);
   };
 
-  // Handle date range selection with proper validation - IMPROVED
+  // Handle date range selection with proper validation
   const handleDateRangeSelect = (range: DateRange | undefined) => {
     if (!range) {
       setDateRange(undefined);
@@ -249,7 +311,6 @@ const RentalBookingForm: React.FC<RentalBookingFormProps> = ({
     if (range.to) {
       handleInputChange("returnDate", format(range.to, "yyyy-MM-dd"));
 
-      // Show success message for valid selection
       toast.success(
         currentLocale === "fr"
           ? "Dates sélectionnées avec succès!"
@@ -278,7 +339,7 @@ const RentalBookingForm: React.FC<RentalBookingFormProps> = ({
     return phoneRegex.test(phone.replace(/\s/g, ""));
   };
 
-  // Handle booking submission - IMPROVED ERROR HANDLING
+  // Handle booking submission
   const handleBookNow = async () => {
     if (!rentalInfo.isFormValid) {
       toast.error("Please fill in all required fields");
@@ -305,7 +366,7 @@ const RentalBookingForm: React.FC<RentalBookingFormProps> = ({
         toast.error(
           "Selected dates are no longer available. Please refresh and try again."
         );
-        await loadVehicleCalendar(); // Refresh calendar
+        await loadVehicleCalendar();
         return;
       }
     }
@@ -322,8 +383,8 @@ const RentalBookingForm: React.FC<RentalBookingFormProps> = ({
         vehicleId: vehicle.id,
         pickupDate: formData.pickupDate,
         returnDate: formData.returnDate,
-        pickupTime: "10:00", // Default pickup time
-        returnTime: "10:00", // Default return time
+        pickupTime: formData.pickupTime,
+        returnTime: formData.returnTime,
         pickupLocation: formData.pickupLocation,
         returnLocation: formData.differentDropoff
           ? formData.returnLocation
@@ -342,7 +403,7 @@ const RentalBookingForm: React.FC<RentalBookingFormProps> = ({
             : "Booking request submitted successfully!"
         );
 
-        // Prepare WhatsApp message
+        // Prepare WhatsApp message with detailed time info
         const customerName = `${formData.firstName} ${formData.lastName}`;
         const bookingNumber = response.data?.bookingNumber || "NEW";
 
@@ -352,14 +413,15 @@ const RentalBookingForm: React.FC<RentalBookingFormProps> = ({
                 intro: `Bonjour! Je viens de faire une demande de réservation pour le ${vehicle.brand} ${vehicle.name} (${vehicle.year}).`,
                 bookingDetails: "Détails de la réservation:",
                 bookingNumber: `Numéro de réservation: ${bookingNumber}`,
-                dates: `Dates: ${formData.pickupDate} au ${formData.returnDate}`,
+                dates: `Dates: ${formData.pickupDate} (${formData.pickupTime}) au ${formData.returnDate} (${formData.returnTime})`,
                 duration: `Durée: ${rentalInfo.rentalDays} jour${
                   rentalInfo.rentalDays > 1 ? "s" : ""
                 }`,
                 location: `Lieu: ${formData.pickupLocation}`,
                 customer: `Client: ${customerName}`,
                 phone: `Téléphone: ${formData.phone}`,
-                total: `Total estimé: €${rentalInfo.totalPrice}`,
+                total: `Total location: €${rentalInfo.totalAmount}`,
+                caution: `Caution: €${rentalInfo.cautionAmount}`,
                 request:
                   "Pouvez-vous confirmer la disponibilité et les détails s'il vous plaît?",
               }
@@ -367,14 +429,15 @@ const RentalBookingForm: React.FC<RentalBookingFormProps> = ({
                 intro: `Hello! I just submitted a booking request for the ${vehicle.brand} ${vehicle.name} (${vehicle.year}).`,
                 bookingDetails: "Booking Details:",
                 bookingNumber: `Booking Number: ${bookingNumber}`,
-                dates: `Dates: ${formData.pickupDate} to ${formData.returnDate}`,
+                dates: `Dates: ${formData.pickupDate} (${formData.pickupTime}) to ${formData.returnDate} (${formData.returnTime})`,
                 duration: `Duration: ${rentalInfo.rentalDays} day${
                   rentalInfo.rentalDays > 1 ? "s" : ""
                 }`,
                 location: `Location: ${formData.pickupLocation}`,
                 customer: `Customer: ${customerName}`,
                 phone: `Phone: ${formData.phone}`,
-                total: `Estimated Total: €${rentalInfo.totalPrice}`,
+                total: `Rental Total: €${rentalInfo.totalAmount}`,
+                caution: `Security Deposit: €${rentalInfo.cautionAmount}`,
                 request: "Can you please confirm availability and details?",
               };
 
@@ -389,6 +452,7 @@ const RentalBookingForm: React.FC<RentalBookingFormProps> = ({
 • ${messageContent.phone}
 
 💰 ${messageContent.total}
+🛡️ ${messageContent.caution}
 
 ${messageContent.request}`;
 
@@ -399,7 +463,6 @@ ${messageContent.request}`;
           whatsappMessage
         )}`;
 
-        // Small delay to show success message, then redirect
         setTimeout(() => {
           window.open(whatsappUrl, "_blank");
         }, 1500);
@@ -414,11 +477,12 @@ ${messageContent.request}`;
           returnLocation: "",
           pickupDate: "",
           returnDate: "",
+          pickupTime: "10:00",
+          returnTime: "10:00",
           differentDropoff: false,
         });
         setDateRange(undefined);
 
-        // Refresh calendar to show updated availability
         await loadVehicleCalendar();
       } else {
         throw new Error(response.message || "Failed to submit booking");
@@ -441,7 +505,7 @@ ${messageContent.request}`;
       <CardContent className="p-6">
         {/* Price Display */}
         <div className="text-center mb-6">
-          {/* Vehicle Availability Status - IMPROVED */}
+          {/* Vehicle Availability Status */}
           <div className="mb-3">
             {isLoadingCalendar ? (
               <div className="flex items-center justify-center gap-2 text-blue-600 bg-blue-50 rounded-lg px-3 py-2">
@@ -477,21 +541,12 @@ ${messageContent.request}`;
                     )}
                   </span>
                 )}
-                {availabilityStatus.currentBooking && (
-                  <span className="text-xs text-red-600">
-                    Booked until{" "}
-                    {format(
-                      new Date(availabilityStatus.currentBooking.returnDate),
-                      "MMM dd"
-                    )}
-                  </span>
-                )}
               </div>
             )}
           </div>
 
           <div className="text-4xl font-bold text-carbookers-red-600 mb-2">
-            €{rentalInfo.hasValidDates ? rentalInfo.totalPrice : vehicle.price}
+            €{rentalInfo.hasValidDates ? rentalInfo.totalAmount : vehicle.price}
           </div>
           <div className="text-gray-600">
             {rentalInfo.hasValidDates ? (
@@ -503,6 +558,12 @@ ${messageContent.request}`;
                 <div className="text-sm text-gray-500">
                   €{vehicle.price}/day
                 </div>
+                {rentalInfo.timeExceededMessage && (
+                  <div className="text-xs text-amber-600 mt-1 flex items-center justify-center gap-1">
+                    <Info className="h-3 w-3" />
+                    {rentalInfo.timeExceededMessage}
+                  </div>
+                )}
               </>
             ) : (
               "per day"
@@ -616,14 +677,11 @@ ${messageContent.request}`;
                     onSelect={handleDateRangeSelect}
                     numberOfMonths={1}
                     disabled={(date) => {
-                      // Disable past dates
                       const today = new Date();
                       today.setHours(0, 0, 0, 0);
                       if (date < today) {
                         return true;
                       }
-
-                      // Disable blocked dates (from backend) - AIRBNB STYLE
                       return isDateBlocked(date);
                     }}
                     modifiers={{
@@ -634,14 +692,13 @@ ${messageContent.request}`;
                         backgroundColor: "#fef2f2",
                         color: "#dc2626",
                         textDecoration: "line-through",
-                        opacity: 0.4, // Low opacity like Airbnb
+                        opacity: 0.4,
                         cursor: "not-allowed",
                       },
                     }}
                     className="rounded-md border shadow"
                   />
 
-                  {/* Legend - IMPROVED */}
                   <div className="p-3 border-t border-gray-200 bg-gray-50">
                     <div className="flex items-center justify-between text-xs mb-2">
                       <div className="flex items-center gap-2">
@@ -662,12 +719,70 @@ ${messageContent.request}`;
                   </div>
                 </PopoverContent>
               </Popover>
-              {isLoadingCalendar && (
-                <p className="text-xs text-blue-600 mt-1 flex items-center gap-1">
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                  Loading vehicle calendar...
-                </p>
-              )}
+            </div>
+
+            {/* Time Selection */}
+            <div className="grid grid-cols-2 gap-3">
+              {/* Pickup Time */}
+              <div>
+                <Label className="text-sm">Pickup Time *</Label>
+                <Select
+                  value={formData.pickupTime}
+                  onValueChange={(value) =>
+                    handleInputChange("pickupTime", value)
+                  }
+                >
+                  <SelectTrigger className="mt-1">
+                    <Clock className="mr-2 h-4 w-4" />
+                    <SelectValue placeholder="Select time" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {timeSlots.map((time) => (
+                      <SelectItem key={time} value={time}>
+                        {time}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Return Time */}
+              <div>
+                <Label className="text-sm">Return Time *</Label>
+                <Select
+                  value={formData.returnTime}
+                  onValueChange={(value) =>
+                    handleInputChange("returnTime", value)
+                  }
+                >
+                  <SelectTrigger className="mt-1">
+                    <Clock className="mr-2 h-4 w-4" />
+                    <SelectValue placeholder="Select time" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {timeSlots.map((time) => (
+                      <SelectItem key={time} value={time}>
+                        {time}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Time Logic Explanation */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <div className="flex items-start gap-2">
+                <Info className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                <div className="text-xs text-blue-800">
+                  <p className="font-medium mb-1">Time Policy:</p>
+                  <ul className="space-y-1">
+                    <li>• 1-hour grace period after pickup time</li>
+                    <li>• Return after grace period = +1 day charge</li>
+                    <li>• Business hours: 8:00 AM - 8:30 PM</li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -684,7 +799,6 @@ ${messageContent.request}`;
                 value={formData.pickupLocation}
                 onValueChange={(value) => {
                   handleInputChange("pickupLocation", value);
-                  // If not different dropoff, also set return location
                   if (!formData.differentDropoff) {
                     handleInputChange("returnLocation", value);
                   }
@@ -704,7 +818,6 @@ ${messageContent.request}`;
               </Select>
             </div>
 
-            {/* Different Return Location Toggle */}
             <div className="flex items-center gap-3">
               <input
                 type="checkbox"
@@ -752,24 +865,107 @@ ${messageContent.request}`;
           {/* Booking Summary */}
           {rentalInfo.hasValidDates && (
             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <h4 className="font-semibold text-green-800 mb-2">
+              <h4 className="font-semibold text-green-800 mb-3">
                 Booking Summary
               </h4>
-              <div className="text-sm text-green-700 space-y-1">
-                <div>
-                  Vehicle: {vehicle.brand} {vehicle.name}
+              <div className="text-sm text-green-700 space-y-2">
+                <div className="flex justify-between">
+                  <span>Vehicle:</span>
+                  <span>
+                    {vehicle.brand} {vehicle.name}
+                  </span>
                 </div>
-                <div>
-                  Duration: {rentalInfo.rentalDays} day
-                  {rentalInfo.rentalDays > 1 ? "s" : ""}
+                <div className="flex justify-between">
+                  <span>Pickup:</span>
+                  <span>
+                    {formData.pickupDate} at {formData.pickupTime}
+                  </span>
                 </div>
-                <div>Location: {formData.pickupLocation}</div>
+                <div className="flex justify-between">
+                  <span>Return:</span>
+                  <span>
+                    {formData.returnDate} at {formData.returnTime}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Duration:</span>
+                  <span>
+                    {rentalInfo.rentalDays} day
+                    {rentalInfo.rentalDays > 1 ? "s" : ""}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Location:</span>
+                  <span>{formData.pickupLocation}</span>
+                </div>
                 {formData.differentDropoff && formData.returnLocation && (
-                  <div>Return: {formData.returnLocation}</div>
+                  <div className="flex justify-between">
+                    <span>Return to:</span>
+                    <span>{formData.returnLocation}</span>
+                  </div>
                 )}
-                <div className="font-semibold pt-2 border-t border-green-300">
-                  Total: €{rentalInfo.totalPrice}
+
+                {/* Pricing Breakdown */}
+                <div className="border-t border-green-300 pt-2 mt-3 space-y-2">
+                  <div className="flex justify-between">
+                    <span>Daily Rate:</span>
+                    <span>€{vehicle.price}/day</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Total Days:</span>
+                    <span>{rentalInfo.rentalDays}</span>
+                  </div>
+                  <div className="flex justify-between font-semibold text-green-900">
+                    <span>Rental Total:</span>
+                    <span>€{rentalInfo.totalAmount}</span>
+                  </div>
+
+                  {/* Security Deposit/Caution */}
+                  <div className="bg-amber-50 border border-amber-200 rounded p-2 mt-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-amber-800 font-medium">
+                        Security Deposit:
+                      </span>
+                      <span className="text-amber-900 font-bold">
+                        €{rentalInfo.cautionAmount}
+                      </span>
+                    </div>
+                    <p className="text-xs text-amber-700 mt-1">
+                      Refundable deposit required at pickup
+                    </p>
+                  </div>
+
+                  {/* Total Summary */}
+                  <div className="bg-green-100 border border-green-300 rounded p-2 mt-3">
+                    <div className="flex justify-between items-center">
+                      <span className="font-bold text-green-900">
+                        Total at Pickup:
+                      </span>
+                      <span className="font-bold text-xl text-green-900">
+                        €{rentalInfo.totalAmount + rentalInfo.cautionAmount}
+                      </span>
+                    </div>
+                    <p className="text-xs text-green-700 mt-1">
+                      Rental (€{rentalInfo.totalAmount}) + Deposit (€
+                      {rentalInfo.cautionAmount})
+                    </p>
+                  </div>
                 </div>
+
+                {/* Time exceeded warning */}
+                {rentalInfo.timeExceededMessage && (
+                  <div className="bg-amber-50 border border-amber-200 rounded p-2 mt-2">
+                    <div className="flex items-center gap-2 text-amber-800">
+                      <AlertCircle className="h-4 w-4" />
+                      <span className="text-xs font-medium">
+                        Time Policy Applied
+                      </span>
+                    </div>
+                    <p className="text-xs text-amber-700 mt-1">
+                      {rentalInfo.timeExceededMessage}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           )}
