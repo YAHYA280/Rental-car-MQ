@@ -1,4 +1,3 @@
-// src/components/dashboard/layout/DashboardSidebar.tsx - Same Design + Auth
 "use client";
 
 import React from "react";
@@ -57,12 +56,12 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
       icon: Calendar,
       current: pathname.includes("/dashboard/bookings"),
     },
-    {
-      name: t("navigation.settings"),
-      href: "/dashboard/settings",
-      icon: Settings,
-      current: pathname.includes("/dashboard/settings"),
-    },
+    // {
+    //   name: t("navigation.settings"),
+    //   href: "/dashboard/settings",
+    //   icon: Settings,
+    //   current: pathname.includes("/dashboard/settings"),
+    // },
   ];
 
   const handleLogout = () => {

@@ -1,4 +1,4 @@
-// src/components/dashboard/cars/EditCarForm.tsx - Updated with unified types
+// src/components/dashboard/cars/EditCarForm.tsx - Enhanced with error handling and notifications
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -6,8 +6,9 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { X, Upload, Plus } from "lucide-react";
+import { X, Upload, Plus, CheckCircle, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 // Import form section components
 import BasicInfoSection from "./components/form/BasicInfoSection";
@@ -53,6 +54,7 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
   const [technicalVisitDate, setTechnicalVisitDate] = useState<
     Date | undefined
   >();
@@ -111,15 +113,159 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
     }
   }, [car]);
 
+  const validateLicensePlate = (plate: string): boolean => {
+    const plateRegex = /^\d{5}[A-Z]$/;
+    return plateRegex.test(plate.toUpperCase());
+  };
+
+  const validateWhatsAppNumber = (number: string): boolean => {
+    const phoneRegex = /^0[67]\d{8}$/;
+    return phoneRegex.test(number.replace(/\s/g, ""));
+  };
+
+  const validateYear = (year: string): boolean => {
+    const yearNum = parseInt(year);
+    return yearNum >= 2000 && yearNum <= 2030; // Updated max year to 2030
+  };
+
+  const validatePrice = (price: string): boolean => {
+    const priceNum = parseFloat(price);
+    return !isNaN(priceNum) && priceNum > 0 && priceNum <= 10000;
+  };
+
+  const validateSingleField = (field: string, value: string) => {
+    const newErrors: Record<string, string> = { ...errors };
+
+    switch (field) {
+      case "brand":
+        if (!value.trim()) {
+          newErrors.brand = t("cars.form.validation.brandRequired");
+        } else {
+          delete newErrors.brand;
+        }
+        break;
+
+      case "name":
+        if (!value.trim()) {
+          newErrors.name = t("cars.form.validation.nameRequired");
+        } else if (value.trim().length < 2) {
+          newErrors.name = "Car name must be at least 2 characters";
+        } else if (value.trim().length > 50) {
+          newErrors.name = "Car name cannot exceed 50 characters";
+        } else {
+          delete newErrors.name;
+        }
+        break;
+
+      case "year":
+        if (!value) {
+          newErrors.year = t("cars.form.validation.yearRequired");
+        } else if (!validateYear(value)) {
+          newErrors.year = "Year must be between 2000 and 2030";
+        } else {
+          delete newErrors.year;
+        }
+        break;
+
+      case "licensePlate":
+        if (!value) {
+          newErrors.licensePlate = t(
+            "cars.form.validation.licensePlateRequired"
+          );
+        } else if (!validateLicensePlate(value)) {
+          newErrors.licensePlate = t("cars.form.validation.licensePlateFormat");
+        } else {
+          delete newErrors.licensePlate;
+        }
+        break;
+
+      case "dailyPrice":
+        if (!value) {
+          newErrors.dailyPrice = t("cars.form.validation.dailyPriceRequired");
+        } else if (!validatePrice(value)) {
+          newErrors.dailyPrice =
+            "Please enter a valid price between €1 and €10,000";
+        } else {
+          delete newErrors.dailyPrice;
+        }
+        break;
+
+      case "caution":
+        if (!value) {
+          newErrors.caution = t("cars.form.validation.cautionRequired");
+        } else if (!validatePrice(value)) {
+          newErrors.caution =
+            "Please enter a valid caution amount between €1 and €10,000";
+        } else {
+          delete newErrors.caution;
+        }
+        break;
+
+      case "whatsappNumber":
+        if (!value) {
+          newErrors.whatsappNumber = t("cars.form.validation.whatsappRequired");
+        } else if (!validateWhatsAppNumber(value)) {
+          newErrors.whatsappNumber =
+            "Please enter a valid WhatsApp number (06XXXXXXXX or 07XXXXXXXX)";
+        } else {
+          delete newErrors.whatsappNumber;
+        }
+        break;
+
+      case "transmission":
+        if (!value) {
+          newErrors.transmission = t(
+            "cars.form.validation.transmissionRequired"
+          );
+        } else {
+          delete newErrors.transmission;
+        }
+        break;
+
+      case "fuelType":
+        if (!value) {
+          newErrors.fuelType = t("cars.form.validation.fuelTypeRequired");
+        } else {
+          delete newErrors.fuelType;
+        }
+        break;
+
+      case "seats":
+        if (!value) {
+          newErrors.seats = t("cars.form.validation.seatsRequired");
+        } else {
+          delete newErrors.seats;
+        }
+        break;
+
+      case "doors":
+        if (!value) {
+          newErrors.doors = t("cars.form.validation.doorsRequired");
+        } else {
+          delete newErrors.doors;
+        }
+        break;
+    }
+
+    setErrors(newErrors);
+  };
+
   const handleInputChange = (field: string, value: string) => {
     console.log(`Changing ${field} to:`, value);
     setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
+
+    // Mark field as touched
+    setTouchedFields((prev) => new Set([...prev, field]));
+
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: "" }));
     }
+
+    // Immediate validation
+    validateSingleField(field, value);
   };
 
   const handleMainImageChange = (file: File | undefined) => {
@@ -127,6 +273,7 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
       ...prev,
       mainImage: file,
     }));
+    setTouchedFields((prev) => new Set([...prev, "mainImage"]));
   };
 
   const handleAdditionalImagesChange = (files: FileList | null) => {
@@ -155,16 +302,6 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
     }));
   };
 
-  const validateLicensePlate = (plate: string): boolean => {
-    const plateRegex = /^\d{5}[A-Z]$/;
-    return plateRegex.test(plate.toUpperCase());
-  };
-
-  const validateWhatsAppNumber = (number: string): boolean => {
-    const phoneRegex = /^0[67]\d{8}$/;
-    return phoneRegex.test(number.replace(/\s/g, ""));
-  };
-
   const handleDateChange = (
     date: Date | undefined,
     field: "technicalVisit" | "oilChange"
@@ -183,43 +320,115 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
+    let hasErrors = false;
 
-    if (!formData.brand)
+    // Required fields validation
+    if (!formData.brand) {
       newErrors.brand = t("cars.form.validation.brandRequired");
-    if (!formData.name) newErrors.name = t("cars.form.validation.nameRequired");
-    if (!formData.year) newErrors.year = t("cars.form.validation.yearRequired");
+      hasErrors = true;
+    }
+
+    if (!formData.name.trim()) {
+      newErrors.name = t("cars.form.validation.nameRequired");
+      hasErrors = true;
+    } else if (formData.name.trim().length < 2) {
+      newErrors.name = "Car name must be at least 2 characters";
+      hasErrors = true;
+    }
+
+    if (!formData.year) {
+      newErrors.year = t("cars.form.validation.yearRequired");
+      hasErrors = true;
+    } else if (!validateYear(formData.year)) {
+      newErrors.year = "Year must be between 2000 and 2030";
+      hasErrors = true;
+    }
+
     if (!formData.licensePlate) {
       newErrors.licensePlate = t("cars.form.validation.licensePlateRequired");
+      hasErrors = true;
     } else if (!validateLicensePlate(formData.licensePlate)) {
       newErrors.licensePlate = t("cars.form.validation.licensePlateFormat");
+      hasErrors = true;
     }
-    if (!formData.transmission)
+
+    if (!formData.transmission) {
       newErrors.transmission = t("cars.form.validation.transmissionRequired");
-    if (!formData.fuelType)
+      hasErrors = true;
+    }
+
+    if (!formData.fuelType) {
       newErrors.fuelType = t("cars.form.validation.fuelTypeRequired");
-    if (!formData.seats)
+      hasErrors = true;
+    }
+
+    if (!formData.seats) {
       newErrors.seats = t("cars.form.validation.seatsRequired");
-    if (!formData.doors)
+      hasErrors = true;
+    }
+
+    if (!formData.doors) {
       newErrors.doors = t("cars.form.validation.doorsRequired");
-    if (!formData.dailyPrice)
+      hasErrors = true;
+    }
+
+    if (!formData.dailyPrice) {
       newErrors.dailyPrice = t("cars.form.validation.dailyPriceRequired");
-    if (!formData.caution)
+      hasErrors = true;
+    } else if (!validatePrice(formData.dailyPrice)) {
+      newErrors.dailyPrice =
+        "Please enter a valid price between €1 and €10,000";
+      hasErrors = true;
+    }
+
+    if (!formData.caution) {
       newErrors.caution = t("cars.form.validation.cautionRequired");
+      hasErrors = true;
+    } else if (!validatePrice(formData.caution)) {
+      newErrors.caution =
+        "Please enter a valid caution amount between €1 and €10,000";
+      hasErrors = true;
+    }
+
     if (!formData.whatsappNumber) {
       newErrors.whatsappNumber = t("cars.form.validation.whatsappRequired");
+      hasErrors = true;
     } else if (!validateWhatsAppNumber(formData.whatsappNumber)) {
       newErrors.whatsappNumber =
         "Please enter a valid WhatsApp number (06XXXXXXXX or 07XXXXXXXX)";
+      hasErrors = true;
     }
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+
+    // Show error toast with specific issues
+    if (hasErrors) {
+      const errorCount = Object.keys(newErrors).length;
+      toast.error("Form Validation Failed", {
+        description: `Please fix ${errorCount} error${
+          errorCount > 1 ? "s" : ""
+        } before updating`,
+        icon: <AlertTriangle className="h-4 w-4" />,
+        duration: 4000,
+      });
+    }
+
+    return !hasErrors;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validateForm()) {
+      // Scroll to first error field
+      const firstErrorField = Object.keys(errors)[0];
+      const errorElement =
+        document.querySelector(`[data-error="${firstErrorField}"]`) ||
+        document.querySelector(`#${firstErrorField}`) ||
+        document.querySelector(`[name="${firstErrorField}"]`);
+      if (errorElement) {
+        errorElement.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
       return;
     }
 
@@ -227,8 +436,23 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
     try {
       console.log("Submitting form data:", formData);
       await onSubmit(formData);
-    } catch (error) {
+
+      // Show success toast
+      toast.success("Car Updated Successfully!", {
+        description: `${formData.brand} ${formData.name} has been updated`,
+        icon: <CheckCircle className="h-4 w-4" />,
+        duration: 5000,
+      });
+    } catch (error: any) {
       console.error("Error updating car:", error);
+
+      // Show error toast with specific message
+      toast.error("Failed to Update Car", {
+        description:
+          error?.message || "An unexpected error occurred. Please try again.",
+        icon: <AlertTriangle className="h-4 w-4" />,
+        duration: 6000,
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -278,6 +502,7 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
               whatsappNumber: formData.whatsappNumber,
             }}
             errors={errors}
+            touchedFields={touchedFields}
             onInputChange={handleInputChange}
           />
 
@@ -290,6 +515,7 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
               mileage: formData.mileage,
             }}
             errors={errors}
+            touchedFields={touchedFields}
             onInputChange={handleInputChange}
           />
 
@@ -299,6 +525,7 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
               caution: formData.caution,
             }}
             errors={errors}
+            touchedFields={touchedFields}
             onInputChange={handleInputChange}
           />
         </div>
@@ -467,7 +694,14 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
           className="bg-carbookers-red-600 hover:bg-carbookers-red-700 w-full sm:w-auto order-1 sm:order-2"
           disabled={isSubmitting}
         >
-          {isSubmitting ? "Updating..." : "Update Car"}
+          {isSubmitting ? (
+            <>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              Updating...
+            </>
+          ) : (
+            "Update Car"
+          )}
         </Button>
       </div>
     </form>

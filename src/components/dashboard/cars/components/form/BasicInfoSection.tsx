@@ -1,4 +1,4 @@
-// src/components/dashboard/cars/components/form/BasicInfoSection.tsx - Added model field
+// src/components/dashboard/cars/components/form/BasicInfoSection.tsx - Enhanced with error handling
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -13,7 +13,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { Phone } from "lucide-react";
+import { Phone, AlertCircle } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface BasicInfoSectionProps {
   formData: {
@@ -24,12 +29,14 @@ interface BasicInfoSectionProps {
     whatsappNumber: string;
   };
   errors: Record<string, string>;
+  touchedFields?: Set<string>;
   onInputChange: (field: string, value: string) => void;
 }
 
 const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
   formData,
   errors,
+  touchedFields = new Set(),
   onInputChange,
 }) => {
   const t = useTranslations("dashboard");
@@ -128,6 +135,16 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
     onInputChange("licensePlate", cleaned);
   };
 
+  // Handle year input with validation
+  const handleYearChange = (value: string) => {
+    // Only allow numbers
+    const cleaned = value.replace(/\D/g, "");
+    // Limit to 4 digits
+    if (cleaned.length <= 4) {
+      onInputChange("year", cleaned);
+    }
+  };
+
   // Format displayed WhatsApp number
   const formatWhatsAppDisplay = (value: string) => {
     if (value.length <= 2) return value;
@@ -139,19 +156,46 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
     return formatted;
   };
 
+  // Check if field has error and should show it
+  const shouldShowError = (field: string) => {
+    return errors[field] && touchedFields.has(field);
+  };
+
+  // Get error styling
+  const getFieldClass = (field: string) => {
+    return shouldShowError(field)
+      ? "border-red-500 focus:border-red-500 focus:ring-red-200"
+      : "";
+  };
+
   return (
     <Card>
       <CardContent className="p-4">
         <h3 className="text-lg font-semibold mb-4">Basic Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="brand">Brand *</Label>
+          <div data-error="brand">
+            <Label htmlFor="brand" className="flex items-center gap-2">
+              Brand *
+              {shouldShowError("brand") && (
+                <Popover>
+                  <PopoverTrigger>
+                    <AlertCircle className="h-4 w-4 text-red-500 cursor-help" />
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80 p-3">
+                    <div className="text-sm text-red-600">
+                      <strong>Brand Error:</strong>
+                      <p className="mt-1">{errors.brand}</p>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              )}
+            </Label>
             <Select
               value={formData.brand}
               onValueChange={(value) => onInputChange("brand", value)}
               disabled={loadingBrands}
             >
-              <SelectTrigger className={errors.brand ? "border-red-500" : ""}>
+              <SelectTrigger className={getFieldClass("brand")}>
                 <SelectValue
                   placeholder={
                     loadingBrands ? "Loading brands..." : "Select brand"
@@ -166,80 +210,174 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
                 ))}
               </SelectContent>
             </Select>
-            {errors.brand && (
-              <p className="text-red-500 text-sm mt-1">{errors.brand}</p>
+            {shouldShowError("brand") && (
+              <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                {errors.brand}
+              </p>
             )}
           </div>
 
-          <div>
-            <Label htmlFor="name">Name *</Label>
+          <div data-error="name">
+            <Label htmlFor="name" className="flex items-center gap-2">
+              Name *
+              {shouldShowError("name") && (
+                <Popover>
+                  <PopoverTrigger>
+                    <AlertCircle className="h-4 w-4 text-red-500 cursor-help" />
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80 p-3">
+                    <div className="text-sm text-red-600">
+                      <strong>Name Error:</strong>
+                      <p className="mt-1">{errors.name}</p>
+                      <p className="mt-2 text-gray-600">
+                        Enter a descriptive name for the car (e.g., "Clio
+                        Campus", "Golf GTI")
+                      </p>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              )}
+            </Label>
             <Input
               id="name"
+              name="name"
               value={formData.name}
               onChange={(e) => onInputChange("name", e.target.value)}
               placeholder="Car name"
-              className={errors.name ? "border-red-500" : ""}
+              className={getFieldClass("name")}
+              maxLength={50}
             />
-            {errors.name && (
-              <p className="text-red-500 text-sm mt-1">{errors.name}</p>
-            )}
+            <div className="flex justify-between items-center mt-1">
+              {shouldShowError("name") && (
+                <p className="text-red-500 text-sm flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {errors.name}
+                </p>
+              )}
+              <p className="text-xs text-gray-500 ml-auto">
+                {formData.name.length}/50
+              </p>
+            </div>
           </div>
 
-          <div>
-            <Label htmlFor="year">Year *</Label>
+          <div data-error="year">
+            <Label htmlFor="year" className="flex items-center gap-2">
+              Year *
+              {shouldShowError("year") && (
+                <Popover>
+                  <PopoverTrigger>
+                    <AlertCircle className="h-4 w-4 text-red-500 cursor-help" />
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80 p-3">
+                    <div className="text-sm text-red-600">
+                      <strong>Year Error:</strong>
+                      <p className="mt-1">{errors.year}</p>
+                      <p className="mt-2 text-gray-600">
+                        Enter the manufacturing year (2000-2030)
+                      </p>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              )}
+            </Label>
             <Input
               id="year"
-              type="number"
+              name="year"
+              type="text"
               value={formData.year}
-              onChange={(e) => onInputChange("year", e.target.value)}
+              onChange={(e) => handleYearChange(e.target.value)}
               placeholder="2024"
-              min="2000"
-              max="2025"
-              className={errors.year ? "border-red-500" : ""}
+              className={getFieldClass("year")}
+              maxLength={4}
             />
-            {errors.year && (
-              <p className="text-red-500 text-sm mt-1">{errors.year}</p>
+            {shouldShowError("year") && (
+              <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                {errors.year}
+              </p>
             )}
           </div>
 
-          <div>
-            <Label htmlFor="licensePlate">License Plate *</Label>
+          <div data-error="licensePlate">
+            <Label htmlFor="licensePlate" className="flex items-center gap-2">
+              License Plate *
+              {shouldShowError("licensePlate") && (
+                <Popover>
+                  <PopoverTrigger>
+                    <AlertCircle className="h-4 w-4 text-red-500 cursor-help" />
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80 p-3">
+                    <div className="text-sm text-red-600">
+                      <strong>License Plate Error:</strong>
+                      <p className="mt-1">{errors.licensePlate}</p>
+                      <p className="mt-2 text-gray-600">
+                        Format: 12345A (5 digits followed by 1 letter)
+                      </p>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              )}
+            </Label>
             <Input
               id="licensePlate"
+              name="licensePlate"
               value={formData.licensePlate}
               onChange={(e) => handleLicensePlateChange(e.target.value)}
               placeholder="12345A"
-              className={errors.licensePlate ? "border-red-500" : ""}
+              className={getFieldClass("licensePlate")}
               maxLength={6}
             />
             <p className="text-xs text-gray-500 mt-1">
               Format: 12345A (5 digits + 1 letter)
             </p>
-            {errors.licensePlate && (
-              <p className="text-red-500 text-sm mt-1">{errors.licensePlate}</p>
+            {shouldShowError("licensePlate") && (
+              <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                {errors.licensePlate}
+              </p>
             )}
           </div>
 
-          <div className="md:col-span-2">
-            <Label htmlFor="whatsappNumber">WhatsApp Number *</Label>
+          <div className="md:col-span-2" data-error="whatsappNumber">
+            <Label htmlFor="whatsappNumber" className="flex items-center gap-2">
+              WhatsApp Number *
+              {shouldShowError("whatsappNumber") && (
+                <Popover>
+                  <PopoverTrigger>
+                    <AlertCircle className="h-4 w-4 text-red-500 cursor-help" />
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80 p-3">
+                    <div className="text-sm text-red-600">
+                      <strong>WhatsApp Number Error:</strong>
+                      <p className="mt-1">{errors.whatsappNumber}</p>
+                      <p className="mt-2 text-gray-600">
+                        Enter a valid Moroccan mobile number starting with 06 or
+                        07
+                      </p>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              )}
+            </Label>
             <div className="relative">
               <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
               <Input
                 id="whatsappNumber"
+                name="whatsappNumber"
                 value={formatWhatsAppDisplay(formData.whatsappNumber)}
                 onChange={(e) => handleWhatsAppChange(e.target.value)}
                 placeholder="06 XX XX XX XX"
-                className={`pl-10 ${
-                  errors.whatsappNumber ? "border-red-500" : ""
-                }`}
-                maxLength={14} // For formatted display
+                className={`pl-10 ${getFieldClass("whatsappNumber")}`}
+                maxLength={14}
               />
             </div>
             <p className="text-xs text-gray-500 mt-1">
               Format: 06 XX XX XX XX or 07 XX XX XX XX
             </p>
-            {errors.whatsappNumber && (
-              <p className="text-red-500 text-sm mt-1">
+            {shouldShowError("whatsappNumber") && (
+              <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
                 {errors.whatsappNumber}
               </p>
             )}
