@@ -954,21 +954,6 @@ ${messageContent.request}`;
                     </p>
                   </div>
                 </div>
-
-                {/* Time exceeded warning */}
-                {rentalInfo.timeExceededMessage && (
-                  <div className="bg-amber-50 border border-amber-200 rounded p-2 mt-2">
-                    <div className="flex items-center gap-2 text-amber-800">
-                      <AlertCircle className="h-4 w-4" />
-                      <span className="text-xs font-medium">
-                        Time Policy Applied
-                      </span>
-                    </div>
-                    <p className="text-xs text-amber-700 mt-1">
-                      {rentalInfo.timeExceededMessage}
-                    </p>
-                  </div>
-                )}
               </div>
             </div>
           )}
