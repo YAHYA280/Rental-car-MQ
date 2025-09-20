@@ -1,10 +1,14 @@
-// src/services/userService.ts - FIXED: Updated for BYTEA storage and optional fields
-
+// src/services/userService.ts - UPDATED: Complete support for all document types and new fields
 import {
   ApiResponse,
   UserData,
   UserFormData,
   UserFiltersType,
+  DocumentUploadData,
+  SingleDocumentUpload,
+  DocumentCompletionStatus,
+  ContractValidation,
+  parseStringBoolean,
 } from "@/components/types";
 
 class UserService {
@@ -18,7 +22,7 @@ class UserService {
     try {
       const queryParams = new URLSearchParams();
 
-      // Handle all filter parameters
+      // Handle all filter parameters including new document status filter
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== "") {
           if (typeof value === "boolean") {
@@ -92,13 +96,13 @@ class UserService {
     }
   }
 
-  // FIXED: Create new user with proper FormData handling
+  // UPDATED: Create new user with comprehensive document support
   async createUser(userData: UserFormData): Promise<ApiResponse<UserData>> {
     try {
-      const formData = this.buildFormData(userData);
+      const formData = this.buildEnhancedFormData(userData);
       const token = localStorage.getItem("token");
 
-      console.log("Creating user with data:", userData);
+      console.log("Creating user with enhanced data:", userData);
 
       const response = await fetch(`${this.baseUrl}/customers`, {
         method: "POST",
@@ -122,16 +126,16 @@ class UserService {
     }
   }
 
-  // FIXED: Update user with proper FormData handling
+  // UPDATED: Update user with comprehensive document support
   async updateUser(
     id: string,
     userData: Partial<UserFormData>
   ): Promise<ApiResponse<UserData>> {
     try {
-      const formData = this.buildFormData(userData);
+      const formData = this.buildEnhancedFormData(userData);
       const token = localStorage.getItem("token");
 
-      console.log("Updating user with data:", userData);
+      console.log("Updating user with enhanced data:", userData);
 
       const response = await fetch(`${this.baseUrl}/customers/${id}`, {
         method: "PUT",
@@ -209,7 +213,7 @@ class UserService {
     }
   }
 
-  // Upload driver license
+  // LEGACY: Upload driver license only (backward compatibility)
   async uploadDriverLicense(
     id: string,
     file: File
@@ -239,6 +243,249 @@ class UserService {
       return result;
     } catch (error) {
       console.error("UserService.uploadDriverLicense error:", error);
+      throw error;
+    }
+  }
+
+  // NEW: Upload passport document
+  async uploadPassport(id: string, file: File): Promise<ApiResponse<UserData>> {
+    try {
+      const formData = new FormData();
+      formData.append("passportImage", file);
+
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${this.baseUrl}/customers/${id}/passport`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to upload passport");
+      }
+
+      return result;
+    } catch (error) {
+      console.error("UserService.uploadPassport error:", error);
+      throw error;
+    }
+  }
+
+  // NEW: Upload CIN document
+  async uploadCin(id: string, file: File): Promise<ApiResponse<UserData>> {
+    try {
+      const formData = new FormData();
+      formData.append("cinImage", file);
+
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${this.baseUrl}/customers/${id}/cin`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to upload CIN");
+      }
+
+      return result;
+    } catch (error) {
+      console.error("UserService.uploadCin error:", error);
+      throw error;
+    }
+  }
+
+  // NEW: Upload multiple documents at once
+  async uploadMultipleDocuments(
+    id: string,
+    documents: DocumentUploadData
+  ): Promise<ApiResponse<UserData>> {
+    try {
+      const formData = new FormData();
+
+      // Add all provided documents
+      if (documents.driverLicenseImage) {
+        formData.append("driverLicenseImage", documents.driverLicenseImage);
+      }
+      if (documents.passportImage) {
+        formData.append("passportImage", documents.passportImage);
+      }
+      if (documents.cinImage) {
+        formData.append("cinImage", documents.cinImage);
+      }
+
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `${this.baseUrl}/customers/${id}/documents`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to upload documents");
+      }
+
+      return result;
+    } catch (error) {
+      console.error("UserService.uploadMultipleDocuments error:", error);
+      throw error;
+    }
+  }
+
+  // NEW: Upload single document by type
+  async uploadSingleDocument(
+    id: string,
+    upload: SingleDocumentUpload
+  ): Promise<ApiResponse<UserData>> {
+    switch (upload.documentType) {
+      case "driverLicense":
+        return this.uploadDriverLicense(id, upload.file);
+      case "passport":
+        return this.uploadPassport(id, upload.file);
+      case "cin":
+        return this.uploadCin(id, upload.file);
+      default:
+        throw new Error(`Unsupported document type: ${upload.documentType}`);
+    }
+  }
+
+  // NEW: Get document completion status
+  async getDocumentStatus(
+    id: string
+  ): Promise<ApiResponse<DocumentCompletionStatus>> {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `${this.baseUrl}/customers/${id}/documents/status`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to fetch document status");
+      }
+
+      return result;
+    } catch (error) {
+      console.error("UserService.getDocumentStatus error:", error);
+      throw error;
+    }
+  }
+
+  // NEW: Remove specific document
+  async removeDocument(
+    id: string,
+    documentType: "driverLicense" | "passport" | "cin"
+  ): Promise<ApiResponse<void>> {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `${this.baseUrl}/customers/${id}/documents/${documentType}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to remove document");
+      }
+
+      return result;
+    } catch (error) {
+      console.error("UserService.removeDocument error:", error);
+      throw error;
+    }
+  }
+
+  // NEW: Get users with incomplete documents
+  async getUsersWithIncompleteDocuments(
+    page = 1,
+    limit = 25
+  ): Promise<ApiResponse<UserData[]>> {
+    try {
+      const token = localStorage.getItem("token");
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+      });
+
+      const response = await fetch(
+        `${this.baseUrl}/customers/filter/incomplete-documents?${params}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to fetch incomplete users");
+      }
+
+      return result;
+    } catch (error) {
+      console.error(
+        "UserService.getUsersWithIncompleteDocuments error:",
+        error
+      );
+      throw error;
+    }
+  }
+
+  // NEW: Bulk update customer documents
+  async bulkUpdateDocuments(
+    updates: Array<{ id: string; [key: string]: any }>
+  ): Promise<ApiResponse<any>> {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${this.baseUrl}/customers/bulk/documents`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ customers: updates }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to bulk update documents");
+      }
+
+      return result;
+    } catch (error) {
+      console.error("UserService.bulkUpdateDocuments error:", error);
       throw error;
     }
   }
@@ -304,16 +551,17 @@ class UserService {
     }
   }
 
-  // FIXED: Helper method to build FormData from UserFormData with proper optional handling
-  private buildFormData(userData: Partial<UserFormData>): FormData {
+  // UPDATED: Enhanced FormData builder with all new fields
+  private buildEnhancedFormData(userData: Partial<UserFormData>): FormData {
     const formData = new FormData();
 
-    console.log("Building FormData from:", userData);
+    console.log("Building enhanced FormData from:", userData);
 
-    // Add regular fields
+    // Add regular fields including new ones
     Object.entries(userData).forEach(([key, value]) => {
-      if (key === "driverLicenseImage") {
-        return; // Handle separately
+      // Skip file fields - handle separately
+      if (["driverLicenseImage", "passportImage", "cinImage"].includes(key)) {
+        return;
       }
 
       if (key === "emergencyContact" && value && typeof value === "object") {
@@ -323,7 +571,7 @@ class UserService {
         // Backend expects JSON string for nested objects
         formData.append(key, JSON.stringify(value));
       } else if (key === "email") {
-        // FIXED: Handle optional email properly
+        // Handle optional email properly
         if (value && typeof value === "string" && value.trim() !== "") {
           formData.append(key, value.trim());
         }
@@ -333,7 +581,7 @@ class UserService {
       }
     });
 
-    // FIXED: Add driver license image only if provided
+    // UPDATED: Add all document images if provided
     if (
       userData.driverLicenseImage &&
       userData.driverLicenseImage instanceof File
@@ -345,8 +593,21 @@ class UserService {
       );
     }
 
+    if (userData.passportImage && userData.passportImage instanceof File) {
+      formData.append("passportImage", userData.passportImage);
+      console.log(
+        "Added passport image to FormData:",
+        userData.passportImage.name
+      );
+    }
+
+    if (userData.cinImage && userData.cinImage instanceof File) {
+      formData.append("cinImage", userData.cinImage);
+      console.log("Added CIN image to FormData:", userData.cinImage.name);
+    }
+
     // Debug log what's in FormData
-    console.log("FormData entries:");
+    console.log("Enhanced FormData entries:");
     for (let [key, value] of formData.entries()) {
       if (value instanceof File) {
         console.log(`${key}: File(${value.name}, ${value.size} bytes)`);
@@ -358,7 +619,7 @@ class UserService {
     return formData;
   }
 
-  // FIXED: Transform backend response to frontend format with BYTEA handling
+  // UPDATED: Transform backend response with all new fields
   transformUserResponse(backendUser: any): UserData {
     const transformed: UserData = {
       ...backendUser,
@@ -373,37 +634,51 @@ class UserService {
       status: backendUser.status || "active",
     };
 
-    // FIXED: Handle driver license image from BYTEA
+    // Handle driver license image from BYTEA
     if (backendUser.driverLicenseImage?.dataUrl) {
       transformed.driverLicenseImage = {
         dataUrl: backendUser.driverLicenseImage.dataUrl,
         mimetype: backendUser.driverLicenseImage.mimetype,
-        name: backendUser.driverLicenseImage.name || "driver-license",
+        name: backendUser.driverLicenseImage.name || "permis-conduire",
       };
     }
 
-    // FIXED: Add formatted phone number
+    // NEW: Handle passport image from BYTEA
+    if (backendUser.passportImage?.dataUrl) {
+      transformed.passportImage = {
+        dataUrl: backendUser.passportImage.dataUrl,
+        mimetype: backendUser.passportImage.mimetype,
+        name: backendUser.passportImage.name || "passeport",
+      };
+    }
+
+    // NEW: Handle CIN image from BYTEA
+    if (backendUser.cinImage?.dataUrl) {
+      transformed.cinImage = {
+        dataUrl: backendUser.cinImage.dataUrl,
+        mimetype: backendUser.cinImage.mimetype,
+        name: backendUser.cinImage.name || "cin",
+      };
+    }
+
+    // Add formatted phone number
     if (backendUser.phoneFormatted) {
       transformed.phoneFormatted = backendUser.phoneFormatted;
     } else if (backendUser.phone) {
-      // Format phone number if not already formatted
-      const cleaned = backendUser.phone.replace(/\s/g, "");
-      if (
-        cleaned.length === 10 &&
-        (cleaned.startsWith("06") || cleaned.startsWith("07"))
-      ) {
-        transformed.phoneFormatted = `${cleaned.substring(
-          0,
-          2
-        )} ${cleaned.substring(2, 4)} ${cleaned.substring(
-          4,
-          6
-        )} ${cleaned.substring(6, 8)} ${cleaned.substring(8, 10)}`;
-      } else {
-        transformed.phoneFormatted = backendUser.phone;
-      }
+      transformed.phoneFormatted = this.formatPhoneForDisplay(
+        backendUser.phone
+      );
     }
 
+    // NEW: Add document completion status if available
+    if (backendUser.documentCompletion) {
+      transformed.documentCompletion = backendUser.documentCompletion;
+    }
+
+    // NEW: Add calculated age if dateOfBirth is available
+    if (backendUser.dateOfBirth) {
+      transformed.age = this.calculateAge(backendUser.dateOfBirth) ?? undefined;
+    }
     return transformed;
   }
 
@@ -456,7 +731,7 @@ class UserService {
     }
   }
 
-  // FIXED: Helper to get driver license image URL
+  // Helper to get driver license image URL
   getDriverLicenseImageUrl(user: UserData): string | null {
     if (user.driverLicenseImage?.dataUrl) {
       return user.driverLicenseImage.dataUrl;
@@ -464,7 +739,23 @@ class UserService {
     return null;
   }
 
-  // FIXED: Helper to format phone number for display
+  // NEW: Helper to get passport image URL
+  getPassportImageUrl(user: UserData): string | null {
+    if (user.passportImage?.dataUrl) {
+      return user.passportImage.dataUrl;
+    }
+    return null;
+  }
+
+  // NEW: Helper to get CIN image URL
+  getCinImageUrl(user: UserData): string | null {
+    if (user.cinImage?.dataUrl) {
+      return user.cinImage.dataUrl;
+    }
+    return null;
+  }
+
+  // Helper to format phone number for display
   formatPhoneForDisplay(phone: string): string {
     if (!phone) return "";
     const cleaned = phone.replace(/\s/g, "");
@@ -483,9 +774,101 @@ class UserService {
     return phone;
   }
 
-  // FIXED: Helper to clean phone number for API
+  // Helper to clean phone number for API
   cleanPhoneForApi(phone: string): string {
     return phone.replace(/\s/g, "");
+  }
+
+  // NEW: Calculate age from date of birth
+  calculateAge(dateOfBirth: string): number | null {
+    if (!dateOfBirth) return null;
+    try {
+      const birthDate = new Date(dateOfBirth);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (
+        monthDiff < 0 ||
+        (monthDiff === 0 && today.getDate() < birthDate.getDate())
+      ) {
+        age--;
+      }
+      return age;
+    } catch {
+      return null;
+    }
+  }
+
+  // NEW: Check if user has complete documentation for contracts
+  hasCompleteDocuments(user: UserData): boolean {
+    return !!(
+      user.firstName &&
+      user.lastName &&
+      user.phone &&
+      user.dateOfBirth &&
+      user.address &&
+      (user.driverLicenseNumber || user.passportNumber || user.cinNumber)
+    );
+  }
+
+  // NEW: Get missing information for contract generation
+  getMissingInfoForContract(user: UserData): ContractValidation {
+    const requiredFields = ["firstName", "lastName", "phone"];
+    const missingFields: string[] = [];
+
+    // Check basic required fields
+    requiredFields.forEach((field) => {
+      if (!user[field as keyof UserData]) {
+        missingFields.push(field);
+      }
+    });
+
+    // Check for important contract fields
+    if (!user.dateOfBirth) missingFields.push("dateOfBirth");
+    if (!user.address) missingFields.push("address");
+
+    // Check for at least one identity document
+    const hasIdentityDoc = !!(
+      user.passportNumber ||
+      user.cinNumber ||
+      user.driverLicenseNumber
+    );
+
+    if (!hasIdentityDoc) {
+      missingFields.push("identity_document");
+    }
+
+    const allFields = [
+      user.firstName,
+      user.lastName,
+      user.phone,
+      user.email,
+      user.dateOfBirth,
+      user.address,
+      user.driverLicenseNumber,
+      user.passportNumber,
+      user.cinNumber,
+      user.passportIssuedAt,
+    ];
+
+    const completedFields = allFields.filter(
+      (field) => field && field.toString().trim() !== ""
+    ).length;
+
+    const completionPercentage = Math.round(
+      (completedFields / allFields.length) * 100
+    );
+
+    return {
+      isValid: missingFields.length === 0,
+      missingFields,
+      completionScore: completedFields,
+      hasRequiredFields: requiredFields.every(
+        (field) => user[field as keyof UserData]
+      ),
+      hasAnyIdentityDocument: hasIdentityDoc,
+      completionPercentage,
+    };
   }
 }
 

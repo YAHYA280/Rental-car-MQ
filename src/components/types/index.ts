@@ -1,4 +1,4 @@
-// src/types/index.ts - Updated types including booking system
+// src/types/index.ts - UPDATED: Added all new customer fields for passport, CIN, and enhanced information
 export interface CarData {
   id: string;
   name: string;
@@ -65,6 +65,7 @@ export interface CarFormData {
   additionalImages: File[];
   description?: string;
 }
+
 export interface CarFilters {
   page?: number;
   limit?: number;
@@ -72,7 +73,7 @@ export interface CarFilters {
   brand?: string | string[];
   transmission?: string | string[];
   fuelType?: string | string[];
-  available?: boolean;
+  available?: boolean | string; // Can be boolean or string from URL params
   minPrice?: number;
   maxPrice?: number;
   seats?: number | string[];
@@ -99,20 +100,24 @@ export interface ApiResponse<T = any> {
   errors?: any[];
 }
 
-// User/Customer types
+// UPDATED: Enhanced User/Customer types with all new fields
 export interface UserData {
   id: string;
   firstName: string;
   lastName: string;
   email?: string; // Email is optional
   phone: string;
-  dateOfBirth?: string;
-  address?: string;
+
+  // UPDATED: Enhanced personal information
+  dateOfBirth?: string; // NEW: Date de naissance
+  age?: number; // Computed field from dateOfBirth
+  address?: string; // ENHANCED: Now supports up to 500 characters
   city?: string;
   postalCode?: string;
   country: string;
-  driverLicenseNumber?: string;
-  // Driver license image structure for BYTEA storage
+
+  // UPDATED: Enhanced driver license information
+  driverLicenseNumber?: string; // ENHANCED: Now properly validated
   driverLicenseImage?: {
     dataUrl?: string;
     mimetype?: string;
@@ -122,12 +127,33 @@ export interface UserData {
   driverLicenseImageData?: ArrayBuffer;
   driverLicenseImageMimetype?: string;
   driverLicenseImageName?: string;
+
+  // NEW: Passport information
+  passportNumber?: string; // Numéro de passeport
+  passportIssuedAt?: string; // Délivré à (city/country where issued)
+  passportImage?: {
+    dataUrl?: string;
+    mimetype?: string;
+    name?: string;
+  };
+
+  // NEW: CIN (Carte d'Identité Nationale) information
+  cinNumber?: string; // Numéro CIN
+  cinImage?: {
+    dataUrl?: string;
+    mimetype?: string;
+    name?: string;
+  };
+
+  // Emergency contact and preferences
   emergencyContact?: {
     name: string;
     phone: string;
     relationship: string;
   };
   preferences?: Record<string, any>;
+
+  // Status and metrics
   status: "active" | "inactive" | "blocked";
   totalBookings: number;
   totalSpent: number;
@@ -138,28 +164,57 @@ export interface UserData {
   emailVerified: boolean;
   phoneVerified: boolean;
   notes?: string;
+
+  // Timestamps and relations
   createdAt: string;
   updatedAt: string;
-  phoneFormatted?: string; // Added formatted phone for display
+  phoneFormatted?: string; // Formatted phone for display
   createdBy?: {
     id: string;
     name: string;
     email: string;
   };
+
+  // NEW: Document completion tracking
+  documentCompletion?: {
+    hasDriverLicense: boolean;
+    hasPassport: boolean;
+    hasCin: boolean;
+    hasDateOfBirth: boolean;
+    hasAddress: boolean;
+    completionScore: number; // 0-5 scale
+  };
 }
 
+// UPDATED: Enhanced form data for customer creation/editing
 export interface UserFormData {
+  // Basic required information
   firstName: string;
   lastName: string;
   email?: string; // Email is optional
   phone: string;
-  dateOfBirth?: string;
-  address?: string;
-  city?: string;
-  postalCode?: string;
-  country?: string;
-  driverLicenseNumber?: string;
-  driverLicenseImage?: File; // Driver license is optional
+
+  // NEW: Enhanced personal information
+  dateOfBirth?: string; // Date de naissance
+  address?: string; // Adresse complète (up to 500 chars)
+  city?: string; // Ville
+  postalCode?: string; // Code postal
+  country?: string; // Pays
+
+  // UPDATED: Enhanced document information
+  driverLicenseNumber?: string; // Numéro de permis de conduire
+  driverLicenseImage?: File; // Image du permis (optional)
+
+  // NEW: Passport information
+  passportNumber?: string; // Numéro de passeport
+  passportIssuedAt?: string; // Délivré à
+  passportImage?: File; // Image du passeport (optional)
+
+  // NEW: CIN information
+  cinNumber?: string; // Numéro CIN
+  cinImage?: File; // Image de la CIN (optional)
+
+  // Additional information
   emergencyContact?: {
     name: string;
     phone: string;
@@ -170,6 +225,7 @@ export interface UserFormData {
   notes?: string;
 }
 
+// UPDATED: Enhanced filters with document status
 export interface UserFiltersType {
   page?: number;
   limit?: number;
@@ -177,8 +233,56 @@ export interface UserFiltersType {
   status?: string;
   source?: string;
   tier?: string;
+  documentStatus?: "complete" | "incomplete" | "no-documents"; // NEW: Filter by document completion
   sort?: string;
   order?: "ASC" | "DESC";
+}
+
+// NEW: Document completion status interface
+export interface DocumentCompletionStatus {
+  hasDriverLicense: boolean;
+  hasPassport: boolean;
+  hasCin: boolean;
+  hasDateOfBirth: boolean;
+  hasAddress: boolean;
+  completionScore: number;
+
+  // Individual document details
+  documents: {
+    driverLicense: {
+      hasNumber: boolean;
+      hasImage: boolean;
+      complete: boolean;
+    };
+    passport: {
+      hasNumber: boolean;
+      hasImage: boolean;
+      hasIssuedAt: boolean;
+      complete: boolean;
+    };
+    cin: {
+      hasNumber: boolean;
+      hasImage: boolean;
+      complete: boolean;
+    };
+    personal: {
+      hasDateOfBirth: boolean;
+      hasAddress: boolean;
+      hasAge: boolean;
+    };
+  };
+}
+
+// NEW: Document upload interfaces
+export interface DocumentUploadData {
+  driverLicenseImage?: File;
+  passportImage?: File;
+  cinImage?: File;
+}
+
+export interface SingleDocumentUpload {
+  file: File;
+  documentType: "driverLicense" | "passport" | "cin";
 }
 
 // Booking types - Updated for real backend integration
@@ -208,6 +312,15 @@ export interface BookingData {
     lastName: string;
     email?: string;
     phone: string;
+    // NEW: Include document information for contract generation
+    dateOfBirth?: string;
+    address?: string;
+    city?: string;
+    country?: string;
+    driverLicenseNumber?: string;
+    passportNumber?: string;
+    passportIssuedAt?: string;
+    cinNumber?: string;
   };
   vehicle?: {
     id: string;
@@ -279,7 +392,7 @@ export interface BookingFormData {
   returnTime: string;
   pickupLocation: string;
   returnLocation: string;
-  notes?: string; // Optional for flexibility
+  notes?: string;
 }
 
 export interface BookingFilters {
@@ -309,7 +422,49 @@ export interface BookingStats {
   monthlyRevenue: number;
 }
 
-// Booking-specific utility types
+// NEW: Contract generation interfaces
+export interface ContractData {
+  customer: {
+    firstName: string;
+    lastName: string;
+    phone: string;
+    email?: string;
+    dateOfBirth?: string;
+    address?: string;
+    city?: string;
+    country?: string;
+    driverLicenseNumber?: string;
+    passportNumber?: string;
+    passportIssuedAt?: string;
+    cinNumber?: string;
+  };
+  vehicle: {
+    brand: string;
+    name: string;
+    year: number;
+    licensePlate: string;
+  };
+  booking: {
+    bookingNumber: string;
+    pickupDate: string;
+    returnDate: string;
+    pickupTime: string;
+    returnTime: string;
+    totalDays: number;
+    totalAmount: number;
+  };
+}
+
+export interface ContractValidation {
+  isValid: boolean;
+  missingFields: string[];
+  completionScore: number;
+  hasRequiredFields: boolean;
+  hasAnyIdentityDocument: boolean;
+  completionPercentage: number;
+}
+
+// Utility interfaces
 export interface ValidationError {
   field: string;
   message: string;
@@ -321,7 +476,6 @@ export interface ValidationResult {
   warnings?: string[];
 }
 
-// Utility type for form validation
 export interface FormValidationState {
   [key: string]: string;
 }
@@ -332,6 +486,16 @@ export type BookingFormSubmitHandler = (
   formData: AdminBookingFormData
 ) => Promise<void>;
 export type BookingSelectHandler = (booking: BookingData) => void;
+
+// NEW: Document upload handler types
+export type DocumentUploadHandler = (
+  customerId: string,
+  documentData: DocumentUploadData
+) => Promise<void>;
+export type SingleDocumentUploadHandler = (
+  customerId: string,
+  upload: SingleDocumentUpload
+) => Promise<void>;
 
 // Constants
 export const BRANDS = [
@@ -378,6 +542,32 @@ export const BOOKING_STATUS = [
 
 export const BOOKING_SOURCES = ["website", "admin"] as const;
 
+// NEW: Document type constants
+export const DOCUMENT_TYPES = ["driverLicense", "passport", "cin"] as const;
+
+export const DOCUMENT_STATUS_FILTERS = [
+  "complete",
+  "incomplete",
+  "no-documents",
+] as const;
+
+// NEW: Country codes with French nationalities
+export const COUNTRY_NATIONALITIES = {
+  MA: "Marocaine",
+  FR: "Française",
+  ES: "Espagnole",
+  DE: "Allemande",
+  IT: "Italienne",
+  GB: "Britannique",
+  US: "Américaine",
+  CA: "Canadienne",
+  DZ: "Algérienne",
+  TN: "Tunisienne",
+  BE: "Belge",
+  NL: "Néerlandaise",
+  PT: "Portugaise",
+} as const;
+
 // Pickup/Return locations
 export const PICKUP_LOCATIONS = [
   "Tangier Airport",
@@ -411,6 +601,59 @@ export const formatWhatsAppNumber = (number: string): string => {
     )} ${cleaned.substring(8, 10)}`;
   }
   return number;
+};
+
+// Helper to convert string boolean to actual boolean
+export const parseStringBoolean = (
+  value: string | boolean | undefined
+): boolean | undefined => {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "string") {
+    if (value.toLowerCase() === "true") return true;
+    if (value.toLowerCase() === "false") return false;
+  }
+  return undefined;
+};
+
+// NEW: Document validation helpers
+export const validatePassportNumber = (passportNumber: string): boolean => {
+  // Basic validation - adjust based on your requirements
+  return !!(passportNumber && passportNumber.trim().length >= 6);
+};
+
+export const validateCinNumber = (cinNumber: string): boolean => {
+  // Basic validation for Moroccan CIN - adjust based on requirements
+  return !!(cinNumber && /^[A-Z]{1,2}\d{6}$/.test(cinNumber.trim()));
+};
+
+export const validateDriverLicenseNumber = (licenseNumber: string): boolean => {
+  // Basic validation - adjust based on your requirements
+  return !!(licenseNumber && licenseNumber.trim().length >= 6);
+};
+
+// NEW: Age validation helper
+export const calculateAge = (dateOfBirth: string): number | null => {
+  if (!dateOfBirth) return null;
+  try {
+    const birthDate = new Date(dateOfBirth);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+    return age;
+  } catch {
+    return null;
+  }
+};
+
+export const isValidAge = (dateOfBirth: string): boolean => {
+  const age = calculateAge(dateOfBirth);
+  return age !== null && age >= 18 && age <= 100;
 };
 
 // Booking helpers
@@ -456,6 +699,39 @@ export const getStatusColor = (status: string): string => {
   );
 };
 
+// NEW: Document completion helpers
+export const calculateDocumentCompletion = (user: UserData): number => {
+  const fields = [
+    user.firstName,
+    user.lastName,
+    user.phone,
+    user.email,
+    user.dateOfBirth,
+    user.address,
+    user.driverLicenseNumber,
+    user.passportNumber,
+    user.cinNumber,
+    user.passportIssuedAt,
+  ];
+
+  const completedFields = fields.filter(
+    (field) => field && field.toString().trim() !== ""
+  ).length;
+
+  return Math.round((completedFields / fields.length) * 100);
+};
+
+export const hasCompleteDocuments = (user: UserData): boolean => {
+  return !!(
+    user.firstName &&
+    user.lastName &&
+    user.phone &&
+    user.dateOfBirth &&
+    user.address &&
+    (user.driverLicenseNumber || user.passportNumber || user.cinNumber)
+  );
+};
+
 // Type guards
 export const isCarData = (obj: any): obj is CarData => {
   return obj && typeof obj.id === "string" && typeof obj.name === "string";
@@ -470,6 +746,7 @@ export const isBooking = (obj: any): obj is BookingData => {
     obj && typeof obj.id === "string" && typeof obj.bookingNumber === "string"
   );
 };
+
 export interface VehicleAvailabilityStatus {
   available: boolean;
   nextAvailableDate?: string;
