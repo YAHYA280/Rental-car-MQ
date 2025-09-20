@@ -1,4 +1,4 @@
-// src/components/dashboard/bookings/components/BookingDetailsModal.tsx - Updated with real backend data
+// src/components/dashboard/bookings/components/BookingDetailsModal.tsx - COMPLETE with Contract Download
 "use client";
 
 import React from "react";
@@ -20,6 +20,9 @@ import {
   formatBookingStatus,
   getStatusColor,
 } from "@/components/types";
+
+// Import the ContractDownload component
+import ContractDownload from "../ContractDownload";
 
 interface BookingDetailsModalProps {
   booking: BookingData | null;
@@ -98,7 +101,7 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
 
         <div className="flex-1 overflow-y-auto px-1">
           <div className="space-y-4 sm:space-y-6 py-4">
-            {/* Header with Booking ID and Status */}
+            {/* Header with Booking ID, Status, and Contract Download */}
             <div className="flex flex-col items-start justify-between p-3 sm:p-4 bg-gray-50 rounded-lg gap-3">
               <div className="w-full">
                 <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
@@ -108,7 +111,18 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
                   Created on {formatDate(booking.createdAt)}
                 </p>
               </div>
-              {getStatusBadge(booking.status, booking.source)}
+
+              {/* Status and Contract Download Row */}
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:items-center sm:justify-between">
+                {getStatusBadge(booking.status, booking.source)}
+
+                {/* Contract Download Button */}
+                <ContractDownload
+                  bookingId={booking.id}
+                  bookingNumber={booking.bookingNumber}
+                  status={booking.status}
+                />
+              </div>
             </div>
 
             {/* Main Content Grid */}
