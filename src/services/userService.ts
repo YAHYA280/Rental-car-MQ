@@ -1,4 +1,4 @@
-// src/services/userService.ts - UPDATED: Complete support for all document types and new fields
+// src/services/userService.ts - UPDATED: Simplified for new customer fields structure (removed city, postalCode, emergencyContact, notes, referralCode)
 import {
   ApiResponse,
   UserData,
@@ -22,7 +22,7 @@ class UserService {
     try {
       const queryParams = new URLSearchParams();
 
-      // Handle all filter parameters including new document status filter
+      // Handle all filter parameters including document status filter
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== "") {
           if (typeof value === "boolean") {
@@ -96,13 +96,13 @@ class UserService {
     }
   }
 
-  // UPDATED: Create new user with comprehensive document support
+  // UPDATED: Create new user with simplified document support
   async createUser(userData: UserFormData): Promise<ApiResponse<UserData>> {
     try {
-      const formData = this.buildEnhancedFormData(userData);
+      const formData = this.buildSimplifiedFormData(userData);
       const token = localStorage.getItem("token");
 
-      console.log("Creating user with enhanced data:", userData);
+      console.log("Creating user with simplified data:", userData);
 
       const response = await fetch(`${this.baseUrl}/customers`, {
         method: "POST",
@@ -126,16 +126,16 @@ class UserService {
     }
   }
 
-  // UPDATED: Update user with comprehensive document support
+  // UPDATED: Update user with simplified document support
   async updateUser(
     id: string,
     userData: Partial<UserFormData>
   ): Promise<ApiResponse<UserData>> {
     try {
-      const formData = this.buildEnhancedFormData(userData);
+      const formData = this.buildSimplifiedFormData(userData);
       const token = localStorage.getItem("token");
 
-      console.log("Updating user with enhanced data:", userData);
+      console.log("Updating user with simplified data:", userData);
 
       const response = await fetch(`${this.baseUrl}/customers/${id}`, {
         method: "PUT",
@@ -247,7 +247,7 @@ class UserService {
     }
   }
 
-  // NEW: Upload passport document
+  // Upload passport document
   async uploadPassport(id: string, file: File): Promise<ApiResponse<UserData>> {
     try {
       const formData = new FormData();
@@ -275,7 +275,7 @@ class UserService {
     }
   }
 
-  // NEW: Upload CIN document
+  // Upload CIN document
   async uploadCin(id: string, file: File): Promise<ApiResponse<UserData>> {
     try {
       const formData = new FormData();
@@ -303,7 +303,7 @@ class UserService {
     }
   }
 
-  // NEW: Upload multiple documents at once
+  // Upload multiple documents at once
   async uploadMultipleDocuments(
     id: string,
     documents: DocumentUploadData
@@ -347,7 +347,7 @@ class UserService {
     }
   }
 
-  // NEW: Upload single document by type
+  // Upload single document by type
   async uploadSingleDocument(
     id: string,
     upload: SingleDocumentUpload
@@ -364,7 +364,7 @@ class UserService {
     }
   }
 
-  // NEW: Get document completion status
+  // Get document completion status
   async getDocumentStatus(
     id: string
   ): Promise<ApiResponse<DocumentCompletionStatus>> {
@@ -393,7 +393,7 @@ class UserService {
     }
   }
 
-  // NEW: Remove specific document
+  // Remove specific document
   async removeDocument(
     id: string,
     documentType: "driverLicense" | "passport" | "cin"
@@ -424,7 +424,7 @@ class UserService {
     }
   }
 
-  // NEW: Get users with incomplete documents
+  // Get users with incomplete documents
   async getUsersWithIncompleteDocuments(
     page = 1,
     limit = 25
@@ -462,7 +462,7 @@ class UserService {
     }
   }
 
-  // NEW: Bulk update customer documents
+  // Bulk update customer documents
   async bulkUpdateDocuments(
     updates: Array<{ id: string; [key: string]: any }>
   ): Promise<ApiResponse<any>> {
@@ -551,23 +551,20 @@ class UserService {
     }
   }
 
-  // UPDATED: Enhanced FormData builder with all new fields
-  private buildEnhancedFormData(userData: Partial<UserFormData>): FormData {
+  // UPDATED: Simplified FormData builder with new structure
+  private buildSimplifiedFormData(userData: Partial<UserFormData>): FormData {
     const formData = new FormData();
 
-    console.log("Building enhanced FormData from:", userData);
+    console.log("Building simplified FormData from:", userData);
 
-    // Add regular fields including new ones
+    // Add regular fields (removed city, postalCode, notes, referralCode, emergencyContact)
     Object.entries(userData).forEach(([key, value]) => {
       // Skip file fields - handle separately
       if (["driverLicenseImage", "passportImage", "cinImage"].includes(key)) {
         return;
       }
 
-      if (key === "emergencyContact" && value && typeof value === "object") {
-        // Backend expects JSON string for nested objects
-        formData.append(key, JSON.stringify(value));
-      } else if (key === "preferences" && value && typeof value === "object") {
+      if (key === "preferences" && value && typeof value === "object") {
         // Backend expects JSON string for nested objects
         formData.append(key, JSON.stringify(value));
       } else if (key === "email") {
@@ -581,7 +578,7 @@ class UserService {
       }
     });
 
-    // UPDATED: Add all document images if provided
+    // Add all document images if provided
     if (
       userData.driverLicenseImage &&
       userData.driverLicenseImage instanceof File
@@ -607,7 +604,7 @@ class UserService {
     }
 
     // Debug log what's in FormData
-    console.log("Enhanced FormData entries:");
+    console.log("Simplified FormData entries:");
     for (let [key, value] of formData.entries()) {
       if (value instanceof File) {
         console.log(`${key}: File(${value.name}, ${value.size} bytes)`);
@@ -619,7 +616,7 @@ class UserService {
     return formData;
   }
 
-  // UPDATED: Transform backend response with all new fields
+  // UPDATED: Transform backend response with simplified structure
   transformUserResponse(backendUser: any): UserData {
     const transformed: UserData = {
       ...backendUser,
@@ -628,7 +625,6 @@ class UserService {
       totalBookings: backendUser.totalBookings || 0,
       totalSpent: backendUser.totalSpent || 0,
       source: backendUser.source || "admin",
-      referralCode: backendUser.referralCode || "",
       emailVerified: backendUser.emailVerified || false,
       phoneVerified: backendUser.phoneVerified || false,
       status: backendUser.status || "active",
@@ -643,7 +639,7 @@ class UserService {
       };
     }
 
-    // NEW: Handle passport image from BYTEA
+    // Handle passport image from BYTEA
     if (backendUser.passportImage?.dataUrl) {
       transformed.passportImage = {
         dataUrl: backendUser.passportImage.dataUrl,
@@ -652,7 +648,7 @@ class UserService {
       };
     }
 
-    // NEW: Handle CIN image from BYTEA
+    // Handle CIN image from BYTEA
     if (backendUser.cinImage?.dataUrl) {
       transformed.cinImage = {
         dataUrl: backendUser.cinImage.dataUrl,
@@ -670,12 +666,12 @@ class UserService {
       );
     }
 
-    // NEW: Add document completion status if available
+    // Add document completion status if available
     if (backendUser.documentCompletion) {
       transformed.documentCompletion = backendUser.documentCompletion;
     }
 
-    // NEW: Add calculated age if dateOfBirth is available
+    // Add calculated age if dateOfBirth is available
     if (backendUser.dateOfBirth) {
       transformed.age = this.calculateAge(backendUser.dateOfBirth) ?? undefined;
     }
@@ -739,7 +735,7 @@ class UserService {
     return null;
   }
 
-  // NEW: Helper to get passport image URL
+  // Helper to get passport image URL
   getPassportImageUrl(user: UserData): string | null {
     if (user.passportImage?.dataUrl) {
       return user.passportImage.dataUrl;
@@ -747,7 +743,7 @@ class UserService {
     return null;
   }
 
-  // NEW: Helper to get CIN image URL
+  // Helper to get CIN image URL
   getCinImageUrl(user: UserData): string | null {
     if (user.cinImage?.dataUrl) {
       return user.cinImage.dataUrl;
@@ -779,7 +775,7 @@ class UserService {
     return phone.replace(/\s/g, "");
   }
 
-  // NEW: Calculate age from date of birth
+  // Calculate age from date of birth
   calculateAge(dateOfBirth: string): number | null {
     if (!dateOfBirth) return null;
     try {
@@ -799,7 +795,7 @@ class UserService {
     }
   }
 
-  // NEW: Check if user has complete documentation for contracts
+  // UPDATED: Check if user has complete documentation for contracts (simplified)
   hasCompleteDocuments(user: UserData): boolean {
     return !!(
       user.firstName &&
@@ -811,7 +807,7 @@ class UserService {
     );
   }
 
-  // NEW: Get missing information for contract generation
+  // UPDATED: Get missing information for contract generation (simplified)
   getMissingInfoForContract(user: UserData): ContractValidation {
     const requiredFields = ["firstName", "lastName", "phone"];
     const missingFields: string[] = [];
@@ -838,13 +834,14 @@ class UserService {
       missingFields.push("identity_document");
     }
 
+    // UPDATED: Simplified field counting for completion percentage
     const allFields = [
       user.firstName,
       user.lastName,
       user.phone,
       user.email,
       user.dateOfBirth,
-      user.address,
+      user.address, // Single address field
       user.driverLicenseNumber,
       user.passportNumber,
       user.cinNumber,

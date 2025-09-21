@@ -1,4 +1,4 @@
-// src/components/dashboard/users/EditUserForm.tsx - UPDATED: Complete support for all new fields
+// src/components/dashboard/users/EditUserForm.tsx - UPDATED: Removed city, postal code, emergency contact, notes, and referral code
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -24,7 +24,6 @@ import {
   MapPin,
   Calendar,
   FileText,
-  Users,
   AlertCircle,
   Trash2,
 } from "lucide-react";
@@ -51,35 +50,21 @@ const EditUserForm: React.FC<EditUserFormProps> = ({
     phone: "",
     dateOfBirth: "",
     address: "",
-    city: "",
-    postalCode: "",
     country: "MA",
     driverLicenseNumber: "",
     passportNumber: "",
     passportIssuedAt: "",
     cinNumber: "",
-    notes: "",
   });
 
-  // NEW: Document image states (for new uploads)
+  // Document image states (for new uploads)
   const [newDocumentImages, setNewDocumentImages] = useState<{
     driverLicense?: File;
     passport?: File;
     cin?: File;
   }>({});
 
-  // NEW: Emergency contact state
-  const [emergencyContact, setEmergencyContact] = useState<{
-    name: string;
-    phone: string;
-    relationship: string;
-  }>({
-    name: "",
-    phone: "",
-    relationship: "",
-  });
-
-  // NEW: Track which existing documents to keep
+  // Track which existing documents to keep
   const [keepExistingDocuments, setKeepExistingDocuments] = useState({
     driverLicense: true,
     passport: true,
@@ -98,30 +83,18 @@ const EditUserForm: React.FC<EditUserFormProps> = ({
         phone: user.phone || "",
         dateOfBirth: user.dateOfBirth || "",
         address: user.address || "",
-        city: user.city || "",
-        postalCode: user.postalCode || "",
         country: user.country || "MA",
         driverLicenseNumber: user.driverLicenseNumber || "",
         passportNumber: user.passportNumber || "",
         passportIssuedAt: user.passportIssuedAt || "",
         cinNumber: user.cinNumber || "",
-        notes: user.notes || "",
       });
-
-      // Initialize emergency contact if it exists
-      if (user.emergencyContact) {
-        setEmergencyContact({
-          name: user.emergencyContact.name || "",
-          phone: user.emergencyContact.phone || "",
-          relationship: user.emergencyContact.relationship || "",
-        });
-      }
     }
   }, [user]);
 
   const handleInputChange = (field: string, value: string) => {
     // Handle phone number formatting
-    if (field === "phone" || field === "emergencyPhone") {
+    if (field === "phone") {
       const cleaned = value.replace(/\D/g, "");
       if (
         cleaned.length <= 10 &&
@@ -143,17 +116,7 @@ const EditUserForm: React.FC<EditUserFormProps> = ({
       }
     }
 
-    // Handle emergency contact fields
-    if (field.startsWith("emergency")) {
-      const contactField = field.replace("emergency", "").toLowerCase();
-      if (contactField === "phone") {
-        setEmergencyContact((prev) => ({ ...prev, phone: value }));
-      } else {
-        setEmergencyContact((prev) => ({ ...prev, [contactField]: value }));
-      }
-    } else {
-      setFormData((prev) => ({ ...prev, [field]: value }));
-    }
+    setFormData((prev) => ({ ...prev, [field]: value }));
 
     // Clear error when user starts typing
     if (errors[field]) {
@@ -161,7 +124,7 @@ const EditUserForm: React.FC<EditUserFormProps> = ({
     }
   };
 
-  // NEW: Handle document image uploads
+  // Handle document image uploads
   const handleDocumentImageChange = (
     documentType: "driverLicense" | "passport" | "cin",
     file: File | undefined
@@ -186,7 +149,7 @@ const EditUserForm: React.FC<EditUserFormProps> = ({
     }
   };
 
-  // NEW: Remove existing document
+  // Remove existing document
   const removeExistingDocument = (
     documentType: "driverLicense" | "passport" | "cin"
   ) => {
@@ -202,7 +165,7 @@ const EditUserForm: React.FC<EditUserFormProps> = ({
     }));
   };
 
-  // NEW: Restore existing document
+  // Restore existing document
   const restoreExistingDocument = (
     documentType: "driverLicense" | "passport" | "cin"
   ) => {
@@ -230,7 +193,7 @@ const EditUserForm: React.FC<EditUserFormProps> = ({
     return phoneRegex.test(cleaned);
   };
 
-  // NEW: Validate date of birth
+  // Validate date of birth
   const validateDateOfBirth = (dateOfBirth: string): boolean => {
     if (!dateOfBirth) return true; // Optional field
     const birthDate = new Date(dateOfBirth);
@@ -239,7 +202,7 @@ const EditUserForm: React.FC<EditUserFormProps> = ({
     return age >= 18 && age <= 100;
   };
 
-  // NEW: Comprehensive form validation
+  // Simplified form validation (removed emergency contact validation)
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
@@ -265,28 +228,9 @@ const EditUserForm: React.FC<EditUserFormProps> = ({
       newErrors.email = "Please enter a valid email address";
     }
 
-    // NEW: Date of birth validation
+    // Date of birth validation
     if (formData.dateOfBirth && !validateDateOfBirth(formData.dateOfBirth)) {
       newErrors.dateOfBirth = "Customer must be between 18 and 100 years old";
-    }
-
-    // NEW: Emergency contact validation (if any field is filled, all should be filled)
-    if (
-      emergencyContact.name ||
-      emergencyContact.phone ||
-      emergencyContact.relationship
-    ) {
-      if (!emergencyContact.name.trim()) {
-        newErrors.emergencyName = "Emergency contact name is required";
-      }
-      if (!emergencyContact.phone.trim()) {
-        newErrors.emergencyPhone = "Emergency contact phone is required";
-      } else if (!validatePhoneNumber(emergencyContact.phone)) {
-        newErrors.emergencyPhone = "Please enter a valid phone number";
-      }
-      if (!emergencyContact.relationship.trim()) {
-        newErrors.emergencyRelationship = "Relationship is required";
-      }
     }
 
     setErrors(newErrors);
@@ -302,7 +246,7 @@ const EditUserForm: React.FC<EditUserFormProps> = ({
 
     setIsSubmitting(true);
     try {
-      // Prepare the complete user data
+      // Prepare the simplified user data
       const userData: UserFormData = {
         ...formData,
         phone: formData.phone.replace(/\s/g, ""), // Clean phone number
@@ -310,20 +254,13 @@ const EditUserForm: React.FC<EditUserFormProps> = ({
           formData.email && formData.email.trim() !== ""
             ? formData.email.trim()
             : undefined,
-        // NEW: Add document images only if new ones are uploaded
+        // Add document images only if new ones are uploaded
         driverLicenseImage: newDocumentImages.driverLicense,
         passportImage: newDocumentImages.passport,
         cinImage: newDocumentImages.cin,
-        // NEW: Add emergency contact if provided
-        emergencyContact:
-          emergencyContact.name ||
-          emergencyContact.phone ||
-          emergencyContact.relationship
-            ? emergencyContact
-            : undefined,
       };
 
-      console.log("Updating user with enhanced data:", userData);
+      console.log("Updating user with simplified data:", userData);
       await onSubmit(userData);
     } catch (error) {
       console.error("Error updating user:", error);
@@ -332,7 +269,7 @@ const EditUserForm: React.FC<EditUserFormProps> = ({
     }
   };
 
-  // NEW: Get existing document display data
+  // Get existing document display data
   const getExistingDocumentUrl = (
     documentType: "driverLicense" | "passport" | "cin"
   ): string | null => {
@@ -348,7 +285,7 @@ const EditUserForm: React.FC<EditUserFormProps> = ({
     }
   };
 
-  // NEW: Enhanced document upload component with existing document handling
+  // Enhanced document upload component with existing document handling
   const DocumentUpload = ({
     documentType,
     label,
@@ -564,7 +501,7 @@ const EditUserForm: React.FC<EditUserFormProps> = ({
               </p>
             </div>
 
-            {/* NEW: Date of Birth */}
+            {/* Date of Birth */}
             <div>
               <Label htmlFor="dateOfBirth">Date of Birth</Label>
               <div className="relative">
@@ -591,7 +528,7 @@ const EditUserForm: React.FC<EditUserFormProps> = ({
               </p>
             </div>
 
-            {/* NEW: Country */}
+            {/* Country */}
             <div>
               <Label htmlFor="country">Country</Label>
               <Select
@@ -617,15 +554,15 @@ const EditUserForm: React.FC<EditUserFormProps> = ({
         </CardContent>
       </Card>
 
-      {/* NEW: Address Information */}
+      {/* Address Information - Simplified */}
       <Card>
         <CardContent className="p-4">
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
             <MapPin className="h-5 w-5" />
             Address Information
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="md:col-span-2">
+          <div className="grid grid-cols-1 gap-4">
+            <div>
               <Label htmlFor="address">Address</Label>
               <Textarea
                 id="address"
@@ -636,36 +573,14 @@ const EditUserForm: React.FC<EditUserFormProps> = ({
                 className="resize-none"
               />
               <p className="text-xs text-gray-500 mt-1">
-                Complete address including street, building number, etc.
+                Complete address including street, building number, city, etc.
               </p>
-            </div>
-
-            <div>
-              <Label htmlFor="city">City</Label>
-              <Input
-                id="city"
-                value={formData.city}
-                onChange={(e) => handleInputChange("city", e.target.value)}
-                placeholder="Enter city"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="postalCode">Postal Code</Label>
-              <Input
-                id="postalCode"
-                value={formData.postalCode}
-                onChange={(e) =>
-                  handleInputChange("postalCode", e.target.value)
-                }
-                placeholder="Enter postal code"
-              />
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* NEW: Document Information */}
+      {/* Document Information */}
       <Card>
         <CardContent className="p-4">
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
@@ -729,7 +644,7 @@ const EditUserForm: React.FC<EditUserFormProps> = ({
         </CardContent>
       </Card>
 
-      {/* NEW: Document Images */}
+      {/* Document Images */}
       <Card>
         <CardContent className="p-4">
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
@@ -778,106 +693,6 @@ const EditUserForm: React.FC<EditUserFormProps> = ({
                 </ul>
               </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* NEW: Emergency Contact */}
-      <Card>
-        <CardContent className="p-4">
-          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            Emergency Contact (Optional)
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <Label htmlFor="emergencyName">Contact Name</Label>
-              <Input
-                id="emergencyName"
-                value={emergencyContact.name}
-                onChange={(e) =>
-                  handleInputChange("emergencyName", e.target.value)
-                }
-                placeholder="Full name"
-                className={errors.emergencyName ? "border-red-500" : ""}
-              />
-              {errors.emergencyName && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.emergencyName}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <Label htmlFor="emergencyPhone">Phone Number</Label>
-              <Input
-                id="emergencyPhone"
-                value={emergencyContact.phone}
-                onChange={(e) =>
-                  handleInputChange("emergencyPhone", e.target.value)
-                }
-                placeholder="06 XX XX XX XX"
-                className={errors.emergencyPhone ? "border-red-500" : ""}
-              />
-              {errors.emergencyPhone && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.emergencyPhone}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <Label htmlFor="emergencyRelationship">Relationship</Label>
-              <Select
-                value={emergencyContact.relationship}
-                onValueChange={(value) =>
-                  handleInputChange("emergencyRelationship", value)
-                }
-              >
-                <SelectTrigger
-                  className={`w-full ${
-                    errors.emergencyRelationship ? "border-red-500" : ""
-                  }`}
-                >
-                  <SelectValue placeholder="Select relationship" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="parent">Parent</SelectItem>
-                  <SelectItem value="spouse">Spouse</SelectItem>
-                  <SelectItem value="sibling">Sibling</SelectItem>
-                  <SelectItem value="child">Child</SelectItem>
-                  <SelectItem value="friend">Friend</SelectItem>
-                  <SelectItem value="colleague">Colleague</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-              {errors.emergencyRelationship && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.emergencyRelationship}
-                </p>
-              )}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* NEW: Additional Notes */}
-      <Card>
-        <CardContent className="p-4">
-          <h3 className="text-lg font-semibold mb-4">Additional Notes</h3>
-          <div>
-            <Label htmlFor="notes">Notes</Label>
-            <Textarea
-              id="notes"
-              value={formData.notes}
-              onChange={(e) => handleInputChange("notes", e.target.value)}
-              placeholder="Any additional information about the customer..."
-              rows={4}
-              className="resize-none"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Internal notes for staff reference only
-            </p>
           </div>
         </CardContent>
       </Card>

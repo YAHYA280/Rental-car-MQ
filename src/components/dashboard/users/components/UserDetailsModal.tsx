@@ -1,4 +1,4 @@
-// src/components/dashboard/users/components/UserDetailsModal.tsx - UPDATED: Complete support for all new fields
+// src/components/dashboard/users/components/UserDetailsModal.tsx - UPDATED: Removed city, postal code, emergency contact, notes, and referral code
 "use client";
 
 import React from "react";
@@ -21,7 +21,6 @@ import {
   FileText,
   MapPin,
   User,
-  Users,
   Flag,
   Clock,
   CheckCircle,
@@ -99,7 +98,7 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
     }).format(amount);
   };
 
-  // NEW: Calculate age from date of birth
+  // Calculate age from date of birth
   const calculateAge = (dateOfBirth: string | undefined): number | null => {
     if (!dateOfBirth) return null;
     try {
@@ -119,7 +118,7 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
     }
   };
 
-  // NEW: Get nationality from country code
+  // Get nationality from country code
   const getNationality = (countryCode: string | undefined): string => {
     const nationalityMap: Record<string, string> = {
       MA: "Moroccan",
@@ -139,7 +138,7 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
     return nationalityMap[countryCode || "MA"] || "Unknown";
   };
 
-  // NEW: Get document completion status
+  // Get document completion status
   const getDocumentCompletion = (user: UserData) => {
     const documents = {
       driverLicense: !!(
@@ -160,7 +159,7 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
     };
   };
 
-  // NEW: Document display component
+  // Document display component
   const DocumentDisplay = ({
     title,
     imageUrl,
@@ -278,7 +277,7 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                   </span>
                 </div>
 
-                {/* NEW: Document completion indicator */}
+                {/* Document completion indicator */}
                 <div className="flex items-center gap-2">
                   <div className="flex-1 bg-gray-200 rounded-full h-2">
                     <div
@@ -356,69 +355,23 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                   </div>
                 </div>
 
-                {/* NEW: Address Information */}
-                {(user.address || user.city || user.postalCode) && (
+                {/* Address Information - Simplified */}
+                {user.address && (
                   <div className="p-4 bg-white border rounded-lg">
                     <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                       <MapPin className="h-5 w-5 text-green-600" />
                       Address Information
                     </h4>
                     <div className="space-y-3">
-                      {user.address && (
-                        <div>
-                          <p className="text-sm text-gray-600">Address</p>
-                          <p className="font-medium">{user.address}</p>
-                        </div>
-                      )}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {user.city && (
-                          <div>
-                            <p className="text-sm text-gray-600">City</p>
-                            <p className="font-medium">{user.city}</p>
-                          </div>
-                        )}
-                        {user.postalCode && (
-                          <div>
-                            <p className="text-sm text-gray-600">Postal Code</p>
-                            <p className="font-medium">{user.postalCode}</p>
-                          </div>
-                        )}
+                      <div>
+                        <p className="text-sm text-gray-600">Address</p>
+                        <p className="font-medium">{user.address}</p>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* NEW: Emergency Contact */}
-                {user.emergencyContact && (
-                  <div className="p-4 bg-white border rounded-lg">
-                    <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                      <Users className="h-5 w-5 text-purple-600" />
-                      Emergency Contact
-                    </h4>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <p className="text-sm text-gray-600">Name</p>
-                        <p className="font-medium">
-                          {user.emergencyContact.name}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Phone</p>
-                        <p className="font-medium">
-                          {user.emergencyContact.phone}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Relationship</p>
-                        <p className="font-medium capitalize">
-                          {user.emergencyContact.relationship}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* NEW: Document Information */}
+                {/* Document Information */}
                 <div className="p-4 bg-white border rounded-lg">
                   <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                     <FileText className="h-5 w-5 text-indigo-600" />
@@ -508,20 +461,6 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                     </div>
                   </div>
                 </div>
-
-                {/* Notes */}
-                {user.notes && (
-                  <div className="p-4 bg-white border rounded-lg">
-                    <h4 className="font-semibold text-gray-900 mb-4">
-                      Staff Notes
-                    </h4>
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <p className="text-gray-700 whitespace-pre-wrap">
-                        {user.notes}
-                      </p>
-                    </div>
-                  </div>
-                )}
               </div>
 
               {/* Right Column */}
@@ -593,14 +532,6 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                       </p>
                       <p className="font-medium capitalize">{user.source}</p>
                     </div>
-                    {user.referralCode && (
-                      <div>
-                        <p className="text-sm text-gray-600">Referral Code</p>
-                        <p className="font-medium font-mono bg-gray-100 px-2 py-1 rounded">
-                          {user.referralCode}
-                        </p>
-                      </div>
-                    )}
                     <div className="flex items-center gap-4 text-sm">
                       <span
                         className={`flex items-center gap-1 ${

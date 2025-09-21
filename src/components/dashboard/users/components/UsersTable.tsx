@@ -1,4 +1,4 @@
-// src/components/dashboard/users/components/UsersTable.tsx - UPDATED: Enhanced display with document status
+// src/components/dashboard/users/components/UsersTable.tsx - UPDATED: Removed city, postal code, emergency contact, notes, and referral code
 "use client";
 
 import React from "react";
@@ -104,7 +104,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
     }).format(amount);
   };
 
-  // NEW: Calculate age from date of birth
+  // Calculate age from date of birth
   const calculateAge = (dateOfBirth: string | undefined): string => {
     if (!dateOfBirth) return "N/A";
     try {
@@ -124,7 +124,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
     }
   };
 
-  // NEW: Get document completion status
+  // Get document completion status
   const getDocumentCompletionBadge = (user: UserData) => {
     const hasDriverLicense = !!(
       user.driverLicenseNumber && user.driverLicenseImage?.dataUrl
@@ -173,7 +173,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
     }
   };
 
-  // NEW: Get available documents list
+  // Get available documents list
   const getAvailableDocuments = (user: UserData): string[] => {
     const docs: string[] = [];
     if (user.driverLicenseNumber || user.driverLicenseImage?.dataUrl)
@@ -182,6 +182,26 @@ const UsersTable: React.FC<UsersTableProps> = ({
       docs.push("Passport");
     if (user.cinNumber || user.cinImage?.dataUrl) docs.push("CIN");
     return docs;
+  };
+
+  // Get nationality from country code
+  const getNationality = (countryCode: string | undefined): string => {
+    const nationalityMap: Record<string, string> = {
+      MA: "Moroccan",
+      FR: "French",
+      ES: "Spanish",
+      DE: "German",
+      IT: "Italian",
+      GB: "British",
+      US: "American",
+      CA: "Canadian",
+      DZ: "Algerian",
+      TN: "Tunisian",
+      BE: "Belgian",
+      NL: "Dutch",
+      PT: "Portuguese",
+    };
+    return nationalityMap[countryCode || "MA"] || "Unknown";
   };
 
   return (
@@ -223,7 +243,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
                 </div>
               </TableCell>
 
-              {/* Contact & Location */}
+              {/* Contact & Location - Simplified */}
               <TableCell>
                 <div className="space-y-1 min-w-0">
                   <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -238,16 +258,13 @@ const UsersTable: React.FC<UsersTableProps> = ({
                     <Phone className="h-4 w-4 flex-shrink-0" />
                     <span>{user.phoneFormatted || user.phone}</span>
                   </div>
-                  {(user.city || user.country) && (
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <MapPin className="h-4 w-4 flex-shrink-0" />
-                      <span className="truncate">
-                        {user.city && user.country !== "MA"
-                          ? `${user.city}, ${user.country}`
-                          : user.city || user.country}
-                      </span>
-                    </div>
-                  )}
+                  {/* Show country/nationality instead of city */}
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <MapPin className="h-4 w-4 flex-shrink-0" />
+                    <span className="truncate">
+                      {getNationality(user.country)}
+                    </span>
+                  </div>
                 </div>
               </TableCell>
 
@@ -316,7 +333,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
                 </div>
               </TableCell>
 
-              {/* Last Activity */}
+              {/* Last Activity - Simplified */}
               <TableCell>
                 <div className="space-y-1">
                   <div>
@@ -338,11 +355,6 @@ const UsersTable: React.FC<UsersTableProps> = ({
                       Joined {formatDate(user.createdAt)}
                     </p>
                   </div>
-                  {user.referralCode && (
-                    <div className="text-xs text-purple-600 font-mono">
-                      #{user.referralCode}
-                    </div>
-                  )}
                 </div>
               </TableCell>
 
