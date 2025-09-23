@@ -38,7 +38,6 @@ const VehicleInfoCard: React.FC<VehicleInfoCardProps> = ({ vehicle }) => {
     }
   };
 
-  // Updated to handle backend transmission format
   const getTransmissionIcon = (transmission: string) => {
     return transmission.toLowerCase() === "manual" ? (
       <Settings className="h-5 w-5" />
@@ -57,8 +56,6 @@ const VehicleInfoCard: React.FC<VehicleInfoCardProps> = ({ vehicle }) => {
               {vehicle.brand}
             </Badge>
             <div className="flex items-center gap-1">
-              <Star className="h-4 w-4 text-yellow-400 fill-current" />
-              <span className="font-semibold">{vehicle.rating}</span>
               <span className="text-gray-500 text-sm">
                 ({vehicle.totalBookings} {tVehicle("bookings")})
               </span>

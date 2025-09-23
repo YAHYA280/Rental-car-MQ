@@ -457,8 +457,9 @@ const RentalBookingForm: React.FC<RentalBookingFormProps> = ({
 ${messageContent.request}`;
 
         // Redirect to WhatsApp
-        const phoneNumber =
-          vehicle.whatsappNumber?.replace(/\s/g, "") || "+212612077309";
+        const phoneNumber = vehicle.whatsappNumber
+          ? vehicle.whatsappNumber.replace(/\s/g, "").replace(/^0/, "212")
+          : "212612077309";
         const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
           whatsappMessage
         )}`;
@@ -588,7 +589,7 @@ ${messageContent.request}`;
                   onChange={(e) =>
                     handleInputChange("firstName", e.target.value)
                   }
-                  placeholder="John"
+                  placeholder="Nom"
                   className="mt-1"
                 />
               </div>
@@ -599,7 +600,7 @@ ${messageContent.request}`;
                   onChange={(e) =>
                     handleInputChange("lastName", e.target.value)
                   }
-                  placeholder="Doe"
+                  placeholder="Prenom"
                   className="mt-1"
                 />
               </div>
@@ -616,9 +617,6 @@ ${messageContent.request}`;
                   className="flex-1"
                 />
               </div>
-              <p className="text-xs text-gray-500 mt-1">
-                Format: 06XXXXXXXX or 07XXXXXXXX
-              </p>
             </div>
 
             <div>
@@ -629,7 +627,7 @@ ${messageContent.request}`;
                   type="email"
                   value={formData.email}
                   onChange={(e) => handleInputChange("email", e.target.value)}
-                  placeholder="john@example.com"
+                  placeholder="email"
                   className="flex-1"
                 />
               </div>
@@ -779,7 +777,6 @@ ${messageContent.request}`;
                   <ul className="space-y-1">
                     <li>• 1-hour grace period after pickup time</li>
                     <li>• Return after grace period = +1 day charge</li>
-                    <li>• Business hours: 8:00 AM - 8:30 PM</li>
                   </ul>
                 </div>
               </div>
@@ -887,24 +884,13 @@ ${messageContent.request}`;
                     {formData.returnDate} at {formData.returnTime}
                   </span>
                 </div>
-                <div className="flex justify-between">
-                  <span>Duration:</span>
-                  <span>
-                    {rentalInfo.rentalDays} day
-                    {rentalInfo.rentalDays > 1 ? "s" : ""}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Location:</span>
-                  <span>{formData.pickupLocation}</span>
-                </div>
+
                 {formData.differentDropoff && formData.returnLocation && (
                   <div className="flex justify-between">
                     <span>Return to:</span>
                     <span>{formData.returnLocation}</span>
                   </div>
                 )}
-
                 {/* Pricing Breakdown */}
                 <div className="border-t border-green-300 pt-2 mt-3 space-y-2">
                   <div className="flex justify-between">

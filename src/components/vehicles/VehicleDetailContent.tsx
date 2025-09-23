@@ -1,4 +1,3 @@
-// src/components/vehicles/VehicleDetailContent.tsx - Refactored with modular components
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -12,8 +11,6 @@ import { CarData } from "@/components/types";
 import { carService } from "@/services/carService";
 import { Link } from "@/i18n/navigation";
 import { toast } from "sonner";
-
-// Import the new modular components
 import VehicleBreadcrumb from "./components/VehicleBreadcrumb";
 import VehicleImageGallery from "./components/VehicleImageGallery";
 import VehicleInfoCard from "./components/VehicleInfoCard";
