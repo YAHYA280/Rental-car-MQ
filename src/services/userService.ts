@@ -1,4 +1,3 @@
-// src/services/userService.ts - UPDATED: Simplified for new customer fields structure (removed city, postalCode, emergencyContact, notes, referralCode)
 import {
   ApiResponse,
   UserData,

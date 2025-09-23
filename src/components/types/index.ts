@@ -81,7 +81,6 @@ export interface CarFilters {
   sort?: string;
 }
 
-// API Response structure
 export interface ApiResponse<T = any> {
   success: boolean;
   message?: string;
@@ -100,7 +99,6 @@ export interface ApiResponse<T = any> {
   errors?: any[];
 }
 
-// UPDATED: Enhanced User/Customer types with all new fields
 export interface UserData {
   id: string;
   firstName: string;
@@ -108,9 +106,8 @@ export interface UserData {
   email?: string; // Email is optional
   phone: string;
 
-  // UPDATED: Enhanced personal information
-  dateOfBirth?: string; // NEW: Date de naissance
-  age?: number; // Computed field from dateOfBirth
+  dateOfBirth?: string;
+  age?: number;
   address?: string; // ENHANCED: Now supports up to 500 characters
   city?: string;
   postalCode?: string;
@@ -767,3 +764,48 @@ export interface VehicleAvailabilityStatus {
     customerName: string;
   };
 }
+
+export interface VehicleSearchFilters {
+  brand?: string;
+  transmission?: string; // "manual" | "automatic"
+  fuelType?: string; // "petrol" | "diesel" | "electric" | "hybrid"
+  seats?: string; // "2" | "4" | "5" | "7" | "8"
+
+  minPrice?: number;
+  maxPrice?: number;
+
+  available?: boolean;
+
+  search?: string;
+
+  page?: number;
+  limit?: number;
+  sort?: string;
+
+  startDate?: string;
+  endDate?: string;
+  location?: string;
+}
+export interface SearchFormData {
+  pickupLocation: string;
+  dropoffLocation: string;
+  pickupDate: string;
+  pickupTime: string;
+  returnDate: string;
+  returnTime: string;
+  differentDropoff: boolean;
+  driverAge: string;
+}
+export const VEHICLE_BRANDS = [
+  "Cupra",
+  "Dacia",
+  "Hyundai",
+  "KIA",
+  "Mercedes",
+  "Opel",
+  "Peugeot",
+  "Porsche",
+  "Renault",
+  "SEAT",
+  "Volkswagen",
+] as const;
