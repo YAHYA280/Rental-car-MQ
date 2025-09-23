@@ -1,4 +1,3 @@
-// src/components/search/CarSearchComponent.tsx - With search validation
 "use client";
 
 import React, { useState, useMemo } from "react";
@@ -46,17 +45,23 @@ interface SearchFormData {
 interface CarSearchProps {
   className?: string;
   onSearch?: (data: SearchFormData) => void;
-  compact?: boolean;
 }
 
 const CarSearchComponent: React.FC<CarSearchProps> = ({
   className = "",
   onSearch,
-  compact = false,
 }) => {
   const t = useTranslations("search");
   const locale = useLocale();
   const router = useRouter();
+
+  const PICKUP_LOCATIONS = [
+    "Tangier Airport",
+    "Tangier City Center",
+    "Tangier Port",
+    "Hotel Pickup",
+    "Custom Location",
+  ];
 
   const [searchData, setSearchData] = useState<SearchFormData>({
     pickupLocation: "",
@@ -100,11 +105,11 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
       const timeDiff = returnDateObj.getTime() - pickupDateObj.getTime();
       rentalDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
 
-      if (rentalDays < 2) {
+      if (rentalDays < 1) {
         errors.push(
           locale === "fr"
-            ? "Minimum 2 jours de location"
-            : "Minimum 2 days rental"
+            ? "Minimum 1 jour de location"
+            : "Minimum 1 day rental"
         );
         isValid = false;
       }
@@ -156,25 +161,23 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
       onSearch(searchData);
     }
 
-    // Navigate to vehicles page with search parameters (only if not compact)
-    if (!compact) {
-      const query: Record<string, string> = {};
+    // Navigate to vehicles page with search parameters
+    const query: Record<string, string> = {};
 
-      if (searchData.pickupLocation) query.pickup = searchData.pickupLocation;
-      if (searchData.dropoffLocation)
-        query.dropoff = searchData.dropoffLocation;
-      if (searchData.pickupDate) query.pickupDate = searchData.pickupDate;
-      if (searchData.pickupTime) query.pickupTime = searchData.pickupTime;
-      if (searchData.returnDate) query.returnDate = searchData.returnDate;
-      if (searchData.returnTime) query.returnTime = searchData.returnTime;
-      if (searchData.differentDropoff) query.differentDropoff = "true";
-      if (searchData.driverAge) query.driverAge = searchData.driverAge;
+    // Map search parameters to backend expected format
+    if (searchData.pickupLocation) query.pickup = searchData.pickupLocation;
+    if (searchData.dropoffLocation) query.dropoff = searchData.dropoffLocation;
+    if (searchData.pickupDate) query.pickupDate = searchData.pickupDate;
+    if (searchData.pickupTime) query.pickupTime = searchData.pickupTime;
+    if (searchData.returnDate) query.returnDate = searchData.returnDate;
+    if (searchData.returnTime) query.returnTime = searchData.returnTime;
+    if (searchData.differentDropoff) query.differentDropoff = "true";
+    if (searchData.driverAge) query.driverAge = searchData.driverAge;
 
-      router.push({
-        pathname: "/vehicles",
-        query: Object.keys(query).length > 0 ? query : undefined,
-      });
-    }
+    router.push({
+      pathname: "/vehicles",
+      query: Object.keys(query).length > 0 ? query : undefined,
+    });
   };
 
   const handleInputChange = (
@@ -277,175 +280,12 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
     </Button>
   );
 
-  // Compact version for vehicle detail page
-  if (compact) {
-    return (
-      <div className={`bg-gray-50 rounded-xl p-4 ${className}`}>
-        <form onSubmit={handleSearchSubmit} className="space-y-4">
-          <ValidationMessage />
-
-          <div className="grid grid-cols-1 gap-3">
-            {/* Pickup Location */}
-            <div>
-              <Label className="text-xs font-medium mb-1 block">
-                {t("pickupLocation")} *
-              </Label>
-              <div
-                className={`flex items-center gap-2 p-2 bg-white rounded-md border ${
-                  showValidation && !searchData.pickupLocation.trim()
-                    ? "border-red-300"
-                    : "border-gray-300"
-                }`}
-              >
-                <MapPin className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                <Input
-                  type="text"
-                  placeholder={t("placeholders.pickupLocation")}
-                  value={searchData.pickupLocation}
-                  onChange={(e) =>
-                    handleInputChange("pickupLocation", e.target.value)
-                  }
-                  className="border-0 p-0 text-sm"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Date Range */}
-            <div>
-              <Label className="text-xs font-medium mb-1 block">
-                {t("rentalPeriod")} * (min. 2{" "}
-                {locale === "fr" ? "jours" : "days"})
-              </Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={`w-full justify-start text-left font-normal p-2 h-auto ${
-                      showValidation && validation.rentalDays < 2
-                        ? "border-red-300"
-                        : "border-gray-300"
-                    }`}
-                  >
-                    <CalendarIcon className="h-4 w-4 mr-2" />
-                    <span className="text-sm">{getDateRangeText()}</span>
-                    {validation.rentalDays > 0 && (
-                      <span className="ml-auto text-xs text-gray-500">
-                        {validation.rentalDays} {locale === "fr" ? "j" : "d"}
-                      </span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    initialFocus
-                    mode="range"
-                    defaultMonth={dateRange?.from}
-                    selected={dateRange}
-                    onSelect={handleDateRangeSelect}
-                    numberOfMonths={1}
-                    disabled={(date) => date < new Date()}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            {/* Times */}
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <Label className="text-xs font-medium mb-1 block">
-                  {t("pickupTime")} *
-                </Label>
-                <Select
-                  value={searchData.pickupTime}
-                  onValueChange={(value) =>
-                    handleInputChange("pickupTime", value)
-                  }
-                >
-                  <SelectTrigger
-                    className={`h-8 ${
-                      showValidation && !searchData.pickupTime
-                        ? "border-red-300"
-                        : ""
-                    }`}
-                  >
-                    <SelectValue placeholder={t("placeholders.selectTime")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {timeOptions.map((time) => (
-                      <SelectItem key={time.value} value={time.value}>
-                        {time.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="text-xs font-medium mb-1 block">
-                  {t("returnTime")} *
-                </Label>
-                <Select
-                  value={searchData.returnTime}
-                  onValueChange={(value) =>
-                    handleInputChange("returnTime", value)
-                  }
-                >
-                  <SelectTrigger
-                    className={`h-8 ${
-                      showValidation && !searchData.returnTime
-                        ? "border-red-300"
-                        : ""
-                    }`}
-                  >
-                    <SelectValue placeholder={t("placeholders.selectTime")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {timeOptions.map((time) => (
-                      <SelectItem key={time.value} value={time.value}>
-                        {time.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-
-          {/* Search Button */}
-          <div className="pt-2">
-            <Button
-              type="submit"
-              disabled={!validation.isValid}
-              className={`w-full flex items-center gap-2 ${
-                validation.isValid
-                  ? "bg-carbookers-red-600 hover:bg-carbookers-red-700 text-white"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              }`}
-            >
-              <Search className="h-4 w-4" />
-              {t("searchButton")}
-              {validation.rentalDays > 0 && validation.isValid && (
-                <span className="text-xs opacity-90">
-                  ({validation.rentalDays}
-                  {locale === "fr" ? "j" : "d"})
-                </span>
-              )}
-            </Button>
-          </div>
-        </form>
-      </div>
-    );
-  }
-
-  // Full version for hero section
   return (
     <div className={`relative ${className}`}>
-      {/* Glass Morphism Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-carbookers-red-950/30 via-carbookers-red-900/20 to-carbookers-red-800/30 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl"></div>
 
       <div className="relative z-10 p-8">
         <form onSubmit={handleSearchSubmit} className="space-y-8">
-          {/* Title */}
           <div className="text-center mb-8">
             <h3 className="text-3xl lg:text-4xl font-bold text-white mb-3">
               <span className="text-white">{t("title")}</span>
@@ -453,42 +293,42 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
             <p className="text-gray-200 text-lg opacity-90">{t("subtitle")}</p>
           </div>
 
-          {/* Validation Message */}
           <ValidationMessage />
 
-          {/* Main Search Container */}
           <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl border border-white/20 overflow-hidden">
-            {/* Desktop Layout */}
             <div className="hidden lg:grid lg:grid-cols-4 divide-x divide-gray-200/50">
-              {/* Pickup Location */}
               <div className="p-6 flex flex-col justify-between h-24">
                 <Label className="text-xs text-carbookers-red-800 uppercase tracking-wide mb-2 block font-semibold">
                   {t("pickupLocation")} *
                 </Label>
                 <div className="flex items-center gap-3">
                   <MapPin className="h-5 w-5 text-carbookers-red-600 flex-shrink-0" />
-                  <Input
-                    type="text"
-                    placeholder={t("placeholders.pickupLocation")}
+                  <Select
                     value={searchData.pickupLocation}
-                    onChange={(e) =>
-                      handleInputChange("pickupLocation", e.target.value)
+                    onValueChange={(value) =>
+                      handleInputChange("pickupLocation", value)
                     }
-                    className={`border-0 p-0 text-gray-900 placeholder:text-gray-500 focus:ring-0 font-medium bg-transparent text-sm w-full ${
-                      showValidation && !searchData.pickupLocation.trim()
-                        ? "text-red-600"
-                        : ""
-                    }`}
-                    required
-                  />
+                  >
+                    <SelectTrigger className="border-0 p-0 text-gray-900 focus:ring-0 font-medium h-auto bg-transparent text-sm w-full">
+                      <SelectValue
+                        placeholder={t("placeholders.pickupLocation")}
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PICKUP_LOCATIONS.map((location) => (
+                        <SelectItem key={location} value={location}>
+                          {location}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
               {/* Date Range Picker */}
               <div className="p-6 flex flex-col justify-between h-24">
                 <Label className="text-xs text-carbookers-red-800 uppercase tracking-wide mb-2 block font-semibold">
-                  {t("rentalPeriod")} * (min. 2{" "}
-                  {locale === "fr" ? "jours" : "days"})
+                  {t("rentalPeriod")}
                 </Label>
                 <Popover>
                   <PopoverTrigger asChild>
@@ -498,7 +338,7 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
                         "w-full justify-start text-left font-medium p-0 h-auto bg-transparent hover:bg-gray-50 text-sm",
                         !dateRange && "text-gray-500",
                         showValidation &&
-                          validation.rentalDays < 2 &&
+                          validation.rentalDays < 1 &&
                           "text-red-600"
                       )}
                     >
@@ -583,9 +423,7 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
               </div>
             </div>
 
-            {/* Mobile Layout */}
             <div className="lg:hidden p-6 space-y-6">
-              {/* Pickup Location */}
               <div>
                 <Label className="text-xs text-carbookers-red-800 uppercase tracking-wide mb-3 block font-semibold">
                   {t("pickupLocation")} *
@@ -598,24 +436,31 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
                   }`}
                 >
                   <MapPin className="h-5 w-5 text-carbookers-red-600 flex-shrink-0" />
-                  <Input
-                    type="text"
-                    placeholder={t("placeholders.pickupLocation")}
+                  <Select
                     value={searchData.pickupLocation}
-                    onChange={(e) =>
-                      handleInputChange("pickupLocation", e.target.value)
+                    onValueChange={(value) =>
+                      handleInputChange("pickupLocation", value)
                     }
-                    className="border-0 p-0 text-gray-900 placeholder:text-gray-500 focus:ring-0 font-medium bg-transparent text-sm w-full min-w-0"
-                    required
-                  />
+                  >
+                    <SelectTrigger className="border-0 p-0 text-gray-900 placeholder:text-gray-500 focus:ring-0 font-medium bg-transparent text-sm w-full min-w-0">
+                      <SelectValue
+                        placeholder={t("placeholders.pickupLocation")}
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PICKUP_LOCATIONS.map((location) => (
+                        <SelectItem key={location} value={location}>
+                          {location}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
-              {/* Date Range Picker - Mobile */}
               <div>
                 <Label className="text-xs text-carbookers-red-800 uppercase tracking-wide mb-3 block font-semibold">
-                  {t("rentalPeriod")} * (min. 2{" "}
-                  {locale === "fr" ? "jours" : "days"})
+                  {t("rentalPeriod")}
                 </Label>
                 <Popover>
                   <PopoverTrigger asChild>
@@ -625,7 +470,7 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
                         "w-full justify-start text-left font-medium p-3 bg-gray-50 rounded-lg min-h-[48px] hover:bg-gray-100 transition-colors",
                         !dateRange && "text-gray-500",
                         showValidation &&
-                          validation.rentalDays < 2 &&
+                          validation.rentalDays < 1 &&
                           "border border-red-300"
                       )}
                     >
@@ -787,22 +632,25 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
               </Label>
               <div className="flex items-center gap-3">
                 <RotateCcw className="h-5 w-5 text-carbookers-red-600" />
-                <Input
-                  type="text"
-                  placeholder={t("placeholders.dropoffLocation")}
+                <Select
                   value={searchData.dropoffLocation}
-                  onChange={(e) =>
-                    handleInputChange("dropoffLocation", e.target.value)
+                  onValueChange={(value) =>
+                    handleInputChange("dropoffLocation", value)
                   }
-                  className={`border-0 p-0 text-gray-900 placeholder:text-gray-500 focus:ring-0 font-medium bg-transparent ${
-                    showValidation &&
-                    searchData.differentDropoff &&
-                    !searchData.dropoffLocation.trim()
-                      ? "text-red-600"
-                      : ""
-                  }`}
-                  required={searchData.differentDropoff}
-                />
+                >
+                  <SelectTrigger className="border-0 p-0 text-gray-900 placeholder:text-gray-500 focus:ring-0 font-medium bg-transparent">
+                    <SelectValue
+                      placeholder={t("placeholders.dropoffLocation")}
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PICKUP_LOCATIONS.map((location) => (
+                      <SelectItem key={location} value={location}>
+                        {location}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               {showValidation &&
                 searchData.differentDropoff &&

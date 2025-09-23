@@ -1,4 +1,4 @@
-// src/components/vehicles/VehicleFilters.tsx - Fixed TypeScript errors
+// src/components/vehicles/VehicleFilters.tsx - Fixed to work with backend
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -15,26 +15,32 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Grid, List, X, Search } from "lucide-react";
-import { carService } from "@/services/carService"; // Added carService for brands
+import { carService } from "@/services/carService";
 
-// Updated interface to match backend structure
+// Updated interface to match backend CarFilters structure
 interface VehicleFiltersType {
-  brand: string[];
-  transmission: string[];
-  fuelType: string[];
-  priceRange: [number, number];
-  seats: string[];
-  minRating: number;
+  brand?: string;
+  transmission?: string;
+  fuelType?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  seats?: string;
+  available?: boolean;
+  search?: string;
+  sort?: string;
+  page?: number;
+  limit?: number;
 }
 
 interface SearchParams {
-  pickupLocation: string;
-  dropoffLocation: string;
-  pickupDate: string;
-  pickupTime: string;
-  returnDate: string;
-  returnTime: string;
-  differentDropoff: boolean;
+  pickup?: string;
+  dropoff?: string;
+  pickupDate?: string;
+  pickupTime?: string;
+  returnDate?: string;
+  returnTime?: string;
+  differentDropoff?: boolean;
+  driverAge?: string;
 }
 
 interface VehicleFiltersProps {
@@ -74,10 +80,20 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
   const [availableBrands, setAvailableBrands] = useState<string[]>([]);
   const [loadingBrands, setLoadingBrands] = useState(true);
 
-  // Backend constants (these should match your backend enums)
+  // Backend constants that match your backend enums
   const TRANSMISSIONS = ["manual", "automatic"];
   const FUEL_TYPES = ["petrol", "diesel", "electric", "hybrid"];
   const SEAT_COUNTS = ["2", "4", "5", "7", "8"];
+
+  // Sort options that match your backend
+  const SORT_OPTIONS = [
+    { value: "createdAt", label: tFilters("recommended") },
+    { value: "price", label: tFilters("priceLowToHigh") },
+    { value: "-price", label: tFilters("priceHighToLow") },
+    { value: "-rating", label: tFilters("rating") },
+    { value: "name", label: tFilters("name") },
+    { value: "brand", label: tFilters("brand") },
+  ];
 
   // Fetch available brands from backend
   useEffect(() => {
@@ -88,7 +104,7 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
         if (response.success && response.data) {
           setAvailableBrands(response.data);
         } else {
-          // Fallback to static brands if API fails
+          console.warn("Failed to fetch brands, using fallback");
           setAvailableBrands([
             "Cupra",
             "Dacia",
@@ -127,95 +143,54 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
     fetchBrands();
   }, []);
 
-  const updateFilter = (
-    key: keyof VehicleFiltersType,
-    value: string | string[] | number | number[]
-  ) => {
-    onFiltersChange({
-      ...filters,
-      [key]: value,
-    });
+  const updateFilter = (key: keyof VehicleFiltersType, value: any) => {
+    const newFilters = { ...filters };
+
+    if (value === "all" || value === "" || value === undefined) {
+      delete newFilters[key];
+    } else {
+      newFilters[key] = value;
+    }
+
+    // Reset to first page when filters change
+    newFilters.page = 1;
+
+    onFiltersChange(newFilters);
   };
 
   const hasActiveFilters = () => {
-    return (
-      filters.brand.length > 0 ||
-      filters.transmission.length > 0 ||
-      filters.fuelType.length > 0 ||
-      filters.seats.length > 0 ||
-      filters.minRating > 0 ||
-      filters.priceRange[0] > 0 ||
-      filters.priceRange[1] < 1500
-    );
+    return Object.keys(filters).some((key) => {
+      if (key === "page" || key === "limit" || key === "sort") return false;
+      return filters[key as keyof VehicleFiltersType] !== undefined;
+    });
   };
 
-  // FIXED: Create empty search params with all required properties
   const clearSearchParams = (): SearchParams => ({
-    pickupLocation: "",
-    dropoffLocation: "",
+    pickup: "",
+    dropoff: "",
     pickupDate: "",
     pickupTime: "",
     returnDate: "",
     returnTime: "",
     differentDropoff: false,
+    driverAge: "",
   });
+
+  const handleSearchInput = (value: string) => {
+    updateFilter("search", value || undefined);
+  };
+
+  const handlePriceRangeChange = (type: "min" | "max", value: string) => {
+    const numValue = value ? Number(value) : undefined;
+    if (type === "min") {
+      updateFilter("minPrice", numValue);
+    } else {
+      updateFilter("maxPrice", numValue);
+    }
+  };
 
   return (
     <div className="space-y-6">
-      {/* Search Parameters from Hero Search */}
-      {(searchParams.pickupLocation || searchParams.pickupDate) && (
-        <Card className="bg-carbookers-red-50 border-carbookers-red-200">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold text-carbookers-red-800 flex items-center gap-2">
-                <Search className="h-4 w-4" />
-                {tFilters("searchCriteria")}
-              </h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onSearchParamsChange(clearSearchParams())}
-                className="text-carbookers-red-600 hover:text-carbookers-red-800"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
-              {searchParams.pickupLocation && (
-                <div>
-                  <span className="text-gray-600">{tFilters("pickup")}:</span>
-                  <p className="font-medium">{searchParams.pickupLocation}</p>
-                </div>
-              )}
-              {searchParams.dropoffLocation && (
-                <div>
-                  <span className="text-gray-600">{tFilters("dropoff")}:</span>
-                  <p className="font-medium">{searchParams.dropoffLocation}</p>
-                </div>
-              )}
-              {searchParams.pickupDate && (
-                <div>
-                  <span className="text-gray-600">{tFilters("dates")}:</span>
-                  <p className="font-medium">
-                    {searchParams.pickupDate}
-                    {searchParams.returnDate && ` - ${searchParams.returnDate}`}
-                  </p>
-                </div>
-              )}
-              {searchParams.pickupTime && (
-                <div>
-                  <span className="text-gray-600">{tFilters("time")}:</span>
-                  <p className="font-medium">
-                    {searchParams.pickupTime}
-                    {searchParams.returnTime && ` - ${searchParams.returnTime}`}
-                  </p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       {/* Main Filter Controls */}
       <Card className="border-gray-200">
         <CardContent className="p-4 lg:p-6">
@@ -269,17 +244,11 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
                   <SelectValue placeholder={tFilters("sortBy")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="recommended">
-                    {tFilters("recommended")}
-                  </SelectItem>
-                  <SelectItem value="price-low">
-                    {tFilters("priceLowToHigh")}
-                  </SelectItem>
-                  <SelectItem value="price-high">
-                    {tFilters("priceHighToLow")}
-                  </SelectItem>
-                  <SelectItem value="rating">{tFilters("rating")}</SelectItem>
-                  <SelectItem value="name">{tFilters("name")}</SelectItem>
+                  {SORT_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
 
@@ -300,6 +269,25 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
             </div>
           </div>
 
+          {/* Search Input */}
+          <div className="mb-4">
+            <Label className="text-xs sm:text-sm font-medium mb-2 block">
+              {tFilters("searchVehicles")}
+            </Label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                type="text"
+                placeholder={
+                  tFilters("searchPlaceholder") || "Search vehicles..."
+                }
+                value={filters.search || ""}
+                onChange={(e) => handleSearchInput(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          </div>
+
           {/* Filter Controls - Mobile-First Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
             {/* Brand Filter - Dynamic from backend */}
@@ -308,10 +296,8 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
                 {tFilters("brand")}
               </Label>
               <Select
-                value={filters.brand[0] || "all"}
-                onValueChange={(value) =>
-                  updateFilter("brand", value === "all" ? [] : [value])
-                }
+                value={filters.brand || "all"}
+                onValueChange={(value) => updateFilter("brand", value)}
                 disabled={loadingBrands}
               >
                 <SelectTrigger className="text-xs sm:text-sm">
@@ -338,10 +324,8 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
                 {tFilters("transmission")}
               </Label>
               <Select
-                value={filters.transmission[0] || "all"}
-                onValueChange={(value) =>
-                  updateFilter("transmission", value === "all" ? [] : [value])
-                }
+                value={filters.transmission || "all"}
+                onValueChange={(value) => updateFilter("transmission", value)}
               >
                 <SelectTrigger className="text-xs sm:text-sm">
                   <SelectValue placeholder={tFilters("allTransmissions")} />
@@ -365,10 +349,8 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
                 {tFilters("fuelType")}
               </Label>
               <Select
-                value={filters.fuelType[0] || "all"}
-                onValueChange={(value) =>
-                  updateFilter("fuelType", value === "all" ? [] : [value])
-                }
+                value={filters.fuelType || "all"}
+                onValueChange={(value) => updateFilter("fuelType", value)}
               >
                 <SelectTrigger className="text-xs sm:text-sm">
                   <SelectValue placeholder={tFilters("allFuelTypes")} />
@@ -392,10 +374,8 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
                 {tFilters("seats")}
               </Label>
               <Select
-                value={filters.seats[0] || "all"}
-                onValueChange={(value) =>
-                  updateFilter("seats", value === "all" ? [] : [value])
-                }
+                value={filters.seats || "all"}
+                onValueChange={(value) => updateFilter("seats", value)}
               >
                 <SelectTrigger className="text-xs sm:text-sm">
                   <SelectValue placeholder={tFilters("allSeats")} />
@@ -420,12 +400,9 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
                 <Input
                   type="number"
                   placeholder={tCommon("minimum")}
-                  value={filters.priceRange[0] || ""}
+                  value={filters.minPrice || ""}
                   onChange={(e) =>
-                    updateFilter("priceRange", [
-                      Number(e.target.value) || 0,
-                      filters.priceRange[1],
-                    ])
+                    handlePriceRangeChange("min", e.target.value)
                   }
                   className="text-xs sm:text-sm h-8 sm:h-9"
                 />
@@ -433,19 +410,38 @@ const VehicleFilters: React.FC<VehicleFiltersProps> = ({
                 <Input
                   type="number"
                   placeholder={tCommon("maximum")}
-                  value={
-                    filters.priceRange[1] === 1500 ? "" : filters.priceRange[1]
-                  }
+                  value={filters.maxPrice || ""}
                   onChange={(e) =>
-                    updateFilter("priceRange", [
-                      filters.priceRange[0],
-                      Number(e.target.value) || 1500,
-                    ])
+                    handlePriceRangeChange("max", e.target.value)
                   }
                   className="text-xs sm:text-sm h-8 sm:h-9"
                 />
               </div>
               <p className="text-xs text-gray-500 mt-1">€ {t("perDay")}</p>
+            </div>
+          </div>
+
+          {/* Availability Filter */}
+          <div className="mt-4 flex items-center gap-4">
+            <Label className="text-xs sm:text-sm font-medium">
+              {tFilters("availability")}
+            </Label>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="available-only"
+                checked={filters.available === true}
+                onChange={(e) =>
+                  updateFilter("available", e.target.checked ? true : undefined)
+                }
+                className="w-4 h-4 text-carbookers-red-600 bg-gray-100 border-gray-300 rounded focus:ring-carbookers-red-500"
+              />
+              <label
+                htmlFor="available-only"
+                className="text-xs sm:text-sm text-gray-700 cursor-pointer"
+              >
+                {tFilters("availableOnly")}
+              </label>
             </div>
           </div>
         </CardContent>

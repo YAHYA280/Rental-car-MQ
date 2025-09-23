@@ -1,4 +1,4 @@
-// src/components/vehicles/VehiclesPageContent.tsx - Fixed naming conflicts
+// src/components/vehicles/VehiclesPageContent.tsx - Fixed to match VehicleFilters interface
 "use client";
 
 import React, { useState, useMemo, useEffect, useCallback } from "react";
@@ -10,29 +10,32 @@ import VehicleFilters from "@/components/vehicles/VehicleFilters";
 import VehicleCard from "@/components/vehicles/VehicleCard";
 import AnimatedContainer from "@/components/ui/animated-container";
 import { Button } from "@/components/ui/button";
-import { CarData, CarFilters } from "@/components/types"; // Updated imports
-import { carService } from "@/services/carService"; // Added carService
+import { CarData, CarFilters } from "@/components/types";
+import { carService } from "@/services/carService";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-// FIXED: Renamed interface to avoid conflict with component import
+// FIXED: Interface to match VehicleFilters expected props
 interface VehicleFiltersState {
-  brand: string[];
-  transmission: string[];
-  fuelType: string[];
-  priceRange: [number, number];
-  seats: string[];
-  minRating: number;
+  brand?: string;
+  transmission?: string;
+  fuelType?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  seats?: string;
+  available?: boolean;
+  search?: string;
 }
 
 interface SearchParamsState {
-  pickupLocation: string;
-  dropoffLocation: string;
-  pickupDate: string;
-  pickupTime: string;
-  returnDate: string;
-  returnTime: string;
-  differentDropoff: boolean;
+  pickup?: string;
+  dropoff?: string;
+  pickupDate?: string;
+  pickupTime?: string;
+  returnDate?: string;
+  returnTime?: string;
+  differentDropoff?: boolean;
+  driverAge?: string;
 }
 
 const VehiclesPageContent = () => {
@@ -42,13 +45,14 @@ const VehiclesPageContent = () => {
 
   // Extract search parameters from URL
   const initialSearchParams: SearchParamsState = {
-    pickupLocation: searchParams.get("pickup") || "",
-    dropoffLocation: searchParams.get("dropoff") || "",
+    pickup: searchParams.get("pickup") || "",
+    dropoff: searchParams.get("dropoff") || "",
     pickupDate: searchParams.get("pickupDate") || "",
     pickupTime: searchParams.get("pickupTime") || "",
     returnDate: searchParams.get("returnDate") || "",
     returnTime: searchParams.get("returnTime") || "",
     differentDropoff: searchParams.get("differentDropoff") === "true",
+    driverAge: searchParams.get("driverAge") || "",
   };
 
   // State management
@@ -56,23 +60,51 @@ const VehiclesPageContent = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [total, setTotal] = useState(0);
+  const [pagination, setPagination] = useState<any>(null);
 
-  const [filters, setFilters] = useState<VehicleFiltersState>({
-    brand: [],
-    transmission: [],
-    fuelType: [],
-    priceRange: [0, 1500],
-    seats: [],
-    minRating: 0,
-  });
+  // FIXED: Updated filters state to match VehicleFilters interface
+  const [filters, setFilters] = useState<VehicleFiltersState>({});
 
   const [searchCriteria, setSearchCriteria] =
     useState<SearchParamsState>(initialSearchParams);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [sortBy, setSortBy] = useState("recommended");
+  const [sortBy, setSortBy] = useState("createdAt");
   const [showResults, setShowResults] = useState(12);
   const [currentPage, setCurrentPage] = useState(1);
   const [favorites, setFavorites] = useState<string[]>([]);
+
+  // Parse initial filters from URL
+  useEffect(() => {
+    const urlFilters: VehicleFiltersState = {};
+
+    if (searchParams.get("brand"))
+      urlFilters.brand = searchParams.get("brand") || undefined;
+    if (searchParams.get("transmission"))
+      urlFilters.transmission = searchParams.get("transmission") || undefined;
+    if (searchParams.get("fuelType"))
+      urlFilters.fuelType = searchParams.get("fuelType") || undefined;
+    if (searchParams.get("seats"))
+      urlFilters.seats = searchParams.get("seats") || undefined; // Keep as string for frontend
+    if (searchParams.get("minPrice"))
+      urlFilters.minPrice =
+        parseInt(searchParams.get("minPrice")!) || undefined;
+    if (searchParams.get("maxPrice"))
+      urlFilters.maxPrice =
+        parseInt(searchParams.get("maxPrice")!) || undefined;
+    if (searchParams.get("available"))
+      urlFilters.available = searchParams.get("available") === "true";
+    if (searchParams.get("search"))
+      urlFilters.search = searchParams.get("search") || undefined;
+
+    setFilters(urlFilters);
+
+    // Set other URL parameters
+    if (searchParams.get("sort")) setSortBy(searchParams.get("sort")!);
+    if (searchParams.get("limit"))
+      setShowResults(parseInt(searchParams.get("limit")!) || 12);
+    if (searchParams.get("page"))
+      setCurrentPage(parseInt(searchParams.get("page")!) || 1);
+  }, [searchParams]);
 
   // Fetch vehicles from backend
   const fetchVehicles = useCallback(async () => {
@@ -84,46 +116,21 @@ const VehiclesPageContent = () => {
       const apiFilters: CarFilters = {
         page: currentPage,
         limit: showResults,
+        sort: sortBy,
       };
 
-      // Add filters to API call
-      if (filters.brand.length > 0) {
-        apiFilters.brand = filters.brand;
-      }
-      if (filters.transmission.length > 0) {
-        apiFilters.transmission = filters.transmission;
-      }
-      if (filters.fuelType.length > 0) {
-        apiFilters.fuelType = filters.fuelType;
-      }
-      if (filters.seats.length > 0) {
-        apiFilters.seats = filters.seats;
-      }
-      if (filters.priceRange[0] > 0) {
-        apiFilters.minPrice = filters.priceRange[0];
-      }
-      if (filters.priceRange[1] < 1500) {
-        apiFilters.maxPrice = filters.priceRange[1];
-      }
-
-      // Add sorting
-      switch (sortBy) {
-        case "price-low":
-          apiFilters.sort = "price";
-          break;
-        case "price-high":
-          apiFilters.sort = "-price";
-          break;
-        case "rating":
-          apiFilters.sort = "-rating";
-          break;
-        case "name":
-          apiFilters.sort = "name";
-          break;
-        default:
-          apiFilters.sort = "-rating"; // Default to highest rated
-          break;
-      }
+      // Add filters to API call - now properly matching the interface
+      if (filters.brand) apiFilters.brand = filters.brand;
+      if (filters.transmission) apiFilters.transmission = filters.transmission;
+      if (filters.fuelType) apiFilters.fuelType = filters.fuelType;
+      if (filters.seats) apiFilters.seats = parseInt(filters.seats); // Convert string to number
+      if (filters.minPrice !== undefined)
+        apiFilters.minPrice = filters.minPrice;
+      if (filters.maxPrice !== undefined)
+        apiFilters.maxPrice = filters.maxPrice;
+      if (filters.available !== undefined)
+        apiFilters.available = filters.available;
+      if (filters.search) apiFilters.search = filters.search;
 
       console.log("Fetching vehicles with filters:", apiFilters);
 
@@ -132,6 +139,7 @@ const VehiclesPageContent = () => {
       if (response.success && response.data) {
         setVehicles(response.data);
         setTotal(response.total || response.data.length);
+        setPagination(response.pagination || null);
         console.log(`Loaded ${response.data.length} vehicles`);
       } else {
         throw new Error(response.message || "Failed to fetch vehicles");
@@ -162,15 +170,10 @@ const VehiclesPageContent = () => {
   // Calculate pagination
   const totalPages = Math.ceil(total / showResults);
 
+  // FIXED: Clear filters function to match new interface
   const handleClearFilters = () => {
-    setFilters({
-      brand: [],
-      transmission: [],
-      fuelType: [],
-      priceRange: [0, 1500],
-      seats: [],
-      minRating: 0,
-    });
+    setFilters({});
+    setCurrentPage(1);
   };
 
   const handleFavorite = (vehicleId: string) => {
@@ -184,6 +187,19 @@ const VehiclesPageContent = () => {
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // FIXED: Handle filters change to match VehicleFilters interface
+  const handleFiltersChange = (newFilters: VehicleFiltersState) => {
+    console.log("Filters changed:", newFilters);
+    setFilters(newFilters);
+    setCurrentPage(1); // Reset to first page when filters change
+  };
+
+  // Handle search params change
+  const handleSearchParamsChange = (newParams: SearchParamsState) => {
+    console.log("Search params changed:", newParams);
+    setSearchCriteria(newParams);
   };
 
   // Error state
@@ -226,13 +242,13 @@ const VehiclesPageContent = () => {
           </p>
         </AnimatedContainer>
 
-        {/* Filters */}
+        {/* Filters - FIXED: Now matches VehicleFilters interface */}
         <AnimatedContainer direction="down" delay={0.2}>
           <VehicleFilters
             filters={filters}
-            onFiltersChange={setFilters}
+            onFiltersChange={handleFiltersChange}
             searchParams={searchCriteria}
-            onSearchParamsChange={setSearchCriteria}
+            onSearchParamsChange={handleSearchParamsChange}
             viewMode={viewMode}
             onViewModeChange={setViewMode}
             sortBy={sortBy}
