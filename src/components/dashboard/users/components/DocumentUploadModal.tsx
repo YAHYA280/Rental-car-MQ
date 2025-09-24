@@ -1,4 +1,4 @@
-// src/components/dashboard/users/components/DocumentUploadModal.tsx - NEW: Dedicated document upload modal
+// src/components/dashboard/users/components/DocumentUploadModal.tsx - Complete with download functionality
 "use client";
 
 import React, { useState } from "react";
@@ -21,6 +21,7 @@ import {
   AlertCircle,
   Download,
   Trash2,
+  Eye,
 } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
@@ -57,6 +58,69 @@ const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
   });
 
   if (!user) return null;
+
+  // Download document function
+  const downloadDocument = (dataUrl: string, documentType: string) => {
+    try {
+      const link = document.createElement("a");
+      link.href = dataUrl;
+
+      const customerName = `${user.firstName}_${user.lastName}`;
+      const timestamp = new Date().toISOString().split("T")[0];
+      const extension = dataUrl.split(";")[0].split("/")[1] || "jpg";
+
+      link.download = `${customerName}_${documentType}_${timestamp}.${extension}`;
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast.success(`${documentType} document downloaded successfully`);
+    } catch (error) {
+      console.error("Error downloading document:", error);
+      toast.error("Error downloading document. Please try again.");
+    }
+  };
+
+  // View document in new tab function
+  const viewDocument = (dataUrl: string, documentType: string) => {
+    try {
+      const newWindow = window.open();
+      if (newWindow) {
+        newWindow.document.write(`
+          <html>
+            <head>
+              <title>${documentType} - ${user.firstName} ${user.lastName}</title>
+              <style>
+                body { 
+                  margin: 0; 
+                  display: flex; 
+                  justify-content: center; 
+                  align-items: center; 
+                  min-height: 100vh; 
+                  background: #f0f0f0;
+                }
+                img { 
+                  max-width: 100%; 
+                  max-height: 100vh; 
+                  object-fit: contain; 
+                  border-radius: 8px;
+                  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                }
+              </style>
+            </head>
+            <body>
+              <img src="${dataUrl}" alt="${documentType}" />
+            </body>
+          </html>
+        `);
+        toast.success(`${documentType} document opened in new tab`);
+      }
+    } catch (error) {
+      console.error("Error viewing document:", error);
+      toast.error("Error viewing document. Please try again.");
+    }
+  };
 
   const handleFileChange = (
     documentType: "driverLicense" | "passport" | "cin",
@@ -110,7 +174,6 @@ const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
     try {
       setUploading(true);
 
-      // First, update document numbers if they've changed
       const numberUpdates: any = {};
       let hasNumberUpdates = false;
 
@@ -133,12 +196,10 @@ const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
         hasNumberUpdates = true;
       }
 
-      // Update numbers first if needed
       if (hasNumberUpdates) {
         await userService.updateUser(user.id, numberUpdates);
       }
 
-      // Upload document files if any
       const filesToUpload = Object.values(documentFiles).filter(Boolean);
       if (filesToUpload.length > 0) {
         const uploadData: DocumentUploadData = {};
@@ -192,6 +253,7 @@ const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
     }
   };
 
+  // Document section with download functionality
   const DocumentSection = ({
     documentType,
     title,
@@ -221,7 +283,6 @@ const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
           {title}
         </h4>
 
-        {/* Document Number Input */}
         <div>
           <Label htmlFor={numberField}>{numberLabel}</Label>
           <Input
@@ -232,7 +293,6 @@ const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
           />
         </div>
 
-        {/* Additional Number Field (for passport issued at) */}
         {additionalNumberField && (
           <div>
             <Label htmlFor={additionalNumberField}>
@@ -249,7 +309,7 @@ const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
           </div>
         )}
 
-        {/* Existing Document Display */}
+        {/* Existing Document Display with Download */}
         {existingUrl && (
           <div className="space-y-2">
             <div className="flex items-center justify-between">
@@ -273,22 +333,39 @@ const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
                 alt={`Current ${title}`}
                 fill
                 className="object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                onClick={() => window.open(existingUrl, "_blank")}
+                onClick={() => viewDocument(existingUrl, title)}
               />
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => window.open(existingUrl, "_blank")}
-              className="w-full"
-            >
-              <Download className="h-4 w-4 mr-2" />
-              View Full Size
-            </Button>
+
+            {/* Action buttons for existing documents */}
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => viewDocument(existingUrl, title)}
+                className="flex-1"
+              >
+                <Eye className="h-4 w-4 mr-2" />
+                View Full Size
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  downloadDocument(
+                    existingUrl,
+                    title.toLowerCase().replace(/\s+/g, "_")
+                  )
+                }
+                className="flex-1"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Download
+              </Button>
+            </div>
           </div>
         )}
 
-        {/* New File Upload */}
         <div className="space-y-2">
           <Label>
             {existingUrl ? `Upload New ${title}` : `Upload ${title}`}
@@ -383,7 +460,6 @@ const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
         </DialogHeader>
 
         <div className="space-y-6 max-h-[calc(95vh-200px)] overflow-y-auto px-1">
-          {/* Document Completion Status */}
           <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <div className="flex items-start gap-3">
               <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
@@ -399,7 +475,6 @@ const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
             </div>
           </div>
 
-          {/* Driver License Section */}
           <DocumentSection
             documentType="driverLicense"
             title="Driver License"
@@ -408,7 +483,6 @@ const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
             numberLabel="Driver License Number"
           />
 
-          {/* Passport Section */}
           <DocumentSection
             documentType="passport"
             title="Passport"
@@ -420,7 +494,6 @@ const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
             additionalNumberLabel="Issued At (City/Country)"
           />
 
-          {/* CIN Section */}
           <DocumentSection
             documentType="cin"
             title="CIN (National ID)"

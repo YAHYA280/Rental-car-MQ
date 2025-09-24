@@ -1,4 +1,3 @@
-// src/components/dashboard/users/components/UserDetailsModal.tsx - UPDATED: Removed city, postal code, emergency contact, notes, and referral code
 "use client";
 
 import React from "react";
@@ -27,6 +26,7 @@ import {
   XCircle,
   AlertCircle,
   Download,
+  Eye,
 } from "lucide-react";
 import { UserData } from "@/components/types";
 
@@ -42,6 +42,77 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
   onEdit,
 }) => {
   const t = useTranslations("dashboard");
+
+  // NEW: Download document function
+  const downloadDocument = (
+    dataUrl: string,
+    filename: string,
+    documentType: string
+  ) => {
+    try {
+      // Create a temporary link element
+      const link = document.createElement("a");
+      link.href = dataUrl;
+
+      // Generate filename with customer name and document type
+      const customerName = user
+        ? `${user.firstName}_${user.lastName}`
+        : "customer";
+      const timestamp = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+      const extension = dataUrl.split(";")[0].split("/")[1] || "jpg";
+
+      link.download = `${customerName}_${documentType}_${timestamp}.${extension}`;
+
+      // Trigger download
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      console.log(`Downloaded ${documentType} for ${customerName}`);
+    } catch (error) {
+      console.error("Error downloading document:", error);
+      alert("Error downloading document. Please try again.");
+    }
+  };
+
+  // NEW: View document in new tab function
+  const viewDocument = (dataUrl: string, documentType: string) => {
+    try {
+      const newWindow = window.open();
+      if (newWindow) {
+        newWindow.document.write(`
+          <html>
+            <head>
+              <title>${documentType} - ${user?.firstName} ${user?.lastName}</title>
+              <style>
+                body { 
+                  margin: 0; 
+                  display: flex; 
+                  justify-content: center; 
+                  align-items: center; 
+                  min-height: 100vh; 
+                  background: #f0f0f0;
+                }
+                img { 
+                  max-width: 100%; 
+                  max-height: 100vh; 
+                  object-fit: contain; 
+                  border-radius: 8px;
+                  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                }
+              </style>
+            </head>
+            <body>
+              <img src="${dataUrl}" alt="${documentType}" />
+            </body>
+          </html>
+        `);
+      }
+    } catch (error) {
+      console.error("Error viewing document:", error);
+      alert("Error viewing document. Please try again.");
+    }
+  };
 
   const getStatusBadge = (status: "active" | "inactive" | "blocked") => {
     switch (status) {
@@ -75,7 +146,6 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   };
 
-  // Safe date formatting
   const formatDate = (dateString: string | undefined) => {
     if (!dateString) return "Not provided";
     try {
@@ -89,7 +159,6 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
     }
   };
 
-  // Safe currency formatting
   const formatCurrency = (amount: number | undefined) => {
     if (amount === undefined || amount === null) return "€0";
     return new Intl.NumberFormat("fr-FR", {
@@ -98,7 +167,6 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
     }).format(amount);
   };
 
-  // Calculate age from date of birth
   const calculateAge = (dateOfBirth: string | undefined): number | null => {
     if (!dateOfBirth) return null;
     try {
@@ -118,7 +186,6 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
     }
   };
 
-  // Get nationality from country code
   const getNationality = (countryCode: string | undefined): string => {
     const nationalityMap: Record<string, string> = {
       MA: "Moroccan",
@@ -138,7 +205,6 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
     return nationalityMap[countryCode || "MA"] || "Unknown";
   };
 
-  // Get document completion status
   const getDocumentCompletion = (user: UserData) => {
     const documents = {
       driverLicense: !!(
@@ -159,7 +225,7 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
     };
   };
 
-  // Document display component
+  // UPDATED: Enhanced document display with download functionality
   const DocumentDisplay = ({
     title,
     imageUrl,
@@ -180,7 +246,7 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
               src={imageUrl}
               alt={title}
               className="w-full h-full object-cover"
-              onClick={() => window.open(imageUrl, "_blank")}
+              onClick={() => viewDocument(imageUrl, title)}
             />
           </div>
           {documentNumber && (
@@ -193,15 +259,34 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
               <span className="font-medium">Additional:</span> {additionalInfo}
             </p>
           )}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => window.open(imageUrl, "_blank")}
-            className="w-full"
-          >
-            <Download className="h-4 w-4 mr-2" />
-            View Full Size
-          </Button>
+
+          {/* NEW: Action buttons for download and view */}
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => viewDocument(imageUrl, title)}
+              className="flex-1"
+            >
+              <Eye className="h-4 w-4 mr-2" />
+              View Full Size
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                downloadDocument(
+                  imageUrl,
+                  `${title.toLowerCase().replace(/\s+/g, "_")}`,
+                  title.toLowerCase().replace(/\s+/g, "_")
+                )
+              }
+              className="flex-1"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Download
+            </Button>
+          </div>
         </div>
       ) : documentNumber ? (
         <div className="p-3 bg-gray-50 rounded-lg">
@@ -277,7 +362,6 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                   </span>
                 </div>
 
-                {/* Document completion indicator */}
                 <div className="flex items-center gap-2">
                   <div className="flex-1 bg-gray-200 rounded-full h-2">
                     <div
@@ -355,7 +439,7 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                   </div>
                 </div>
 
-                {/* Address Information - Simplified */}
+                {/* Address Information */}
                 {user.address && (
                   <div className="p-4 bg-white border rounded-lg">
                     <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
@@ -371,7 +455,7 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                   </div>
                 )}
 
-                {/* Document Information */}
+                {/* Document Information with Download */}
                 <div className="p-4 bg-white border rounded-lg">
                   <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                     <FileText className="h-5 w-5 text-indigo-600" />
@@ -402,7 +486,6 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                     />
                   </div>
 
-                  {/* Document completion summary */}
                   <div className="mt-6 p-3 bg-gray-50 rounded-lg">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium text-gray-700">
