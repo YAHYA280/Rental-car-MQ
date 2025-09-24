@@ -20,7 +20,7 @@ const VehicleStatsCard: React.FC<VehicleStatsCardProps> = ({ vehicle }) => {
       <CardContent className="p-6">
         <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
           <CheckCircle className="h-5 w-5 text-blue-600" />
-          Vehicle Info
+          {tVehicle("vehicleStats")}
         </h3>
 
         <div className="space-y-4">
@@ -32,7 +32,7 @@ const VehicleStatsCard: React.FC<VehicleStatsCardProps> = ({ vehicle }) => {
               ) : (
                 <XCircle className="h-4 w-4 text-red-600" />
               )}
-              Availability
+              {tVehicle("availability")}
             </span>
             <Badge
               className={
@@ -41,7 +41,9 @@ const VehicleStatsCard: React.FC<VehicleStatsCardProps> = ({ vehicle }) => {
                   : "bg-red-100 text-red-800 border-red-200"
               }
             >
-              {vehicle.available ? "Available" : "Not Available"}
+              {vehicle.available
+                ? tVehicle("available")
+                : tVehicle("unavailable")}
             </Badge>
           </div>
 
@@ -50,7 +52,7 @@ const VehicleStatsCard: React.FC<VehicleStatsCardProps> = ({ vehicle }) => {
             <div className="flex justify-between items-center">
               <span className="text-gray-600 flex items-center gap-2">
                 <Gauge className="h-4 w-4 text-blue-600" />
-                Mileage
+                {tVehicle("mileage")}
               </span>
               <span className="font-semibold text-gray-900">
                 {vehicle.mileage.toLocaleString()} km
@@ -64,7 +66,7 @@ const VehicleStatsCard: React.FC<VehicleStatsCardProps> = ({ vehicle }) => {
           <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
             <p className="text-sm text-red-700 flex items-center gap-2">
               <XCircle className="h-4 w-4" />
-              This vehicle is currently booked or under maintenance
+              {tVehicle("unavailable")}
             </p>
           </div>
         )}
@@ -73,7 +75,7 @@ const VehicleStatsCard: React.FC<VehicleStatsCardProps> = ({ vehicle }) => {
           <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
             <p className="text-sm text-green-700 flex items-center gap-2">
               <CheckCircle className="h-4 w-4" />
-              Ready to book for your dates
+              {tVehicle("available")}
             </p>
           </div>
         )}

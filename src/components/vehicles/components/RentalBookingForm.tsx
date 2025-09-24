@@ -63,6 +63,8 @@ const RentalBookingForm: React.FC<RentalBookingFormProps> = ({
   onDetailsChange,
 }) => {
   const t = useTranslations("vehicles");
+  const tVehicle = useTranslations("vehicleDetail");
+  const tBooking = useTranslations("vehicleDetail.bookingForm");
   const currentLocale = useLocale();
 
   // All state variables
@@ -129,7 +131,11 @@ const RentalBookingForm: React.FC<RentalBookingFormProps> = ({
       }
     } catch (error) {
       console.error("Error loading vehicle calendar:", error);
-      toast.error("Error loading vehicle availability");
+      toast.error(
+        currentLocale === "fr"
+          ? "Erreur lors du chargement de la disponibilité du véhicule"
+          : "Error loading vehicle availability"
+      );
     } finally {
       setIsLoadingCalendar(false);
     }
@@ -201,7 +207,10 @@ const RentalBookingForm: React.FC<RentalBookingFormProps> = ({
           (timeDifference - oneHourInMinutes) / 60
         );
         const excessMinutes = (timeDifference - oneHourInMinutes) % 60;
-        timeExceededMessage = `+1 day added (return time exceeds pickup time by ${excessHours}h ${excessMinutes}m)`;
+        timeExceededMessage =
+          currentLocale === "fr"
+            ? `+1 jour ajouté (heure de retour dépasse l'heure de prise de ${excessHours}h ${excessMinutes}m)`
+            : `+1 day added (return time exceeds pickup time by ${excessHours}h ${excessMinutes}m)`;
       }
 
       isValidPeriod = rentalDays >= 1;
@@ -231,7 +240,7 @@ const RentalBookingForm: React.FC<RentalBookingFormProps> = ({
       isFormValid,
       timeExceededMessage,
     };
-  }, [formData, vehicle.price, vehicle.caution]);
+  }, [formData, vehicle.price, vehicle.caution, currentLocale]);
 
   // Handle form field changes
   const handleInputChange = (field: string, value: string | boolean) => {
@@ -330,7 +339,9 @@ const RentalBookingForm: React.FC<RentalBookingFormProps> = ({
     } else if (dateRange?.from) {
       return format(dateRange.from, "MMM dd, yyyy");
     }
-    return "Select rental period";
+    return currentLocale === "fr"
+      ? "Sélectionner la période de location"
+      : "Select rental period";
   };
 
   // Validate Moroccan phone number
@@ -342,13 +353,19 @@ const RentalBookingForm: React.FC<RentalBookingFormProps> = ({
   // Handle booking submission
   const handleBookNow = async () => {
     if (!rentalInfo.isFormValid) {
-      toast.error("Please fill in all required fields");
+      toast.error(
+        currentLocale === "fr"
+          ? "Veuillez remplir tous les champs requis"
+          : "Please fill in all required fields"
+      );
       return;
     }
 
     if (!isValidPhone(formData.phone)) {
       toast.error(
-        "Please enter a valid Moroccan phone number (06XXXXXXXX or 07XXXXXXXX)"
+        currentLocale === "fr"
+          ? "Veuillez entrer un numéro de téléphone marocain valide (06XXXXXXXX ou 07XXXXXXXX)"
+          : "Please enter a valid Moroccan phone number (06XXXXXXXX or 07XXXXXXXX)"
       );
       return;
     }
@@ -364,7 +381,9 @@ const RentalBookingForm: React.FC<RentalBookingFormProps> = ({
 
       if (hasConflict) {
         toast.error(
-          "Selected dates are no longer available. Please refresh and try again."
+          currentLocale === "fr"
+            ? "Les dates sélectionnées ne sont plus disponibles. Veuillez actualiser et réessayer."
+            : "Selected dates are no longer available. Please refresh and try again."
         );
         await loadVehicleCalendar();
         return;
@@ -512,7 +531,9 @@ ${messageContent.request}`;
               <div className="flex items-center justify-center gap-2 text-blue-600 bg-blue-50 rounded-lg px-3 py-2">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 <span className="text-sm font-medium">
-                  Loading availability...
+                  {currentLocale === "fr"
+                    ? "Chargement de la disponibilité..."
+                    : "Loading availability..."}
                 </span>
               </div>
             ) : availabilityStatus.available ? (
@@ -520,10 +541,16 @@ ${messageContent.request}`;
                 <CheckCircle className="h-4 w-4" />
                 <span className="text-sm font-medium">
                   {availabilityStatus.upcomingBooking
-                    ? `Available until ${format(
+                    ? `${
+                        currentLocale === "fr"
+                          ? "Disponible jusqu'au"
+                          : "Available until"
+                      } ${format(
                         new Date(availabilityStatus.upcomingBooking.pickupDate),
                         "MMM dd"
                       )}`
+                    : currentLocale === "fr"
+                    ? "Disponible maintenant"
                     : "Available Now"}
                 </span>
               </div>
@@ -531,11 +558,17 @@ ${messageContent.request}`;
               <div className="flex flex-col items-center gap-1 text-red-600 bg-red-50 rounded-lg px-3 py-2">
                 <div className="flex items-center gap-2">
                   <AlertCircle className="h-4 w-4" />
-                  <span className="text-sm font-medium">Not Available</span>
+                  <span className="text-sm font-medium">
+                    {currentLocale === "fr"
+                      ? "Non disponible"
+                      : "Not Available"}
+                  </span>
                 </div>
                 {availabilityStatus.nextAvailableDate && (
                   <span className="text-xs text-red-700">
-                    Next available:{" "}
+                    {currentLocale === "fr"
+                      ? "Prochaine disponibilité: "
+                      : "Next available: "}
                     {format(
                       new Date(availabilityStatus.nextAvailableDate),
                       "MMM dd, yyyy"
@@ -554,10 +587,18 @@ ${messageContent.request}`;
               <>
                 <div className="text-lg font-semibold">
                   {rentalInfo.rentalDays}{" "}
-                  {rentalInfo.rentalDays > 1 ? "days" : "day"} total
+                  {rentalInfo.rentalDays > 1
+                    ? currentLocale === "fr"
+                      ? "jours"
+                      : "days"
+                    : currentLocale === "fr"
+                    ? "jour"
+                    : "day"}{" "}
+                  {currentLocale === "fr" ? "au total" : "total"}
                 </div>
                 <div className="text-sm text-gray-500">
-                  €{vehicle.price}/day
+                  €{vehicle.price}
+                  {currentLocale === "fr" ? "/jour" : "/day"}
                 </div>
                 {rentalInfo.timeExceededMessage && (
                   <div className="text-xs text-amber-600 mt-1 flex items-center justify-center gap-1">
@@ -566,6 +607,8 @@ ${messageContent.request}`;
                   </div>
                 )}
               </>
+            ) : currentLocale === "fr" ? (
+              "par jour"
             ) : (
               "per day"
             )}
@@ -578,36 +621,47 @@ ${messageContent.request}`;
           <div className="space-y-3">
             <h4 className="font-semibold text-gray-900 flex items-center gap-2">
               <User className="h-4 w-4" />
-              Contact Information
+              {currentLocale === "fr"
+                ? "Informations de Contact"
+                : "Contact Information"}
             </h4>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-sm">First Name *</Label>
+                <Label className="text-sm">
+                  {currentLocale === "fr" ? "Prénom" : "First Name"} *
+                </Label>
                 <Input
                   value={formData.firstName}
                   onChange={(e) =>
                     handleInputChange("firstName", e.target.value)
                   }
-                  placeholder="Nom"
+                  placeholder={currentLocale === "fr" ? "Prénom" : "First Name"}
                   className="mt-1"
                 />
               </div>
               <div>
-                <Label className="text-sm">Last Name *</Label>
+                <Label className="text-sm">
+                  {currentLocale === "fr" ? "Nom" : "Last Name"} *
+                </Label>
                 <Input
                   value={formData.lastName}
                   onChange={(e) =>
                     handleInputChange("lastName", e.target.value)
                   }
-                  placeholder="Prenom"
+                  placeholder={currentLocale === "fr" ? "Nom" : "Last Name"}
                   className="mt-1"
                 />
               </div>
             </div>
 
             <div>
-              <Label className="text-sm">Phone Number *</Label>
+              <Label className="text-sm">
+                {currentLocale === "fr"
+                  ? "Numéro de Téléphone"
+                  : "Phone Number"}{" "}
+                *
+              </Label>
               <div className="flex items-center gap-2 mt-1">
                 <Phone className="h-4 w-4 text-gray-400" />
                 <Input
@@ -620,14 +674,16 @@ ${messageContent.request}`;
             </div>
 
             <div>
-              <Label className="text-sm">Email (optional)</Label>
+              <Label className="text-sm">
+                Email ({currentLocale === "fr" ? "optionnel" : "optional"})
+              </Label>
               <div className="flex items-center gap-2 mt-1">
                 <Mail className="h-4 w-4 text-gray-400" />
                 <Input
                   type="email"
                   value={formData.email}
                   onChange={(e) => handleInputChange("email", e.target.value)}
-                  placeholder="email"
+                  placeholder="email@example.com"
                   className="flex-1"
                 />
               </div>
@@ -638,11 +694,16 @@ ${messageContent.request}`;
           <div className="space-y-3">
             <h4 className="font-semibold text-gray-900 flex items-center gap-2">
               <CalendarIcon className="h-4 w-4" />
-              Rental Period
+              {currentLocale === "fr" ? "Période de Location" : "Rental Period"}
             </h4>
 
             <div>
-              <Label className="text-sm">Select Dates *</Label>
+              <Label className="text-sm">
+                {currentLocale === "fr"
+                  ? "Sélectionner les Dates"
+                  : "Select Dates"}{" "}
+                *
+              </Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -654,14 +715,17 @@ ${messageContent.request}`;
                     {isLoadingCalendar ? (
                       <span className="flex items-center gap-2">
                         <Loader2 className="h-3 w-3 animate-spin" />
-                        Loading calendar...
+                        {currentLocale === "fr"
+                          ? "Chargement du calendrier..."
+                          : "Loading calendar..."}
                       </span>
                     ) : (
                       <span className="text-sm">{getDateRangeText()}</span>
                     )}
                     {rentalInfo.rentalDays > 0 && !isLoadingCalendar && (
                       <span className="ml-auto text-xs text-gray-500">
-                        {rentalInfo.rentalDays}d
+                        {rentalInfo.rentalDays}
+                        {currentLocale === "fr" ? "j" : "d"}
                       </span>
                     )}
                   </Button>
@@ -701,17 +765,31 @@ ${messageContent.request}`;
                     <div className="flex items-center justify-between text-xs mb-2">
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 bg-green-100 border border-green-300 rounded"></div>
-                        <span>Available</span>
+                        <span>
+                          {currentLocale === "fr" ? "Disponible" : "Available"}
+                        </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 bg-red-100 border border-red-300 rounded opacity-40"></div>
-                        <span>Booked</span>
+                        <span>
+                          {currentLocale === "fr" ? "Réservé" : "Booked"}
+                        </span>
                       </div>
                     </div>
                     {blockedDates.length > 0 && (
                       <p className="text-xs text-gray-600">
-                        {blockedDates.length} blocked date
-                        {blockedDates.length !== 1 ? "s" : ""} in this period
+                        {blockedDates.length}{" "}
+                        {currentLocale === "fr" ? "date" : "blocked date"}
+                        {blockedDates.length !== 1
+                          ? currentLocale === "fr"
+                            ? "s bloquée"
+                            : "s"
+                          : currentLocale === "fr"
+                          ? " bloquée"
+                          : ""}{" "}
+                        {currentLocale === "fr"
+                          ? "dans cette période"
+                          : "in this period"}
                       </p>
                     )}
                   </div>
@@ -723,7 +801,9 @@ ${messageContent.request}`;
             <div className="grid grid-cols-2 gap-3">
               {/* Pickup Time */}
               <div>
-                <Label className="text-sm">Pickup Time *</Label>
+                <Label className="text-sm">
+                  {currentLocale === "fr" ? "Heure de Prise" : "Pickup Time"} *
+                </Label>
                 <Select
                   value={formData.pickupTime}
                   onValueChange={(value) =>
@@ -732,7 +812,13 @@ ${messageContent.request}`;
                 >
                   <SelectTrigger className="mt-1">
                     <Clock className="mr-2 h-4 w-4" />
-                    <SelectValue placeholder="Select time" />
+                    <SelectValue
+                      placeholder={
+                        currentLocale === "fr"
+                          ? "Sélectionner l'heure"
+                          : "Select time"
+                      }
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     {timeSlots.map((time) => (
@@ -746,7 +832,9 @@ ${messageContent.request}`;
 
               {/* Return Time */}
               <div>
-                <Label className="text-sm">Return Time *</Label>
+                <Label className="text-sm">
+                  {currentLocale === "fr" ? "Heure de Retour" : "Return Time"} *
+                </Label>
                 <Select
                   value={formData.returnTime}
                   onValueChange={(value) =>
@@ -755,7 +843,13 @@ ${messageContent.request}`;
                 >
                   <SelectTrigger className="mt-1">
                     <Clock className="mr-2 h-4 w-4" />
-                    <SelectValue placeholder="Select time" />
+                    <SelectValue
+                      placeholder={
+                        currentLocale === "fr"
+                          ? "Sélectionner l'heure"
+                          : "Select time"
+                      }
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     {timeSlots.map((time) => (
@@ -773,10 +867,24 @@ ${messageContent.request}`;
               <div className="flex items-start gap-2">
                 <Info className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
                 <div className="text-xs text-blue-800">
-                  <p className="font-medium mb-1">Time Policy:</p>
+                  <p className="font-medium mb-1">
+                    {currentLocale === "fr"
+                      ? "Politique Horaire:"
+                      : "Time Policy:"}
+                  </p>
                   <ul className="space-y-1">
-                    <li>• 1-hour grace period after pickup time</li>
-                    <li>• Return after grace period = +1 day charge</li>
+                    <li>
+                      •{" "}
+                      {currentLocale === "fr"
+                        ? "1 heure de grâce après l'heure de prise"
+                        : "1-hour grace period after pickup time"}
+                    </li>
+                    <li>
+                      •{" "}
+                      {currentLocale === "fr"
+                        ? "Retour après la période de grâce = +1 jour de frais"
+                        : "Return after grace period = +1 day charge"}
+                    </li>
                   </ul>
                 </div>
               </div>
@@ -787,11 +895,13 @@ ${messageContent.request}`;
           <div className="space-y-3">
             <h4 className="font-semibold text-gray-900 flex items-center gap-2">
               <MapPin className="h-4 w-4" />
-              Location
+              {currentLocale === "fr" ? "Emplacement" : "Location"}
             </h4>
 
             <div>
-              <Label className="text-sm">Pickup Location *</Label>
+              <Label className="text-sm">
+                {currentLocale === "fr" ? "Lieu de Prise" : "Pickup Location"} *
+              </Label>
               <Select
                 value={formData.pickupLocation}
                 onValueChange={(value) => {
@@ -803,7 +913,13 @@ ${messageContent.request}`;
               >
                 <SelectTrigger className="mt-1">
                   <MapPin className="mr-2 h-4 w-4 text-gray-400" />
-                  <SelectValue placeholder="Select pickup location" />
+                  <SelectValue
+                    placeholder={
+                      currentLocale === "fr"
+                        ? "Sélectionner le lieu de prise"
+                        : "Select pickup location"
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {PICKUP_LOCATIONS.map((location) => (
@@ -829,14 +945,21 @@ ${messageContent.request}`;
                 htmlFor="different-return"
                 className="text-sm cursor-pointer"
               >
-                Return to different location
+                {currentLocale === "fr"
+                  ? "Retourner à un endroit différent"
+                  : "Return to different location"}
               </label>
             </div>
 
             {/* Return Location (conditional) */}
             {formData.differentDropoff && (
               <div>
-                <Label className="text-sm">Return Location *</Label>
+                <Label className="text-sm">
+                  {currentLocale === "fr"
+                    ? "Lieu de Retour"
+                    : "Return Location"}{" "}
+                  *
+                </Label>
                 <Select
                   value={formData.returnLocation}
                   onValueChange={(value) =>
@@ -845,7 +968,13 @@ ${messageContent.request}`;
                 >
                   <SelectTrigger className="mt-1">
                     <MapPin className="mr-2 h-4 w-4 text-gray-400" />
-                    <SelectValue placeholder="Select return location" />
+                    <SelectValue
+                      placeholder={
+                        currentLocale === "fr"
+                          ? "Sélectionner le lieu de retour"
+                          : "Select return location"
+                      }
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     {PICKUP_LOCATIONS.map((location) => (
@@ -863,46 +992,65 @@ ${messageContent.request}`;
           {rentalInfo.hasValidDates && (
             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
               <h4 className="font-semibold text-green-800 mb-3">
-                Booking Summary
+                {tBooking("bookingSummary")}
               </h4>
               <div className="text-sm text-green-700 space-y-2">
                 <div className="flex justify-between">
-                  <span>Vehicle:</span>
+                  <span>
+                    {currentLocale === "fr" ? "Véhicule:" : "Vehicle:"}
+                  </span>
                   <span>
                     {vehicle.brand} {vehicle.name}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Pickup:</span>
+                  <span>{currentLocale === "fr" ? "Prise:" : "Pickup:"}</span>
                   <span>
-                    {formData.pickupDate} at {formData.pickupTime}
+                    {formData.pickupDate} {currentLocale === "fr" ? "à" : "at"}{" "}
+                    {formData.pickupTime}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Return:</span>
+                  <span>{currentLocale === "fr" ? "Retour:" : "Return:"}</span>
                   <span>
-                    {formData.returnDate} at {formData.returnTime}
+                    {formData.returnDate} {currentLocale === "fr" ? "à" : "at"}{" "}
+                    {formData.returnTime}
                   </span>
                 </div>
 
                 {formData.differentDropoff && formData.returnLocation && (
                   <div className="flex justify-between">
-                    <span>Return to:</span>
+                    <span>
+                      {currentLocale === "fr" ? "Retourner à:" : "Return to:"}
+                    </span>
                     <span>{formData.returnLocation}</span>
                   </div>
                 )}
                 {/* Pricing Breakdown */}
                 <div className="border-t border-green-300 pt-2 mt-3 space-y-2">
                   <div className="flex justify-between">
-                    <span>Daily Rate:</span>
-                    <span>€{vehicle.price}/day</span>
+                    <span>
+                      {currentLocale === "fr"
+                        ? "Tarif Journalier:"
+                        : "Daily Rate:"}
+                    </span>
+                    <span>
+                      €{vehicle.price}
+                      {currentLocale === "fr" ? "/jour" : "/day"}
+                    </span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Total Days:</span>
+                    <span>
+                      {currentLocale === "fr" ? "Total Jours:" : "Total Days:"}
+                    </span>
                     <span>{rentalInfo.rentalDays}</span>
                   </div>
                   <div className="flex justify-between font-semibold text-green-900">
-                    <span>Rental Total:</span>
+                    <span>
+                      {currentLocale === "fr"
+                        ? "Total Location:"
+                        : "Rental Total:"}
+                    </span>
                     <span>€{rentalInfo.totalAmount}</span>
                   </div>
 
@@ -910,14 +1058,18 @@ ${messageContent.request}`;
                   <div className="bg-amber-50 border border-amber-200 rounded p-2 mt-3">
                     <div className="flex justify-between items-center">
                       <span className="text-amber-800 font-medium">
-                        Security Deposit:
+                        {currentLocale === "fr"
+                          ? "Caution de Sécurité:"
+                          : "Security Deposit:"}
                       </span>
                       <span className="text-amber-900 font-bold">
                         €{rentalInfo.cautionAmount}
                       </span>
                     </div>
                     <p className="text-xs text-amber-700 mt-1">
-                      Refundable deposit required at pickup
+                      {currentLocale === "fr"
+                        ? "Caution remboursable requise à la prise"
+                        : "Refundable deposit required at pickup"}
                     </p>
                   </div>
 
@@ -925,7 +1077,9 @@ ${messageContent.request}`;
                   <div className="bg-green-100 border border-green-300 rounded p-2 mt-3">
                     <div className="flex justify-between items-center">
                       <span className="font-bold text-green-900">
-                        Total at Pickup:
+                        {currentLocale === "fr"
+                          ? "Total à la Prise:"
+                          : "Total at Pickup:"}
                       </span>
                       <span className="font-bold text-xl text-green-900">
                         €
@@ -935,8 +1089,9 @@ ${messageContent.request}`;
                       </span>
                     </div>
                     <p className="text-xs text-green-700 mt-1">
-                      Rental (€{rentalInfo.totalAmount}) + Deposit (€
-                      {rentalInfo.cautionAmount})
+                      {currentLocale === "fr"
+                        ? `Location (€${rentalInfo.totalAmount}) + Caution (€${rentalInfo.cautionAmount})`
+                        : `Rental (€${rentalInfo.totalAmount}) + Deposit (€${rentalInfo.cautionAmount})`}
                     </p>
                   </div>
                 </div>
@@ -956,34 +1111,38 @@ ${messageContent.request}`;
             {isSubmitting ? (
               <>
                 <Loader2 className="h-5 w-5 animate-spin" />
-                Submitting...
+                {currentLocale === "fr" ? "Envoi en cours..." : "Submitting..."}
               </>
             ) : isLoadingCalendar ? (
               <>
                 <Loader2 className="h-5 w-5 animate-spin" />
-                Loading calendar...
+                {currentLocale === "fr"
+                  ? "Chargement du calendrier..."
+                  : "Loading calendar..."}
               </>
             ) : (
               <>
                 <MessageCircle className="h-5 w-5" />
-                Book Now
+                {t("bookNow")}
               </>
             )}
           </Button>
 
           <div className="text-center text-sm text-gray-500">
             <CheckCircle className="h-4 w-4 inline mr-1" />
-            Your booking will be confirmed via WhatsApp
+            {currentLocale === "fr"
+              ? "Votre réservation sera confirmée via WhatsApp"
+              : "Your booking will be confirmed via WhatsApp"}
           </div>
         </div>
 
         {/* Contact Info */}
         <div className="mt-6 pt-6 border-t border-gray-200 text-center">
-          <p className="text-sm text-gray-600 mb-2">Need help?</p>
+          <p className="text-sm text-gray-600 mb-2">{t("needHelp")}</p>
           <p className="font-semibold text-carbookers-red-600">
             {vehicle.whatsappNumber || "+212612077309"}
           </p>
-          <p className="text-sm text-gray-500">WhatsApp available 24/7</p>
+          <p className="text-sm text-gray-500">{t("whatsappAvailable")}</p>
         </div>
       </CardContent>
     </Card>
