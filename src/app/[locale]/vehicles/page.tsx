@@ -39,7 +39,6 @@ function VehiclesLoading() {
 export default async function VehiclesPage({ params }: Props) {
   const { locale } = await params;
 
-  // Enable static rendering
   setRequestLocale(locale);
 
   return (

@@ -215,6 +215,8 @@
 
   "filters": {
     "searchCriteria": "Critères de Recherche",
+    "searchVehicles": "Rechercher des véhicules...",
+    "searchPlaceholder": "Rechercher par lieu, marque ou modèle...",
     "pickup": "Prise",
     "dropoff": "Retour",
     "dates": "Dates",
@@ -239,6 +241,8 @@
     "allSeats": "Toutes",
     "seatsLabel": "places",
     "priceRange": "Gamme de Prix (€)",
+    "availability": "Disponibilité",
+    "availableOnly": "Disponible seulement",
     "previous": "Précédent",
     "next": "Suivant",
     "showingResults": "Affichage {start}-{end} sur {total} résultats",
@@ -264,9 +268,14 @@
       "diesel": "Diesel",
       "electric": "Électrique",
       "hybrid": "Hybride"
+    },
+    "vehicleFeatures": {
+      "airConditioning": "Climatisation",
+      "gps": "Navigation GPS",
+      "parkingSensors": "Capteurs de Stationnement",
+      "leatherSeats": "Sièges en Cuir"
     }
   },
-
   "testimonials": {
     "title": "Ce Que Disent Nos Clients",
     "subtitle": "Découvrez les expériences de nos clients satisfaits",
