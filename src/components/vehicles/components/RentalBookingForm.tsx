@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { PhoneInput } from "@/components/ui/phone-input";
 import {
   MapPin,
   Calendar as CalendarIcon,
@@ -42,6 +43,7 @@ import {
 import { DateRange } from "react-day-picker";
 import { bookingService } from "@/services/bookingService";
 import { toast } from "sonner";
+import { isValidPhoneNumber } from "react-phone-number-input";
 
 interface RentalBookingFormProps {
   vehicle: CarData;
@@ -155,7 +157,7 @@ const RentalBookingForm: React.FC<RentalBookingFormProps> = ({
     return slots;
   }, []);
 
-  // UPDATED: Calculate rental info with your specific time logic
+  // Calculate rental info with your specific time logic
   const rentalInfo = useMemo(() => {
     let rentalDays = 0;
     let isValidPeriod = false;
@@ -219,10 +221,12 @@ const RentalBookingForm: React.FC<RentalBookingFormProps> = ({
     const totalAmount = vehicle.price * Math.max(rentalDays, 1);
     const cautionAmount = Number(vehicle.caution) || 0;
 
+    // Updated form validation to use phone number validation from react-phone-number-input
     const isFormValid = Boolean(
       formData.firstName.trim() &&
         formData.lastName.trim() &&
-        formData.phone.trim() &&
+        formData.phone &&
+        isValidPhoneNumber(formData.phone) &&
         formData.pickupLocation &&
         formData.pickupDate &&
         formData.returnDate &&
@@ -344,12 +348,6 @@ const RentalBookingForm: React.FC<RentalBookingFormProps> = ({
       : "Select rental period";
   };
 
-  // Validate Moroccan phone number
-  const isValidPhone = (phone: string) => {
-    const phoneRegex = /^0[67]\d{8}$/;
-    return phoneRegex.test(phone.replace(/\s/g, ""));
-  };
-
   // Handle booking submission
   const handleBookNow = async () => {
     if (!rentalInfo.isFormValid) {
@@ -361,11 +359,12 @@ const RentalBookingForm: React.FC<RentalBookingFormProps> = ({
       return;
     }
 
-    if (!isValidPhone(formData.phone)) {
+    // Validate phone number using react-phone-number-input
+    if (!formData.phone || !isValidPhoneNumber(formData.phone)) {
       toast.error(
         currentLocale === "fr"
-          ? "Veuillez entrer un numéro de téléphone marocain valide (06XXXXXXXX ou 07XXXXXXXX)"
-          : "Please enter a valid Moroccan phone number (06XXXXXXXX or 07XXXXXXXX)"
+          ? "Veuillez entrer un numéro de téléphone valide"
+          : "Please enter a valid phone number"
       );
       return;
     }
@@ -655,6 +654,7 @@ ${messageContent.request}`;
               </div>
             </div>
 
+            {/* Updated Phone Number Input with PhoneInput component */}
             <div>
               <Label className="text-sm">
                 {currentLocale === "fr"
@@ -662,15 +662,24 @@ ${messageContent.request}`;
                   : "Phone Number"}{" "}
                 *
               </Label>
-              <div className="flex items-center gap-2 mt-1">
-                <Phone className="h-4 w-4 text-gray-400" />
-                <Input
-                  value={formData.phone}
-                  onChange={(e) => handleInputChange("phone", e.target.value)}
-                  placeholder="0612345678"
-                  className="flex-1"
-                />
-              </div>
+              <PhoneInput
+                value={formData.phone}
+                onChange={(value) => handleInputChange("phone", value || "")}
+                defaultCountry="MA"
+                placeholder={
+                  currentLocale === "fr"
+                    ? "Entrer le numéro de téléphone"
+                    : "Enter phone number"
+                }
+                className="mt-1"
+              />
+              {formData.phone && !isValidPhoneNumber(formData.phone) && (
+                <p className="text-sm text-red-500 mt-1">
+                  {currentLocale === "fr"
+                    ? "Numéro de téléphone invalide"
+                    : "Invalid phone number"}
+                </p>
+              )}
             </div>
 
             <div>
