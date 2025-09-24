@@ -274,7 +274,13 @@
       "airConditioning": "Air Conditioning",
       "gps": "GPS Navigation",
       "parkingSensors": "Parking Sensors",
-      "leatherSeats": "Leather Seats"
+      "leatherSeats": "Leather Seats",
+      "electricWindows": "Electric Windows",
+      "abs": "ABS Brakes",
+      "keylessEntry": "Keyless Entry",
+      "backupCamera": "Backup Camera",
+      "cruiseControl": "Cruise Control",
+      "bluetooth": "Bluetooth"
     }
   },
   "testimonials": {

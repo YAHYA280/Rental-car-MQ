@@ -273,7 +273,13 @@
       "airConditioning": "Climatisation",
       "gps": "Navigation GPS",
       "parkingSensors": "Capteurs de Stationnement",
-      "leatherSeats": "Sièges en Cuir"
+      "leatherSeats": "Sièges en Cuir",
+      "electricWindows": "Vitres Électriques",
+      "abs": "Freins ABS",
+      "keylessEntry": "Entrée sans Clé",
+      "backupCamera": "Caméra de Recul",
+      "cruiseControl": "Régulateur de Vitesse",
+      "bluetooth": "Bluetooth"
     }
   },
   "testimonials": {
