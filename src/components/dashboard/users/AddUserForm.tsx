@@ -1,4 +1,4 @@
-// src/components/dashboard/users/AddUserForm.tsx - UPDATED: Removed city, postal code, emergency contact, notes, and referral code
+// src/components/dashboard/users/AddUserForm.tsx - UPDATED: Replaced phone input with PhoneInput component
 "use client";
 
 import React, { useState } from "react";
@@ -15,10 +15,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { PhoneInput } from "@/components/ui/phone-input";
 import {
   Upload,
   X,
-  Phone,
   Mail,
   User,
   MapPin,
@@ -63,34 +63,21 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ onSubmit, onClose }) => {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleInputChange = (field: string, value: string) => {
-    // Handle phone number formatting
-    if (field === "phone") {
-      const cleaned = value.replace(/\D/g, "");
-      if (
-        cleaned.length <= 10 &&
-        (cleaned.startsWith("06") ||
-          cleaned.startsWith("07") ||
-          cleaned.length < 2)
-      ) {
-        let formatted = cleaned;
-        if (cleaned.length > 2) {
-          formatted = cleaned.substring(0, 2);
-          if (cleaned.length > 2) formatted += " " + cleaned.substring(2, 4);
-          if (cleaned.length > 4) formatted += " " + cleaned.substring(4, 6);
-          if (cleaned.length > 6) formatted += " " + cleaned.substring(6, 8);
-          if (cleaned.length > 8) formatted += " " + cleaned.substring(8, 10);
-        }
-        value = formatted;
-      } else if (cleaned.length > 10) {
-        return; // Don't allow more than 10 digits
-      }
-    }
-
     setFormData((prev) => ({ ...prev, [field]: value }));
 
     // Clear error when user starts typing
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: "" }));
+    }
+  };
+
+  // NEW: Handle phone number change from PhoneInput
+  const handlePhoneChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, phone: value || "" }));
+
+    // Clear phone error when user starts typing
+    if (errors.phone) {
+      setErrors((prev) => ({ ...prev, phone: "" }));
     }
   };
 
@@ -117,10 +104,14 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ onSubmit, onClose }) => {
     return emailRegex.test(email);
   };
 
+  // UPDATED: Simplified phone validation using PhoneInput's built-in validation
   const validatePhoneNumber = (phone: string): boolean => {
-    const cleaned = phone.replace(/\s/g, "");
-    const phoneRegex = /^0[67]\d{8}$/;
-    return phoneRegex.test(cleaned);
+    if (!phone || phone.trim() === "") return false; // Phone is required
+
+    // PhoneInput returns in E.164 format (+212612345678)
+    // Check if it's a valid format and reasonable length
+    const phoneRegex = /^\+[1-9]\d{1,14}$/;
+    return phoneRegex.test(phone) && phone.length >= 10 && phone.length <= 16;
   };
 
   // Validate date of birth
@@ -132,7 +123,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ onSubmit, onClose }) => {
     return age >= 18 && age <= 100;
   };
 
-  // Simplified form validation (removed emergency contact validation)
+  // UPDATED: Form validation with improved phone validation
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
@@ -146,7 +137,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ onSubmit, onClose }) => {
     if (!formData.phone.trim()) {
       newErrors.phone = "Phone number is required";
     } else if (!validatePhoneNumber(formData.phone)) {
-      newErrors.phone = "Please enter a valid Moroccan phone number";
+      newErrors.phone = "Please enter a valid phone number with country code";
     }
 
     // Email validation (optional)
@@ -179,7 +170,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ onSubmit, onClose }) => {
       // Prepare the simplified user data
       const userData: UserFormData = {
         ...formData,
-        phone: formData.phone.replace(/\s/g, ""), // Clean phone number
+        // Phone is already in E.164 format from PhoneInput
         email:
           formData.email && formData.email.trim() !== ""
             ? formData.email.trim()
@@ -349,29 +340,23 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ onSubmit, onClose }) => {
               {errors.email && (
                 <p className="text-red-500 text-sm mt-1">{errors.email}</p>
               )}
-              <p className="text-xs text-gray-500 mt-1">
-                Email is optional but recommended for notifications
-              </p>
             </div>
 
+            {/* UPDATED: Phone input using PhoneInput component */}
             <div>
               <Label htmlFor="phone">Phone Number *</Label>
               <div className="relative">
-                <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  id="phone"
+                <PhoneInput
                   value={formData.phone}
-                  onChange={(e) => handleInputChange("phone", e.target.value)}
-                  placeholder="06 XX XX XX XX"
-                  className={`pl-10 ${errors.phone ? "border-red-500" : ""}`}
+                  onChange={handlePhoneChange}
+                  defaultCountry="MA"
+                  placeholder="Enter phone number"
+                  className={errors.phone ? "border-red-500" : ""}
                 />
               </div>
               {errors.phone && (
                 <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
               )}
-              <p className="text-xs text-gray-500 mt-1">
-                Moroccan mobile number (06 or 07)
-              </p>
             </div>
 
             {/* Date of Birth */}
@@ -396,9 +381,6 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ onSubmit, onClose }) => {
                   {errors.dateOfBirth}
                 </p>
               )}
-              <p className="text-xs text-gray-500 mt-1">
-                Required for rental contracts
-              </p>
             </div>
 
             {/* Country */}
@@ -509,9 +491,6 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ onSubmit, onClose }) => {
                 onChange={(e) => handleInputChange("cinNumber", e.target.value)}
                 placeholder="Enter CIN number"
               />
-              <p className="text-xs text-gray-500 mt-1">
-                Moroccan National ID Card
-              </p>
             </div>
           </div>
         </CardContent>
