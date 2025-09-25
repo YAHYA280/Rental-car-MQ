@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Car, Users, Calendar, Phone, CreditCard } from "lucide-react";
+import { Car, Phone, CreditCard } from "lucide-react";
 import { CarData } from "@/components/types";
 
 interface VehicleSelectionSectionProps {

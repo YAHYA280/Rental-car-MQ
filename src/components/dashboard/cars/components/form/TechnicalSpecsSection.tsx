@@ -39,7 +39,7 @@ const TechnicalSpecsSection: React.FC<TechnicalSpecsSectionProps> = ({
   touchedFields = new Set(),
   onInputChange,
 }) => {
-  const t = useTranslations("dashboard");
+  const t = useTranslations("dashboard.cars");
 
   const transmissionTypes = ["manual", "automatic"];
   const fuelTypes = ["petrol", "diesel", "electric", "hybrid"];
@@ -95,13 +95,13 @@ const TechnicalSpecsSection: React.FC<TechnicalSpecsSectionProps> = ({
       <CardContent className="p-4">
         <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
           <Settings className="h-5 w-5" />
-          {t("cars.form.sections.technicalSpecs")}
+          {t("form.sections.technicalSpecs")}
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div data-error="transmission">
             <Label htmlFor="transmission" className="flex items-center gap-2">
               <Car className="h-4 w-4" />
-              {t("cars.form.transmission")} *
+              {t("form.transmission")} *
               {shouldShowError("transmission") && (
                 <Popover>
                   <PopoverTrigger>
@@ -109,10 +109,10 @@ const TechnicalSpecsSection: React.FC<TechnicalSpecsSectionProps> = ({
                   </PopoverTrigger>
                   <PopoverContent className="w-80 p-3">
                     <div className="text-sm text-red-600">
-                      <strong>Transmission Error:</strong>
+                      <strong>{t("form.transmission")} Error:</strong>
                       <p className="mt-1">{errors.transmission}</p>
                       <p className="mt-2 text-gray-600">
-                        Select either Manual or Automatic transmission type
+                        {t("form.transmissionHelp")}
                       </p>
                     </div>
                   </PopoverContent>
@@ -125,7 +125,7 @@ const TechnicalSpecsSection: React.FC<TechnicalSpecsSectionProps> = ({
             >
               <SelectTrigger className={getFieldClass("transmission")}>
                 <SelectValue
-                  placeholder={t("cars.form.placeholders.selectTransmission")}
+                  placeholder={t("form.placeholders.selectTransmission")}
                 />
               </SelectTrigger>
               <SelectContent>
@@ -133,7 +133,7 @@ const TechnicalSpecsSection: React.FC<TechnicalSpecsSectionProps> = ({
                   <SelectItem key={type} value={type}>
                     <div className="flex items-center gap-2">
                       <Settings className="h-4 w-4" />
-                      {t(`cars.form.transmissions.${type}`)}
+                      {t(`form.transmissions.${type}`)}
                     </div>
                   </SelectItem>
                 ))}
@@ -150,7 +150,7 @@ const TechnicalSpecsSection: React.FC<TechnicalSpecsSectionProps> = ({
           <div data-error="fuelType">
             <Label htmlFor="fuelType" className="flex items-center gap-2">
               <span>⛽</span>
-              {t("cars.form.fuelType")} *
+              {t("form.fuelType")} *
               {shouldShowError("fuelType") && (
                 <Popover>
                   <PopoverTrigger>
@@ -158,11 +158,10 @@ const TechnicalSpecsSection: React.FC<TechnicalSpecsSectionProps> = ({
                   </PopoverTrigger>
                   <PopoverContent className="w-80 p-3">
                     <div className="text-sm text-red-600">
-                      <strong>Fuel Type Error:</strong>
+                      <strong>{t("form.fuelType")} Error:</strong>
                       <p className="mt-1">{errors.fuelType}</p>
                       <p className="mt-2 text-gray-600">
-                        Select the vehicle's fuel type: Petrol, Diesel,
-                        Electric, or Hybrid
+                        {t("form.fuelTypeHelp")}
                       </p>
                     </div>
                   </PopoverContent>
@@ -175,7 +174,7 @@ const TechnicalSpecsSection: React.FC<TechnicalSpecsSectionProps> = ({
             >
               <SelectTrigger className={getFieldClass("fuelType")}>
                 <SelectValue
-                  placeholder={t("cars.form.placeholders.selectFuelType")}
+                  placeholder={t("form.placeholders.selectFuelType")}
                 />
               </SelectTrigger>
               <SelectContent>
@@ -183,7 +182,7 @@ const TechnicalSpecsSection: React.FC<TechnicalSpecsSectionProps> = ({
                   <SelectItem key={type} value={type}>
                     <div className="flex items-center gap-2">
                       <span>{getFuelIcon(type)}</span>
-                      {t(`cars.form.fuelTypes.${type}`)}
+                      {t(`form.fuelTypes.${type}`)}
                     </div>
                   </SelectItem>
                 ))}
@@ -200,7 +199,7 @@ const TechnicalSpecsSection: React.FC<TechnicalSpecsSectionProps> = ({
           <div data-error="seats">
             <Label htmlFor="seats" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
-              {t("cars.form.seats")} *
+              {t("form.seats")} *
               {shouldShowError("seats") && (
                 <Popover>
                   <PopoverTrigger>
@@ -208,10 +207,10 @@ const TechnicalSpecsSection: React.FC<TechnicalSpecsSectionProps> = ({
                   </PopoverTrigger>
                   <PopoverContent className="w-80 p-3">
                     <div className="text-sm text-red-600">
-                      <strong>Seats Error:</strong>
+                      <strong>{t("form.seats")} Error:</strong>
                       <p className="mt-1">{errors.seats}</p>
                       <p className="mt-2 text-gray-600">
-                        Select the number of passenger seats (2-8)
+                        {t("form.seatsHelp")}
                       </p>
                     </div>
                   </PopoverContent>
@@ -223,16 +222,14 @@ const TechnicalSpecsSection: React.FC<TechnicalSpecsSectionProps> = ({
               onValueChange={(value) => onInputChange("seats", value)}
             >
               <SelectTrigger className={getFieldClass("seats")}>
-                <SelectValue
-                  placeholder={t("cars.form.placeholders.selectSeats")}
-                />
+                <SelectValue placeholder={t("form.placeholders.selectSeats")} />
               </SelectTrigger>
               <SelectContent>
                 {seatOptions.map((seats) => (
                   <SelectItem key={seats} value={seats}>
                     <div className="flex items-center gap-2">
                       <Users className="h-4 w-4" />
-                      {seats} {t("cars.form.seatsLabel")}
+                      {seats} {t("form.seatsLabel")}
                     </div>
                   </SelectItem>
                 ))}
@@ -249,7 +246,7 @@ const TechnicalSpecsSection: React.FC<TechnicalSpecsSectionProps> = ({
           <div data-error="doors">
             <Label htmlFor="doors" className="flex items-center gap-2">
               <Car className="h-4 w-4" />
-              {t("cars.form.doors")} *
+              {t("form.doors")} *
               {shouldShowError("doors") && (
                 <Popover>
                   <PopoverTrigger>
@@ -257,10 +254,10 @@ const TechnicalSpecsSection: React.FC<TechnicalSpecsSectionProps> = ({
                   </PopoverTrigger>
                   <PopoverContent className="w-80 p-3">
                     <div className="text-sm text-red-600">
-                      <strong>Doors Error:</strong>
+                      <strong>{t("form.doors")} Error:</strong>
                       <p className="mt-1">{errors.doors}</p>
                       <p className="mt-2 text-gray-600">
-                        Select the number of doors (2-5)
+                        {t("form.doorsHelp")}
                       </p>
                     </div>
                   </PopoverContent>
@@ -272,16 +269,14 @@ const TechnicalSpecsSection: React.FC<TechnicalSpecsSectionProps> = ({
               onValueChange={(value) => onInputChange("doors", value)}
             >
               <SelectTrigger className={getFieldClass("doors")}>
-                <SelectValue
-                  placeholder={t("cars.form.placeholders.selectDoors")}
-                />
+                <SelectValue placeholder={t("form.placeholders.selectDoors")} />
               </SelectTrigger>
               <SelectContent>
                 {doorOptions.map((doors) => (
                   <SelectItem key={doors} value={doors}>
                     <div className="flex items-center gap-2">
                       <Car className="h-4 w-4" />
-                      {doors} {t("cars.form.doorsLabel")}
+                      {doors} {t("form.doorsLabel")}
                     </div>
                   </SelectItem>
                 ))}
@@ -298,9 +293,9 @@ const TechnicalSpecsSection: React.FC<TechnicalSpecsSectionProps> = ({
           <div className="md:col-span-2">
             <Label htmlFor="mileage" className="flex items-center gap-2">
               <span>🚗</span>
-              {t("cars.form.mileage")} (km)
+              {t("form.mileage")} (km)
               <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                Optional
+                {t("form.optional")}
               </span>
             </Label>
             <Input
@@ -315,9 +310,6 @@ const TechnicalSpecsSection: React.FC<TechnicalSpecsSectionProps> = ({
               className="text-right"
             />
             <div className="flex justify-between items-center mt-1">
-              <p className="text-xs text-gray-500">
-                Optional - Current odometer reading
-              </p>
               {formData.mileage && (
                 <p className="text-xs text-gray-600">
                   {formatMileageDisplay(formData.mileage)} km

@@ -30,17 +30,17 @@ const MaintenanceSection: React.FC<MaintenanceSectionProps> = ({
   oilChangeDate,
   onDateChange,
 }) => {
-  const t = useTranslations("dashboard");
+  const t = useTranslations("dashboard.cars");
 
   return (
     <Card>
       <CardContent className="p-4">
         <h3 className="text-lg font-semibold mb-4">
-          {t("cars.form.sections.maintenance")}
+          {t("form.sections.maintenance")}
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <Label>{t("cars.form.lastTechnicalVisit")}</Label>
+            <Label>{t("form.lastTechnicalVisit")}</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -54,7 +54,7 @@ const MaintenanceSection: React.FC<MaintenanceSectionProps> = ({
                   {technicalVisitDate ? (
                     format(technicalVisitDate, "PPP")
                   ) : (
-                    <span>{t("cars.form.placeholders.selectDate")}</span>
+                    <span>{t("form.placeholders.selectDate")}</span>
                   )}
                 </Button>
               </PopoverTrigger>
@@ -70,7 +70,7 @@ const MaintenanceSection: React.FC<MaintenanceSectionProps> = ({
           </div>
 
           <div>
-            <Label>{t("cars.form.lastOilChange")}</Label>
+            <Label>{t("form.lastOilChange")}</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -84,7 +84,7 @@ const MaintenanceSection: React.FC<MaintenanceSectionProps> = ({
                   {oilChangeDate ? (
                     format(oilChangeDate, "PPP")
                   ) : (
-                    <span>{t("cars.form.placeholders.selectDate")}</span>
+                    <span>{t("form.placeholders.selectDate")}</span>
                   )}
                 </Button>
               </PopoverTrigger>

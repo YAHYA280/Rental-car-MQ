@@ -1,4 +1,3 @@
-// src/components/dashboard/cars/components/form/FeaturesSection.tsx
 "use client";
 
 import React from "react";
@@ -15,7 +14,7 @@ const FeaturesSection: React.FC<FeaturesSectionProps> = ({
   selectedFeatures,
   onToggleFeature,
 }) => {
-  const t = useTranslations("dashboard");
+  const t = useTranslations("dashboard.cars");
 
   // Updated with only 10 main basic features
   const availableFeatures = [
@@ -35,7 +34,7 @@ const FeaturesSection: React.FC<FeaturesSectionProps> = ({
     <Card>
       <CardContent className="p-4">
         <h3 className="text-lg font-semibold mb-4">
-          {t("cars.form.sections.features")}
+          {t("form.sections.features")}
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-2 gap-2">
           {availableFeatures.map((feature) => {
@@ -59,7 +58,7 @@ const FeaturesSection: React.FC<FeaturesSectionProps> = ({
                   className="h-5 w-5 data-[state=checked]:bg-carbookers-red-500 data-[state=checked]:border-carbookers-red-500"
                 />
                 <span className="text-sm flex-1">
-                  {t(`cars.form.features.${feature}`)}
+                  {t(`form.features.${feature}`)}
                 </span>
               </label>
             );

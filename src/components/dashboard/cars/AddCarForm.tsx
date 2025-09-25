@@ -1,4 +1,3 @@
-// src/components/dashboard/cars/AddCarForm.tsx - With built-in Toaster
 "use client";
 
 import React, { useState } from "react";
@@ -8,7 +7,6 @@ import { format } from "date-fns";
 import { toast, Toaster } from "sonner";
 import { AlertTriangle, CheckCircle } from "lucide-react";
 
-// Import form section components
 import BasicInfoSection from "./components/form/BasicInfoSection";
 import TechnicalSpecsSection from "./components/form/TechnicalSpecsSection";
 import PricingSection from "./components/form/PricingSection";
@@ -16,7 +14,6 @@ import MaintenanceSection from "./components/form/MaintenanceSection";
 import FeaturesSection from "./components/form/FeaturesSection";
 import ImagesSection from "./components/form/ImagesSection";
 
-// Import the unified types
 import { CarFormData } from "../../types";
 
 interface AddCarFormProps {
@@ -124,13 +121,11 @@ const AddCarForm: React.FC<AddCarFormProps> = ({ onSubmit, onClose }) => {
   };
 
   const validateLicensePlate = (plate: string): boolean => {
-    // Format: 5 digits + 1 letter (e.g., 12345A)
     const plateRegex = /^\d{5}[A-Z]$/;
     return plateRegex.test(plate.toUpperCase());
   };
 
   const validateWhatsAppNumber = (number: string): boolean => {
-    // Updated validation for 10-digit format: 06XXXXXXXX or 07XXXXXXXX
     const phoneRegex = /^0[67]\d{8}$/;
     return phoneRegex.test(number.replace(/\s/g, ""));
   };

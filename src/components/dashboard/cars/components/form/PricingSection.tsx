@@ -29,7 +29,7 @@ const PricingSection: React.FC<PricingSectionProps> = ({
   touchedFields = new Set(),
   onInputChange,
 }) => {
-  const t = useTranslations("dashboard");
+  const t = useTranslations("dashboard.cars");
 
   // Handle price input (numbers and decimal only)
   const handlePriceChange = (field: string, value: string) => {
@@ -68,12 +68,12 @@ const PricingSection: React.FC<PricingSectionProps> = ({
     <Card>
       <CardContent className="p-4">
         <h3 className="text-lg font-semibold mb-4">
-          {t("cars.form.sections.pricing")}
+          {t("form.sections.pricing")}
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div data-error="dailyPrice">
             <Label htmlFor="dailyPrice" className="flex items-center gap-2">
-              {t("cars.form.dailyPrice")} (€) *
+              {t("form.dailyPrice")} (€) *
               {shouldShowError("dailyPrice") && (
                 <Popover>
                   <PopoverTrigger>
@@ -81,10 +81,10 @@ const PricingSection: React.FC<PricingSectionProps> = ({
                   </PopoverTrigger>
                   <PopoverContent className="w-80 p-3">
                     <div className="text-sm text-red-600">
-                      <strong>Daily Price Error:</strong>
+                      <strong>{t("form.dailyPrice")} Error:</strong>
                       <p className="mt-1">{errors.dailyPrice}</p>
                       <p className="mt-2 text-gray-600">
-                        Enter a valid price between €1 and €10,000 per day
+                        {t("form.dailyPriceHelp")}
                       </p>
                     </div>
                   </PopoverContent>
@@ -106,7 +106,7 @@ const PricingSection: React.FC<PricingSectionProps> = ({
               />
             </div>
             <p className="text-xs text-gray-500 mt-1">
-              Rental price per day in Euros
+              {t("form.rentalPricePerDay")}
             </p>
             {shouldShowError("dailyPrice") && (
               <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
@@ -118,7 +118,7 @@ const PricingSection: React.FC<PricingSectionProps> = ({
 
           <div data-error="caution">
             <Label htmlFor="caution" className="flex items-center gap-2">
-              {t("cars.form.caution")} (€) *
+              {t("form.caution")} (€) *
               {shouldShowError("caution") && (
                 <Popover>
                   <PopoverTrigger>
@@ -126,11 +126,10 @@ const PricingSection: React.FC<PricingSectionProps> = ({
                   </PopoverTrigger>
                   <PopoverContent className="w-80 p-3">
                     <div className="text-sm text-red-600">
-                      <strong>Caution Error:</strong>
+                      <strong>{t("form.caution")} Error:</strong>
                       <p className="mt-1">{errors.caution}</p>
                       <p className="mt-2 text-gray-600">
-                        Enter a valid security deposit amount between €1 and
-                        €10,000
+                        {t("form.cautionHelp")}
                       </p>
                     </div>
                   </PopoverContent>
@@ -150,7 +149,7 @@ const PricingSection: React.FC<PricingSectionProps> = ({
               />
             </div>
             <p className="text-sm text-gray-500 mt-1">
-              {t("cars.form.cautionDescription")}
+              {t("form.cautionDescription")}
             </p>
             {shouldShowError("caution") && (
               <p className="text-red-500 text-sm mt-1 flex items-center gap-1">

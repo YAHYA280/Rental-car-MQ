@@ -378,13 +378,6 @@ const DashboardCarsContent = () => {
               onFilterChange={handleFilterChange}
             />
           </div>
-          {/* FIXED: Add debug info */}
-          {process.env.NODE_ENV === "development" && (
-            <div className="mt-2 text-xs text-gray-500">
-              Debug: Search="{debouncedSearchTerm}" Filter="{selectedFilter}"
-              Total={total}
-            </div>
-          )}
         </CardContent>
       </Card>
 

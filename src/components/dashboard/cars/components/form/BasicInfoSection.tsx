@@ -1,4 +1,3 @@
-// src/components/dashboard/cars/components/form/BasicInfoSection.tsx - Enhanced with error handling
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -39,7 +38,7 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
   touchedFields = new Set(),
   onInputChange,
 }) => {
-  const t = useTranslations("dashboard");
+  const t = useTranslations("dashboard.cars");
   const [brands, setBrands] = useState<string[]>([]);
   const [loadingBrands, setLoadingBrands] = useState(true);
 
@@ -57,7 +56,6 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
         if (data.success) {
           setBrands(data.data);
         } else {
-          // Fallback to static brands if API fails
           setBrands([
             "Cupra",
             "Dacia",
@@ -74,7 +72,6 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
         }
       } catch (error) {
         console.error("Error fetching brands:", error);
-        // Fallback to static brands
         setBrands([
           "Cupra",
           "Dacia",
@@ -171,11 +168,13 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
   return (
     <Card>
       <CardContent className="p-4">
-        <h3 className="text-lg font-semibold mb-4">Basic Information</h3>
+        <h3 className="text-lg font-semibold mb-4">
+          {t("form.sections.basicInfo")}
+        </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div data-error="brand">
             <Label htmlFor="brand" className="flex items-center gap-2">
-              Brand *
+              {t("form.brand")} *
               {shouldShowError("brand") && (
                 <Popover>
                   <PopoverTrigger>
@@ -183,7 +182,7 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
                   </PopoverTrigger>
                   <PopoverContent className="w-80 p-3">
                     <div className="text-sm text-red-600">
-                      <strong>Brand Error:</strong>
+                      <strong>{t("form.brand")} Error:</strong>
                       <p className="mt-1">{errors.brand}</p>
                     </div>
                   </PopoverContent>
@@ -198,7 +197,9 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
               <SelectTrigger className={getFieldClass("brand")}>
                 <SelectValue
                   placeholder={
-                    loadingBrands ? "Loading brands..." : "Select brand"
+                    loadingBrands
+                      ? "Loading brands..."
+                      : t("form.placeholders.selectBrand")
                   }
                 />
               </SelectTrigger>
@@ -220,7 +221,7 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
 
           <div data-error="name">
             <Label htmlFor="name" className="flex items-center gap-2">
-              Name *
+              {t("form.name")} *
               {shouldShowError("name") && (
                 <Popover>
                   <PopoverTrigger>
@@ -228,11 +229,10 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
                   </PopoverTrigger>
                   <PopoverContent className="w-80 p-3">
                     <div className="text-sm text-red-600">
-                      <strong>Name Error:</strong>
+                      <strong>{t("form.name")} Error:</strong>
                       <p className="mt-1">{errors.name}</p>
                       <p className="mt-2 text-gray-600">
-                        Enter a descriptive name for the car (e.g., "Clio
-                        Campus", "Golf GTI")
+                        {t("form.placeholders.name")}
                       </p>
                     </div>
                   </PopoverContent>
@@ -244,7 +244,7 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
               name="name"
               value={formData.name}
               onChange={(e) => onInputChange("name", e.target.value)}
-              placeholder="Car name"
+              placeholder={t("form.placeholders.name")}
               className={getFieldClass("name")}
               maxLength={50}
             />
@@ -263,7 +263,7 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
 
           <div data-error="year">
             <Label htmlFor="year" className="flex items-center gap-2">
-              Year *
+              {t("form.year")} *
               {shouldShowError("year") && (
                 <Popover>
                   <PopoverTrigger>
@@ -271,7 +271,7 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
                   </PopoverTrigger>
                   <PopoverContent className="w-80 p-3">
                     <div className="text-sm text-red-600">
-                      <strong>Year Error:</strong>
+                      <strong>{t("form.year")} Error:</strong>
                       <p className="mt-1">{errors.year}</p>
                       <p className="mt-2 text-gray-600">
                         Enter the manufacturing year (2000-2030)
@@ -301,7 +301,7 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
 
           <div data-error="licensePlate">
             <Label htmlFor="licensePlate" className="flex items-center gap-2">
-              License Plate *
+              {t("form.licensePlate")} *
               {shouldShowError("licensePlate") && (
                 <Popover>
                   <PopoverTrigger>
@@ -309,10 +309,10 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
                   </PopoverTrigger>
                   <PopoverContent className="w-80 p-3">
                     <div className="text-sm text-red-600">
-                      <strong>License Plate Error:</strong>
+                      <strong>{t("form.licensePlate")} Error:</strong>
                       <p className="mt-1">{errors.licensePlate}</p>
                       <p className="mt-2 text-gray-600">
-                        Format: 12345A (5 digits followed by 1 letter)
+                        {t("form.placeholders.licensePlateFormat")}
                       </p>
                     </div>
                   </PopoverContent>
@@ -329,7 +329,7 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
               maxLength={6}
             />
             <p className="text-xs text-gray-500 mt-1">
-              Format: 12345A (5 digits + 1 letter)
+              {t("form.placeholders.licensePlateFormat")}
             </p>
             {shouldShowError("licensePlate") && (
               <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
@@ -341,7 +341,7 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
 
           <div className="md:col-span-2" data-error="whatsappNumber">
             <Label htmlFor="whatsappNumber" className="flex items-center gap-2">
-              WhatsApp Number *
+              {t("form.whatsappNumber")} *
               {shouldShowError("whatsappNumber") && (
                 <Popover>
                   <PopoverTrigger>
@@ -349,11 +349,10 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
                   </PopoverTrigger>
                   <PopoverContent className="w-80 p-3">
                     <div className="text-sm text-red-600">
-                      <strong>WhatsApp Number Error:</strong>
+                      <strong>{t("form.whatsappNumber")} Error:</strong>
                       <p className="mt-1">{errors.whatsappNumber}</p>
                       <p className="mt-2 text-gray-600">
-                        Enter a valid Moroccan mobile number starting with 06 or
-                        07
+                        {t("form.whatsappDescription")}
                       </p>
                     </div>
                   </PopoverContent>
@@ -367,14 +366,12 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
                 name="whatsappNumber"
                 value={formatWhatsAppDisplay(formData.whatsappNumber)}
                 onChange={(e) => handleWhatsAppChange(e.target.value)}
-                placeholder="06 XX XX XX XX"
+                placeholder={t("form.placeholders.whatsappNumber")}
                 className={`pl-10 ${getFieldClass("whatsappNumber")}`}
                 maxLength={14}
               />
             </div>
-            <p className="text-xs text-gray-500 mt-1">
-              Format: 06 XX XX XX XX or 07 XX XX XX XX
-            </p>
+
             {shouldShowError("whatsappNumber") && (
               <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
                 <AlertCircle className="h-3 w-3" />

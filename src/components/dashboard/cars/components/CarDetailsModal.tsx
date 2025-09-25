@@ -1,4 +1,3 @@
-// src/components/dashboard/cars/components/CarDetailsModal.tsx - Fixed with unified types
 "use client";
 
 import React from "react";
@@ -29,16 +28,16 @@ const CarDetailsModal: React.FC<CarDetailsModalProps> = ({
   onClose,
   onEdit,
 }) => {
-  const t = useTranslations("dashboard");
+  const t = useTranslations("dashboard.cars");
 
   const getStatusBadge = (available: boolean) => {
     return available ? (
       <Badge className="bg-green-100 text-green-800">
-        {t("cars.statusBadges.available")}
+        {t("statusBadges.available")}
       </Badge>
     ) : (
       <Badge className="bg-red-100 text-red-800">
-        {t("cars.statusBadges.rented")}
+        {t("statusBadges.rented")}
       </Badge>
     );
   };
@@ -82,10 +81,10 @@ const CarDetailsModal: React.FC<CarDetailsModalProps> = ({
       <DialogContent className="w-[calc(100vw-16px)] max-w-4xl h-[calc(100vh-32px)] max-h-[90vh] sm:w-[min(900px,95vw)] sm:max-w-[min(1200px,95vw)] sm:h-auto flex flex-col overflow-hidden">
         <DialogHeader className="flex-shrink-0 pb-3 sm:pb-4">
           <DialogTitle className="text-lg sm:text-xl">
-            {t("cars.details.title")}
+            {t("details.title")}
           </DialogTitle>
           <DialogDescription className="text-sm sm:text-base">
-            {t("cars.details.description")}
+            {t("details.description")}
           </DialogDescription>
         </DialogHeader>
 
@@ -119,37 +118,33 @@ const CarDetailsModal: React.FC<CarDetailsModalProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               <div className="p-3 sm:p-4 bg-white border rounded-lg">
                 <h4 className="font-semibold text-gray-900 mb-3 text-sm sm:text-base">
-                  {t("cars.details.basicInfo")}
+                  {t("details.basicInfo")}
                 </h4>
                 <div className="space-y-2">
                   <p className="text-sm sm:text-base">
-                    <span className="text-gray-600">
-                      {t("cars.details.seats")}:
-                    </span>{" "}
+                    <span className="text-gray-600">{t("details.seats")}:</span>{" "}
                     <span className="font-medium">{car.seats}</span>
                   </p>
                   <p className="text-sm sm:text-base">
-                    <span className="text-gray-600">
-                      {t("cars.details.doors")}:
-                    </span>{" "}
+                    <span className="text-gray-600">{t("details.doors")}:</span>{" "}
                     <span className="font-medium">{car.doors}</span>
                   </p>
                   <p className="text-sm sm:text-base">
                     <span className="text-gray-600">
-                      {t("cars.details.transmission")}:
+                      {t("details.transmission")}:
                     </span>{" "}
                     <span className="font-medium">{car.transmission}</span>
                   </p>
                   <p className="text-sm sm:text-base">
                     <span className="text-gray-600">
-                      {t("cars.details.fuelType")}:
+                      {t("details.fuelType")}:
                     </span>{" "}
                     <span className="font-medium">{car.fuelType}</span>
                   </p>
                   {car.mileage && (
                     <p className="text-sm sm:text-base">
                       <span className="text-gray-600">
-                        {t("cars.details.mileage")}:
+                        {t("details.mileage")}:
                       </span>{" "}
                       <span className="font-medium">
                         {car.mileage.toLocaleString()} km
@@ -161,32 +156,32 @@ const CarDetailsModal: React.FC<CarDetailsModalProps> = ({
 
               <div className="p-3 sm:p-4 bg-white border rounded-lg">
                 <h4 className="font-semibold text-gray-900 mb-3 text-sm sm:text-base">
-                  {t("cars.details.pricing")}
+                  {t("details.pricing")}
                 </h4>
                 <div className="space-y-3">
                   <div className="bg-green-50 p-3 rounded-lg">
                     <p className="text-sm sm:text-base">
                       <span className="text-gray-600">
-                        {t("cars.details.dailyPrice")}:
+                        {t("details.dailyPrice")}:
                       </span>
                     </p>
                     <p className="text-lg sm:text-xl font-bold text-green-600">
                       €{car.price}
                       <span className="text-sm font-normal text-gray-500 ml-1">
-                        / day
+                        / {t("table.perDay")}
                       </span>
                     </p>
                   </div>
                   <div className="bg-orange-50 p-3 rounded-lg">
                     <p className="text-sm sm:text-base">
                       <span className="text-gray-600">
-                        {t("cars.details.caution")}:
+                        {t("details.caution")}:
                       </span>
                     </p>
                     <p className="text-lg sm:text-xl font-bold text-orange-600">
                       €{car.caution}
                       <span className="text-sm font-normal text-gray-500 ml-1">
-                        (deposit)
+                        ({t("table.deposit")})
                       </span>
                     </p>
                   </div>
@@ -195,7 +190,7 @@ const CarDetailsModal: React.FC<CarDetailsModalProps> = ({
 
               <div className="p-3 sm:p-4 bg-white border rounded-lg">
                 <h4 className="font-semibold text-gray-900 mb-3 text-sm sm:text-base">
-                  Contact Information
+                  {t("details.contactInfo")}
                 </h4>
                 <div className="space-y-2">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
@@ -209,7 +204,7 @@ const CarDetailsModal: React.FC<CarDetailsModalProps> = ({
                       )}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-green-600 hover:underline flex items-center gap-1 font-medium text-sm sm:text-base bg-green-50 p-2 rounded-lg inline-flex w-fit"
+                      className="text-green-600 hover:underline  items-center gap-1 font-medium text-sm sm:text-base bg-green-50 p-2 rounded-lg inline-flex w-fit"
                     >
                       <Phone className="h-4 w-4 flex-shrink-0" />
                       <span className="break-all">
@@ -224,12 +219,12 @@ const CarDetailsModal: React.FC<CarDetailsModalProps> = ({
 
               <div className="p-3 sm:p-4 bg-white border rounded-lg">
                 <h4 className="font-semibold text-gray-900 mb-3 text-sm sm:text-base">
-                  {t("cars.details.maintenance")}
+                  {t("details.maintenance")}
                 </h4>
                 <div className="space-y-2">
                   <div>
                     <p className="text-gray-600 text-xs sm:text-sm">
-                      {t("cars.details.lastTechnicalVisit")}:
+                      {t("details.lastTechnicalVisit")}:
                     </p>
                     <p
                       className={`text-sm sm:text-base font-medium ${
@@ -240,12 +235,12 @@ const CarDetailsModal: React.FC<CarDetailsModalProps> = ({
                     >
                       {car.lastTechnicalVisit
                         ? new Date(car.lastTechnicalVisit).toLocaleDateString()
-                        : "Not recorded"}
+                        : t("details.notRecorded")}
                     </p>
                   </div>
                   <div>
                     <p className="text-gray-600 text-xs sm:text-sm">
-                      {t("cars.details.lastOilChange")}:
+                      {t("details.lastOilChange")}:
                     </p>
                     <p
                       className={`text-sm sm:text-base font-medium ${
@@ -254,7 +249,7 @@ const CarDetailsModal: React.FC<CarDetailsModalProps> = ({
                     >
                       {car.lastOilChange
                         ? new Date(car.lastOilChange).toLocaleDateString()
-                        : "Not recorded"}
+                        : t("details.notRecorded")}
                     </p>
                   </div>
                 </div>
@@ -263,19 +258,25 @@ const CarDetailsModal: React.FC<CarDetailsModalProps> = ({
               {/* Status and Bookings Info */}
               <div className="p-3 sm:p-4 bg-white border rounded-lg">
                 <h4 className="font-semibold text-gray-900 mb-3 text-sm sm:text-base">
-                  Status & Stats
+                  {t("details.statusStats")}
                 </h4>
                 <div className="space-y-2">
                   <p className="text-sm sm:text-base">
-                    <span className="text-gray-600">Status:</span>{" "}
+                    <span className="text-gray-600">
+                      {t("details.status")}:
+                    </span>{" "}
                     <span className="font-medium capitalize">{car.status}</span>
                   </p>
                   <p className="text-sm sm:text-base">
-                    <span className="text-gray-600">Total Bookings:</span>{" "}
+                    <span className="text-gray-600">
+                      {t("details.totalBookings")}:
+                    </span>{" "}
                     <span className="font-medium">{car.totalBookings}</span>
                   </p>
                   <p className="text-sm sm:text-base">
-                    <span className="text-gray-600">Rating:</span>{" "}
+                    <span className="text-gray-600">
+                      {t("details.rating")}:
+                    </span>{" "}
                     <span className="font-medium">{car.rating}/5</span>
                   </p>
                 </div>
@@ -283,7 +284,7 @@ const CarDetailsModal: React.FC<CarDetailsModalProps> = ({
 
               <div className="sm:col-span-2 p-3 sm:p-4 bg-white border rounded-lg">
                 <h4 className="font-semibold text-gray-900 mb-3 text-sm sm:text-base">
-                  {t("cars.details.features")}
+                  {t("details.features")}
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   {car.features && car.features.length > 0 ? (
@@ -293,12 +294,12 @@ const CarDetailsModal: React.FC<CarDetailsModalProps> = ({
                         variant="secondary"
                         className="bg-blue-100 text-blue-800 hover:bg-blue-200 text-xs sm:text-sm"
                       >
-                        {t(`cars.form.features.${feature}`)}
+                        {t(`form.features.${feature}`)}
                       </Badge>
                     ))
                   ) : (
                     <p className="text-gray-500 italic text-sm">
-                      No features listed
+                      {t("details.noFeatures")}
                     </p>
                   )}
                 </div>
@@ -308,7 +309,7 @@ const CarDetailsModal: React.FC<CarDetailsModalProps> = ({
               {car.description && (
                 <div className="sm:col-span-2 p-3 sm:p-4 bg-white border rounded-lg">
                   <h4 className="font-semibold text-gray-900 mb-3 text-sm sm:text-base">
-                    Description
+                    {t("details.description")}
                   </h4>
                   <p className="text-gray-700 bg-gray-50 p-3 rounded-lg text-sm sm:text-base leading-relaxed">
                     {car.description}
@@ -320,16 +321,20 @@ const CarDetailsModal: React.FC<CarDetailsModalProps> = ({
               <div className="sm:col-span-2 p-3 sm:p-4 bg-gray-50 border rounded-lg">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm text-gray-600">
                   <div>
-                    <span className="font-medium">Created:</span>{" "}
+                    <span className="font-medium">{t("details.created")}:</span>{" "}
                     {new Date(car.createdAt).toLocaleString()}
                   </div>
                   <div>
-                    <span className="font-medium">Last Updated:</span>{" "}
+                    <span className="font-medium">
+                      {t("details.lastUpdated")}:
+                    </span>{" "}
                     {new Date(car.updatedAt).toLocaleString()}
                   </div>
                   {car.createdBy && (
                     <div className="sm:col-span-2">
-                      <span className="font-medium">Created by:</span>{" "}
+                      <span className="font-medium">
+                        {t("details.createdBy")}:
+                      </span>{" "}
                       {car.createdBy.name} ({car.createdBy.email})
                     </div>
                   )}
@@ -345,7 +350,7 @@ const CarDetailsModal: React.FC<CarDetailsModalProps> = ({
             onClick={onClose}
             className="w-full sm:w-auto order-2 sm:order-1"
           >
-            {t("cars.details.close")}
+            {t("details.close")}
           </Button>
           <Button
             className="bg-carbookers-red-600 hover:bg-carbookers-red-700 w-full sm:w-auto order-1 sm:order-2"
@@ -354,7 +359,7 @@ const CarDetailsModal: React.FC<CarDetailsModalProps> = ({
               onClose();
             }}
           >
-            {t("cars.details.edit")}
+            {t("details.edit")}
           </Button>
         </DialogFooter>
       </DialogContent>

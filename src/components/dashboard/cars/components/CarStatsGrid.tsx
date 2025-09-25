@@ -1,4 +1,3 @@
-// src/components/dashboard/cars/components/CarStatsGrid.tsx - SIMPLIFIED VERSION
 "use client";
 
 import React from "react";

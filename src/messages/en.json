@@ -629,6 +629,13 @@
         "bookingsCount": "bookings"
       },
       "form": {
+        "transmissionHelp": "Select either Manual or Automatic transmission type",
+        "fuelTypeHelp": "Select the vehicle's fuel type: Petrol, Diesel, Electric, or Hybrid",
+        "seatsHelp": "Select the number of passenger seats (2-8)",
+        "doorsHelp": "Select the number of doors (2-5)",
+        "dailyPriceHelp": "Enter a valid price between €1 and €10,000 per day",
+        "rentalPricePerDay": "Rental price per day in Euros",
+        "cautionHelp": "Enter a valid security deposit amount between €1 and €10,000",
         "title": "Add New Vehicle",
         "description": "Add a new vehicle to your rental fleet. Complete all required information.",
         "submit": "Add to Fleet",
@@ -717,9 +724,24 @@
           "mainImageRequired": "Main photo is required"
         },
         "success": "Vehicle successfully added to the fleet!",
-        "error": "Error adding the vehicle"
+        "error": "Error adding the vehicle",
+        "changeImage": "Change Image",
+        "optional": "Optional",
+        "removeImage": "Remove image",
+        "addMore": "Add More",
+        "maxImagesReached": "Maximum of 5 additional images reached"
       },
       "details": {
+        "contactInfo": "Contact Information",
+        "notRecorded": "Not recorded",
+        "statusStats": "Status & Stats",
+        "status": "Status",
+        "totalBookings": "Total Bookings",
+        "rating": "Rating",
+        "noFeatures": "No features listed",
+        "created": "Created",
+        "lastUpdated": "Last Updated",
+        "createdBy": "Created by",
         "title": "Vehicle Details",
         "description": "Complete information and specifications of the vehicle",
         "basicInfo": "Basic Information",

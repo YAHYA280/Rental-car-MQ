@@ -1,5 +1,3 @@
-// STEP 2B: Replace src/components/dashboard/users/DashboardUsersContent.tsx
-
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
@@ -17,7 +15,6 @@ import {
 import { Plus, Search, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-// Import components
 import AddUserForm from "./AddUserForm";
 import EditUserForm from "./EditUserForm";
 import UserStatsGrid from "./components/UserStatsGrid";
@@ -27,15 +24,11 @@ import UserDetailsModal from "./components/UserDetailsModal";
 import DeleteConfirmationDialog from "./components/DeleteConfirmationDialog";
 import { UserFormData, UserData, UserFiltersType } from "@/components/types";
 
-// Import service
 import { userService } from "@/services/userService";
-
-// FIXED: Updated UserData interface to match backend exactly
 
 const DashboardUsersContent = () => {
   const t = useTranslations("dashboard");
 
-  // State management
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -48,10 +41,8 @@ const DashboardUsersContent = () => {
   const [pagination, setPagination] = useState<any>(null);
   const [total, setTotal] = useState(0);
 
-  // Debounced search
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
 
-  // Debounce search to avoid too many API calls
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
@@ -60,7 +51,6 @@ const DashboardUsersContent = () => {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // FIXED: Fetch users from API
   const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
@@ -253,13 +243,6 @@ const DashboardUsersContent = () => {
               onFilterChange={handleFilterChange}
             />
           </div>
-          {/* Debug info */}
-          {process.env.NODE_ENV === "development" && (
-            <div className="mt-2 text-xs text-gray-500">
-              Debug: Search="{debouncedSearchTerm}" Filter="{selectedFilter}"
-              Total={total}
-            </div>
-          )}
         </CardContent>
       </Card>
 

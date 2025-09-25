@@ -1,4 +1,3 @@
-// src/components/dashboard/cars/components/DeleteConfirmationDialog.tsx
 "use client";
 
 import React from "react";

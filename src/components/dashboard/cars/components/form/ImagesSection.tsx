@@ -32,7 +32,7 @@ const ImagesSection: React.FC<ImagesSectionProps> = ({
   onAdditionalImagesChange,
   onRemoveAdditionalImage,
 }) => {
-  const t = useTranslations("dashboard");
+  const t = useTranslations("dashboard.cars");
 
   // Check if field has error and should show it
   const shouldShowError = (field: string) => {
@@ -103,13 +103,13 @@ const ImagesSection: React.FC<ImagesSectionProps> = ({
       <CardContent className="p-4">
         <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
           <Image className="h-5 w-5" />
-          {t("cars.form.sections.images")}
+          {t("form.sections.images")}
         </h3>
 
         {/* Main Image */}
         <div className="mb-6" data-error="mainImage">
           <Label htmlFor="mainImage" className="flex items-center gap-2">
-            {t("cars.form.mainImage")} *
+            {t("form.mainImage")} *
             {shouldShowError("mainImage") && (
               <Popover>
                 <PopoverTrigger>
@@ -117,11 +117,10 @@ const ImagesSection: React.FC<ImagesSectionProps> = ({
                 </PopoverTrigger>
                 <PopoverContent className="w-80 p-3">
                   <div className="text-sm text-red-600">
-                    <strong>Main Image Required:</strong>
+                    <strong>{t("form.mainImage")} Required:</strong>
                     <p className="mt-1">{errors.mainImage}</p>
                     <p className="mt-2 text-gray-600">
-                      Please upload a high-quality main image of the vehicle.
-                      This will be the primary image displayed in listings.
+                      {t("form.uploadMainImage")}
                     </p>
                   </div>
                 </PopoverContent>
@@ -129,7 +128,7 @@ const ImagesSection: React.FC<ImagesSectionProps> = ({
             )}
           </Label>
           <p className="text-sm text-gray-500 mb-2">
-            {t("cars.form.uploadMainImage")}
+            {t("form.uploadMainImage")}
           </p>
           <div
             className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
@@ -166,9 +165,9 @@ const ImagesSection: React.FC<ImagesSectionProps> = ({
             ) : (
               <>
                 <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600 mb-2">{t("cars.form.mainImage")}</p>
+                <p className="text-gray-600 mb-2">{t("form.mainImage")}</p>
                 <p className="text-sm text-gray-500 mb-4">
-                  JPG, PNG or WebP (Max 10MB)
+                  {t("form.imageFormats")}
                 </p>
               </>
             )}
@@ -190,7 +189,7 @@ const ImagesSection: React.FC<ImagesSectionProps> = ({
               }
             >
               <Upload className="h-4 w-4 mr-2" />
-              {mainImage ? "Change Image" : t("cars.form.chooseImage")}
+              {mainImage ? t("form.changeImage") : t("form.chooseImage")}
             </Button>
           </div>
           {shouldShowError("mainImage") && (
@@ -204,14 +203,13 @@ const ImagesSection: React.FC<ImagesSectionProps> = ({
         {/* Additional Images */}
         <div>
           <Label htmlFor="additionalImages" className="flex items-center gap-2">
-            {t("cars.form.additionalImages")}
+            {t("form.additionalImages")}
             <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-              Optional
+              {t("form.optional")}
             </span>
           </Label>
           <p className="text-sm text-gray-500 mb-3">
-            Upload additional images to showcase different angles and features
-            (Max 5 images)
+            {t("form.additionalImagesDescription")}
           </p>
 
           {additionalImages.length > 0 && (
@@ -227,7 +225,7 @@ const ImagesSection: React.FC<ImagesSectionProps> = ({
                     type="button"
                     onClick={() => onRemoveAdditionalImage(index)}
                     className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors shadow-md"
-                    title="Remove image"
+                    title={t("form.removeImage")}
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -256,14 +254,14 @@ const ImagesSection: React.FC<ImagesSectionProps> = ({
           >
             <Plus className="h-4 w-4 mr-2" />
             {additionalImages.length === 0
-              ? t("cars.form.addMoreImages")
-              : `Add More (${additionalImages.length}/5)`}
+              ? t("form.addMoreImages")
+              : `${t("form.addMore")} (${additionalImages.length}/5)`}
           </Button>
 
           {additionalImages.length >= 5 && (
             <p className="text-amber-600 text-sm mt-2 flex items-center gap-1">
               <AlertCircle className="h-3 w-3" />
-              Maximum of 5 additional images reached
+              {t("form.maxImagesReached")}
             </p>
           )}
         </div>

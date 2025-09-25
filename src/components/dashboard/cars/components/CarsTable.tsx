@@ -1,4 +1,3 @@
-// src/components/dashboard/cars/components/CarsTable.tsx - Fixed with unified types
 "use client";
 
 import React from "react";

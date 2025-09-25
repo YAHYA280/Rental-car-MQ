@@ -1,4 +1,3 @@
-// src/components/dashboard/cars/components/CarFilters.tsx - Fixed naming
 "use client";
 
 import React from "react";
