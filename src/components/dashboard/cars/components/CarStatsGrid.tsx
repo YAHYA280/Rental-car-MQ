@@ -35,21 +35,20 @@ const CarStatsGrid: React.FC<CarStatsGridProps> = ({ cars }) => {
       value: totalCars.toString(),
       icon: Car,
       color: "blue",
-      description: "Total vehicles in fleet",
+      // description: "Total vehicles in fleet",
     },
     {
       title: t("stats.activeCars"),
       value: availableCars.toString(),
       icon: Car,
       color: "green",
-      description: "Available for booking",
+      // description: "Available for booking",
     },
     {
       title: t("stats.rentedCars"),
       value: rentedCars.toString(),
       icon: Users,
       color: "red",
-      description: "Currently rented out",
     },
   ];
 

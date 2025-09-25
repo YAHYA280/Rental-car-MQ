@@ -31,7 +31,7 @@ import CarDetailsModal from "./components/CarDetailsModal";
 import DeleteConfirmationDialog from "./components/DeleteConfirmationDialog";
 
 const DashboardCarsContent = () => {
-  const t = useTranslations("dashboard");
+  const t = useTranslations("dashboard.cars");
 
   // State management
   const [cars, setCars] = useState<CarData[]>([]);
@@ -98,19 +98,19 @@ const DashboardCarsContent = () => {
         console.log(`Loaded ${response.data.length} cars`);
       } else {
         console.error("API returned unsuccessful response:", response);
-        toast.error("Failed to fetch cars");
+        toast.error(t("messages.loadingFailed"));
         setCars([]);
         setTotal(0);
       }
     } catch (error: any) {
       console.error("Error fetching cars:", error);
-      toast.error(error.message || "Failed to fetch cars");
+      toast.error(error.message || t("messages.loadingFailed"));
       setCars([]);
       setTotal(0);
     } finally {
       setLoading(false);
     }
-  }, [debouncedSearchTerm, selectedFilter]);
+  }, [debouncedSearchTerm, selectedFilter, t]);
 
   // FIXED: Trigger fetch when dependencies change
   useEffect(() => {
@@ -122,16 +122,16 @@ const DashboardCarsContent = () => {
       const response = await carService.deleteCar(carId);
 
       if (response.success) {
-        toast.success("Car deleted successfully");
+        toast.success(t("messages.deleteSuccess"));
         // Refresh the list
         await fetchCars();
         setCarToDelete(null);
       } else {
-        toast.error(response.message || "Failed to delete car");
+        toast.error(response.message || t("messages.deleteFailed"));
       }
     } catch (error: any) {
       console.error("Error deleting car:", error);
-      toast.error(error.message || "Failed to delete car");
+      toast.error(error.message || t("messages.deleteFailed"));
     }
   };
 
@@ -210,9 +210,7 @@ const DashboardCarsContent = () => {
         console.error("API Error Response:", errorText);
 
         if (response.status === 431) {
-          throw new Error(
-            "Request too large. Please use smaller image files (max 5MB each)."
-          );
+          throw new Error(t("messages.fileTooLarge"));
         }
 
         try {
@@ -230,15 +228,15 @@ const DashboardCarsContent = () => {
       const result = await response.json();
 
       if (result.success) {
-        toast.success("Car created successfully");
+        toast.success(t("form.success"));
         setIsAddCarDialogOpen(false);
         await fetchCars();
       } else {
-        throw new Error(result.message || "Failed to create car");
+        throw new Error(result.message || t("form.error"));
       }
     } catch (error: any) {
       console.error("Error creating car:", error);
-      toast.error(error.message || "Failed to create car");
+      toast.error(error.message || t("form.error"));
       throw error;
     }
   };
@@ -272,9 +270,7 @@ const DashboardCarsContent = () => {
         console.error("Update API Error Response:", errorText);
 
         if (response.status === 431) {
-          throw new Error(
-            "Request too large. Please use smaller image files (max 5MB each)."
-          );
+          throw new Error(t("messages.fileTooLarge"));
         }
 
         try {
@@ -292,16 +288,16 @@ const DashboardCarsContent = () => {
       const result = await response.json();
 
       if (result.success) {
-        toast.success("Car updated successfully");
+        toast.success(t("messages.updateSuccess"));
         setIsEditCarDialogOpen(false);
         setCarToEdit(null);
         await fetchCars();
       } else {
-        throw new Error(result.message || "Failed to update car");
+        throw new Error(result.message || t("messages.updateFailed"));
       }
     } catch (error: any) {
       console.error("Error updating car:", error);
-      toast.error(error.message || "Failed to update car");
+      toast.error(error.message || t("messages.updateFailed"));
       throw error;
     }
   };
@@ -323,10 +319,8 @@ const DashboardCarsContent = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            {t("cars.title")}
-          </h1>
-          <p className="text-gray-600">{t("cars.subtitle")}</p>
+          <h1 className="text-3xl font-bold text-gray-900">{t("title")}</h1>
+          <p className="text-gray-600">{t("subtitle")}</p>
         </div>
         <Dialog open={isAddCarDialogOpen} onOpenChange={setIsAddCarDialogOpen}>
           <Button
@@ -334,14 +328,12 @@ const DashboardCarsContent = () => {
             onClick={() => setIsAddCarDialogOpen(true)}
           >
             <Plus className="h-4 w-4" />
-            {t("cars.addNew")}
+            {t("addNew")}
           </Button>
           <DialogContent className="w-[min(1400px,95vw)] sm:max-w-[min(1400px,95vw)] max-h-[95vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>{t("cars.form.title")}</DialogTitle>
-              <DialogDescription>
-                {t("cars.form.description")}
-              </DialogDescription>
+              <DialogTitle>{t("form.title")}</DialogTitle>
+              <DialogDescription>{t("form.description")}</DialogDescription>
             </DialogHeader>
             <div className="overflow-y-auto max-h-[calc(95vh-200px)] px-1">
               <AddCarForm
@@ -363,7 +355,7 @@ const DashboardCarsContent = () => {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
-                placeholder={t("common.searchCars")}
+                placeholder={t("searchPlaceholder")}
                 value={searchTerm}
                 onChange={(e) => handleSearchChange(e.target.value)}
                 className="pl-10"
@@ -385,7 +377,7 @@ const DashboardCarsContent = () => {
       <Card className="border-0 shadow-md">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            {t("cars.fleetOverview")} ({total} cars)
+            {t("fleetOverview")} ({total} {t("carsCount")})
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
           </CardTitle>
         </CardHeader>
@@ -394,19 +386,19 @@ const DashboardCarsContent = () => {
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
                 <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-carbookers-red-600" />
-                <p className="text-gray-600">Loading cars...</p>
+                <p className="text-gray-600">{t("messages.loadingCars")}</p>
               </div>
             </div>
           ) : cars.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-600">
                 {searchTerm || selectedFilter !== "all"
-                  ? "No cars found matching your criteria"
-                  : "No cars found"}
+                  ? t("messages.noMatchingCars")
+                  : t("messages.noCarsFound")}
               </p>
               {(searchTerm || selectedFilter !== "all") && (
                 <p className="text-sm text-gray-500 mt-2">
-                  Try clearing your search or changing filters
+                  {t("messages.tryDifferentSearch")}
                 </p>
               )}
             </div>
@@ -431,10 +423,8 @@ const DashboardCarsContent = () => {
       <Dialog open={isEditCarDialogOpen} onOpenChange={setIsEditCarDialogOpen}>
         <DialogContent className="w-[min(1400px,95vw)] sm:max-w-[min(1400px,95vw)] max-h-[95vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit Car</DialogTitle>
-            <DialogDescription>
-              Update the vehicle information and details
-            </DialogDescription>
+            <DialogTitle>{t("editCarTitle")}</DialogTitle>
+            <DialogDescription>{t("editCarDescription")}</DialogDescription>
           </DialogHeader>
           <div className="overflow-y-auto max-h-[calc(95vh-200px)] px-1">
             {carToEdit && (

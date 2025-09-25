@@ -273,12 +273,6 @@ const CarDetailsModal: React.FC<CarDetailsModalProps> = ({
                     </span>{" "}
                     <span className="font-medium">{car.totalBookings}</span>
                   </p>
-                  <p className="text-sm sm:text-base">
-                    <span className="text-gray-600">
-                      {t("details.rating")}:
-                    </span>{" "}
-                    <span className="font-medium">{car.rating}/5</span>
-                  </p>
                 </div>
               </div>
 
