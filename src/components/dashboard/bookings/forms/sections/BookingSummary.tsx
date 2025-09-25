@@ -59,8 +59,7 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
   const dailyRate = car.price;
   const subtotal = dailyRate * days;
   const discount = 0;
-  const taxes = Math.round(subtotal * 0.1); // 10% tax example
-  const finalTotal = subtotal - discount + taxes;
+  const finalTotal = subtotal - discount;
   const cautionAmount = Number(car.caution) || 0; // FIXED: Convert to number
 
   // Calculate time excess info
@@ -273,10 +272,6 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
               )}
 
               {/* Taxes */}
-              <div className="flex justify-between items-center text-sm text-gray-600">
-                <span>Taxes & fees (10%)</span>
-                <span>+€{taxes}</span>
-              </div>
 
               {/* Divider */}
               <div className="border-t border-gray-300 my-2"></div>
@@ -309,83 +304,7 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
               </div>
 
               {/* Per day average */}
-              <div className="flex justify-between items-center text-xs text-gray-500 pt-2">
-                <span>Average per day:</span>
-                <span>€{Math.round(totalAmount / days)}/day</span>
-              </div>
             </div>
-          </div>
-
-          {/* Booking Features */}
-          <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-            <h4 className="font-medium text-green-900 mb-2 flex items-center gap-2 text-sm">
-              <Shield className="h-4 w-4" />
-              Included Features
-            </h4>
-            <div className="grid grid-cols-1 gap-1">
-              <div className="flex items-center gap-2 text-xs text-green-800">
-                <CheckCircle className="h-3 w-3" />
-                <span>Comprehensive insurance coverage</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-green-800">
-                <CheckCircle className="h-3 w-3" />
-                <span>24/7 roadside assistance</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-green-800">
-                <CheckCircle className="h-3 w-3" />
-                <span>Fuel top-up service available</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-green-800">
-                <CheckCircle className="h-3 w-3" />
-                <span>Free cancellation up to 24h</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Admin Note */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <div className="flex items-center gap-2 mb-2">
-              <Star className="h-4 w-4 text-blue-600" />
-              <span className="font-medium text-blue-900 text-sm">
-                Admin Booking
-              </span>
-            </div>
-            <ul className="text-xs text-blue-800 space-y-1">
-              <li>• This booking will be automatically confirmed</li>
-              <li>• No payment processing required</li>
-              <li>• Customer will be notified via email/WhatsApp</li>
-              <li>• Vehicle will be reserved immediately</li>
-              <li>• Security deposit must be paid at pickup</li>
-            </ul>
-          </div>
-
-          {/* Time Policy Info */}
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-            <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2 text-sm">
-              <Info className="h-4 w-4 text-gray-600" />
-              Time Policy
-            </h4>
-            <ul className="text-xs text-gray-600 space-y-1">
-              <li>• 1-hour grace period after pickup time</li>
-              <li>• Return beyond grace period = additional day charge</li>
-              <li>• Business hours: 8:00 AM - 8:30 PM</li>
-              <li>• Late returns subject to availability</li>
-            </ul>
-          </div>
-
-          {/* Action Items */}
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-            <h4 className="font-medium text-amber-900 mb-2 flex items-center gap-2 text-sm">
-              <MapPin className="h-4 w-4" />
-              Next Steps
-            </h4>
-            <ul className="text-xs text-amber-800 space-y-1">
-              <li>• Confirm pickup/return locations and times</li>
-              <li>• Verify customer driver's license validity</li>
-              <li>• Prepare vehicle and documentation</li>
-              <li>• Collect security deposit at pickup</li>
-              <li>• Send confirmation details to customer</li>
-            </ul>
           </div>
         </div>
       </CardContent>

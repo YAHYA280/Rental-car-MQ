@@ -269,43 +269,8 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
                   )}
                 </div>
               </div>
-
-              {pickupDate && returnDate && pickupTime && returnTime && (
-                <div className="mt-2 pt-2 border-t border-green-200 text-xs text-green-700">
-                  <div className="flex justify-between">
-                    <span>
-                      From: {format(pickupDate, "MMM dd, yyyy")} at {pickupTime}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>
-                      To: {format(returnDate, "MMM dd, yyyy")} at {returnTime}
-                    </span>
-                  </div>
-                </div>
-              )}
             </div>
           )}
-
-          {/* Same day rental warning */}
-          {isSameDay && (
-            <div className="flex items-center gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-              <AlertCircle className="h-4 w-4 text-amber-600" />
-              <div className="text-sm text-amber-800">
-                <p className="font-medium">Same Day Rental</p>
-                <p className="text-xs text-amber-700">
-                  Please ensure return time is after pickup time for same-day
-                  bookings.
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Business hours info */}
-          <div className="text-xs text-gray-500 flex items-center gap-1">
-            <Clock className="h-3 w-3" />
-            Business hours: 8:00 AM - 8:30 PM
-          </div>
         </div>
       </CardContent>
     </Card>

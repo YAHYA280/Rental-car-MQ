@@ -1,4 +1,3 @@
-// src/components/dashboard/bookings/forms/sections/VehicleSelectionSection.tsx - Updated with unified types
 "use client";
 
 import React from "react";
@@ -185,28 +184,6 @@ const VehicleSelectionSection: React.FC<VehicleSelectionSectionProps> = ({
                       </a>
                     </div>
                   )}
-                </div>
-              </div>
-
-              {/* Vehicle Features */}
-              <div className="mt-3 pt-3 border-t border-blue-200">
-                <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-3 text-blue-700">
-                    <span className="flex items-center gap-1">
-                      <Users className="h-3 w-3" />
-                      Vehicle Info
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3 text-blue-800">
-                    <span>
-                      {getTransmissionIcon(selectedCar.transmission)}{" "}
-                      {selectedCar.transmission}
-                    </span>
-                    <span>
-                      {getFuelIcon(selectedCar.fuelType)} {selectedCar.fuelType}
-                    </span>
-                    <span>👥 {selectedCar.seats} seats</span>
-                  </div>
                 </div>
               </div>
             </div>
