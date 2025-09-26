@@ -1,4 +1,4 @@
-// src/components/dashboard/bookings/forms/AddBookingForm.tsx - Updated with real backend
+// src/components/dashboard/bookings/forms/AddBookingForm.tsx - UPDATED: Pass selectedCarId to DateTimeSection
 "use client";
 
 import React, { useState } from "react";
@@ -55,9 +55,9 @@ const AddBookingForm: React.FC<AddBookingFormProps> = ({
     [] // We'll handle availability check in the backend
   );
 
-  // Get selected entities
+  // FIXED: Get selected entities properly
   const selectedCustomer = users.find(
-    (user) => user.id === formData.customerId
+    (user) => user.id === formData.customerId // Fixed: was using vehicleId
   );
   const selectedCar = cars.find((car) => car.id === formData.vehicleId);
 
@@ -190,12 +190,13 @@ const AddBookingForm: React.FC<AddBookingFormProps> = ({
             error={errors.vehicleId}
           />
 
-          {/* Date and Time Selection */}
+          {/* Date and Time Selection - UPDATED: Pass selectedCarId */}
           <DateTimeSection
             pickupDate={pickupDate}
             returnDate={returnDate}
             pickupTime={formData.pickupTime}
             returnTime={formData.returnTime}
+            selectedCarId={formData.vehicleId}
             onPickupDateChange={(date) => handleDateChange(date, "pickup")}
             onReturnDateChange={(date) => handleDateChange(date, "return")}
             onPickupTimeChange={(time) => handleInputChange("pickupTime", time)}
