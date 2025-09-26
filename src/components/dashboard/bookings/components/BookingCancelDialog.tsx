@@ -1,4 +1,3 @@
-// src/components/dashboard/bookings/components/BookingCancelDialog.tsx - Updated with unified types
 "use client";
 
 import React from "react";
@@ -44,19 +43,17 @@ const BookingCancelDialog: React.FC<BookingCancelDialogProps> = ({
             <AlertTriangle className="h-6 w-6 text-red-600" />
           </div>
           <DialogTitle className="text-lg">
-            Cancel Booking Confirmation
+            {t("bookings.cancelConfirmation.title")}
           </DialogTitle>
           <DialogDescription className="text-gray-600">
-            Are you sure you want to cancel this booking? This action cannot be
-            undone.
+            {t("bookings.cancelConfirmation.description")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 my-4">
           <p className="text-sm text-red-800">
-            <strong>Warning:</strong> This action cannot be undone. The booking
-            will be marked as cancelled and the vehicle will become available
-            again.
+            <strong>{t("bookings.cancelConfirmation.warningLabel")}</strong>{" "}
+            {t("bookings.cancelConfirmation.warningText")}
           </p>
         </div>
 
@@ -67,7 +64,7 @@ const BookingCancelDialog: React.FC<BookingCancelDialogProps> = ({
             disabled={isLoading}
             className="flex-1"
           >
-            Keep Booking
+            {t("bookings.cancelConfirmation.keepBooking")}
           </Button>
           <Button
             variant="destructive"
@@ -75,7 +72,9 @@ const BookingCancelDialog: React.FC<BookingCancelDialogProps> = ({
             disabled={isLoading}
             className="flex-1"
           >
-            {isLoading ? "Cancelling..." : "Cancel Booking"}
+            {isLoading
+              ? t("bookings.cancelConfirmation.cancelling")
+              : t("bookings.cancelConfirmation.cancelBooking")}
           </Button>
         </DialogFooter>
       </DialogContent>

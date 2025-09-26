@@ -1,4 +1,4 @@
-// src/components/dashboard/bookings/components/BookingFilters.tsx
+// src/components/dashboard/bookings/components/BookingFilters.tsx - Updated with translations
 "use client";
 
 import React from "react";
@@ -21,32 +21,32 @@ const BookingFilters: React.FC<BookingFiltersProps> = ({
   const filters = [
     {
       value: "all",
-      label: t("bookings.all"),
+      label: t("bookings.filters.all"),
       count: 0, // You can pass counts if needed
     },
     {
       value: "pending",
-      label: t("bookings.pending"),
+      label: t("bookings.filters.pending"),
       count: 0,
     },
     {
       value: "confirmed",
-      label: t("bookings.confirmed"),
+      label: t("bookings.filters.confirmed"),
       count: 0,
     },
     {
       value: "active",
-      label: t("bookings.active"),
+      label: t("bookings.filters.active"),
       count: 0,
     },
     {
       value: "completed",
-      label: t("bookings.completed"),
+      label: t("bookings.filters.completed"),
       count: 0,
     },
     {
       value: "cancelled",
-      label: t("bookings.cancelled"),
+      label: t("bookings.filters.cancelled"),
       count: 0,
     },
   ];

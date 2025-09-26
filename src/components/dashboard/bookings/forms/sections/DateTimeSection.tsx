@@ -1,4 +1,4 @@
-// src/components/dashboard/bookings/forms/sections/DateTimeSection.tsx - FIXED: Working calendar with minimum 2 days
+// src/components/dashboard/bookings/forms/sections/DateTimeSection.tsx - Updated with translations
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -119,8 +119,10 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
         });
 
         if (!response.data.available && response.data.nextAvailableDate) {
-          toast.info("Vehicle availability updated", {
-            description: `Next available: ${format(
+          toast.info(t("bookings.form.dateTime.vehicleAvailabilityUpdated"), {
+            description: `${t(
+              "bookings.form.dateTime.nextAvailable"
+            )}: ${format(
               new Date(response.data.nextAvailableDate),
               "MMM dd, yyyy"
             )}`,
@@ -129,8 +131,8 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
       }
     } catch (error) {
       console.error("Error loading vehicle calendar:", error);
-      toast.error("Failed to load vehicle availability", {
-        description: "Some dates might not be accurate",
+      toast.error(t("bookings.form.dateTime.errorLoadingAvailability"), {
+        description: t("bookings.form.dateTime.datesNotAccurate"),
       });
     } finally {
       setIsLoadingCalendar(false);
@@ -143,7 +145,7 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
     return blockedDates.includes(dateStr);
   };
 
-  // FIXED: Simple date change handlers (like your old working code)
+  // FIXED: Simple date change handlers
   const handlePickupDateChange = (date: Date | undefined) => {
     onPickupDateChange(date);
 
@@ -164,8 +166,8 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
       );
 
       if (diffDays < 2) {
-        toast.error("Minimum rental period is 2 days", {
-          description: "Please select at least 2 days for your rental",
+        toast.error(t("bookings.form.dateTime.minimumRentalError"), {
+          description: t("bookings.form.dateTime.minimumRentalDesc"),
           duration: 4000,
         });
       }
@@ -190,8 +192,8 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
       );
 
       if (diffDays < 2) {
-        toast.error("Minimum rental period is 2 days", {
-          description: "Please select at least 2 days for your rental",
+        toast.error(t("bookings.form.dateTime.minimumRentalError"), {
+          description: t("bookings.form.dateTime.minimumRentalDesc"),
           duration: 4000,
         });
         return;
@@ -212,20 +214,26 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
       }
 
       if (hasBlockedDate) {
-        toast.error(`${blockedDate} is not available`, {
-          description: "Please select only available dates",
-        });
+        toast.error(
+          t("bookings.form.dateTime.dateNotAvailable", { date: blockedDate }),
+          {
+            description: t("bookings.form.dateTime.selectAvailableDates"),
+          }
+        );
         return;
       }
 
       // Success message
-      toast.success(`${diffDays} days selected successfully!`, {
-        description: `From ${format(pickupDate, "MMM dd")} to ${format(
-          date,
-          "MMM dd"
-        )}`,
-        duration: 2000,
-      });
+      toast.success(
+        t("bookings.form.dateTime.daysSelectedSuccess", { days: diffDays }),
+        {
+          description: `${t("bookings.form.dateTime.fromTo", {
+            from: format(pickupDate, "MMM dd"),
+            to: format(date, "MMM dd"),
+          })}`,
+          duration: 2000,
+        }
+      );
     }
 
     onReturnDateChange(date);
@@ -344,7 +352,10 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
           hasExcess: true,
           excessHours,
           excessMinutes: remainingMinutes,
-          message: `+1 day will be added (${excessHours}h ${remainingMinutes}m beyond grace period)`,
+          message: t("bookings.form.dateTime.timeExcessMessage", {
+            hours: excessHours,
+            minutes: remainingMinutes,
+          }),
         };
       }
 
@@ -361,9 +372,9 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
       <CardContent className="p-4">
         <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
           <CalendarIcon className="h-5 w-5" />
-          Rental Period
+          {t("bookings.form.dateTime.title")}
           <span className="text-sm font-normal text-blue-600 bg-blue-50 px-2 py-1 rounded">
-            Minimum 2 days
+            {t("bookings.form.dateTime.minimumDays")}
           </span>
         </h3>
 
@@ -375,7 +386,7 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
                 <div className="flex items-center justify-center gap-2 text-blue-600 bg-blue-50 rounded-lg px-3 py-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
                   <span className="text-sm font-medium">
-                    Loading vehicle availability...
+                    {t("bookings.form.dateTime.loadingAvailability")}
                   </span>
                 </div>
               ) : vehicleAvailability.available ? (
@@ -383,13 +394,15 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
                   <CheckCircle className="h-4 w-4" />
                   <span className="text-sm font-medium">
                     {vehicleAvailability.upcomingBooking
-                      ? `Available until ${format(
-                          new Date(
-                            vehicleAvailability.upcomingBooking.pickupDate
+                      ? t("bookings.form.dateTime.availableUntil", {
+                          date: format(
+                            new Date(
+                              vehicleAvailability.upcomingBooking.pickupDate
+                            ),
+                            "MMM dd"
                           ),
-                          "MMM dd"
-                        )}`
-                      : "Available Now"}
+                        })
+                      : t("bookings.form.dateTime.availableNow")}
                   </span>
                 </div>
               ) : (
@@ -397,12 +410,12 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
                   <div className="flex items-center gap-2">
                     <AlertCircle className="h-4 w-4" />
                     <span className="text-sm font-medium">
-                      Vehicle Not Available
+                      {t("bookings.form.dateTime.vehicleNotAvailable")}
                     </span>
                   </div>
                   {vehicleAvailability.nextAvailableDate && (
                     <span className="text-xs text-red-700">
-                      Next available:{" "}
+                      {t("bookings.form.dateTime.nextAvailable")}:{" "}
                       {format(
                         new Date(vehicleAvailability.nextAvailableDate),
                         "MMM dd, yyyy"
@@ -414,11 +427,11 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
             </div>
           )}
 
-          {/* FIXED: Separate Pickup and Return Date Selection (like your old working code) */}
+          {/* Date Selection */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Pickup Date */}
             <div>
-              <Label>Pickup Date *</Label>
+              <Label>{t("bookings.form.dateTime.pickupDate")} *</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -433,7 +446,7 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {pickupDate
                       ? format(pickupDate, "PPP")
-                      : "Select pickup date"}
+                      : t("bookings.form.dateTime.selectPickupDate")}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -472,7 +485,7 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
 
             {/* Return Date */}
             <div>
-              <Label>Return Date *</Label>
+              <Label>{t("bookings.form.dateTime.returnDate")} *</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -489,7 +502,7 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {returnDate
                       ? format(returnDate, "PPP")
-                      : "Select return date"}
+                      : t("bookings.form.dateTime.selectReturnDate")}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -542,18 +555,18 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
                     <div className="flex items-center justify-between text-xs mb-2">
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 bg-green-100 border border-green-300 rounded"></div>
-                        <span>Available</span>
+                        <span>{t("bookings.form.dateTime.available")}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 bg-red-100 border border-red-300 rounded opacity-40"></div>
-                        <span>Booked</span>
+                        <span>{t("bookings.form.dateTime.booked")}</span>
                       </div>
                     </div>
                     <div className="bg-blue-50 border border-blue-200 rounded p-2">
                       <div className="flex items-center gap-1 text-blue-800">
                         <CalendarIcon className="h-3 w-3" />
                         <span className="text-xs font-medium">
-                          Minimum 2 days required
+                          {t("bookings.form.dateTime.minimumDaysRequired")}
                         </span>
                       </div>
                     </div>
@@ -572,13 +585,17 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
           {/* Time Selection */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="pickupTime">Pickup Time *</Label>
+              <Label htmlFor="pickupTime">
+                {t("bookings.form.dateTime.pickupTime")} *
+              </Label>
               <Select value={pickupTime} onValueChange={onPickupTimeChange}>
                 <SelectTrigger
                   className={errors.pickupTime ? "border-red-500" : ""}
                 >
                   <Clock className="mr-2 h-4 w-4" />
-                  <SelectValue placeholder="Select pickup time" />
+                  <SelectValue
+                    placeholder={t("bookings.form.dateTime.selectPickupTime")}
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {timeSlots.map((time) => (
@@ -597,13 +614,17 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
             </div>
 
             <div>
-              <Label htmlFor="returnTime">Return Time *</Label>
+              <Label htmlFor="returnTime">
+                {t("bookings.form.dateTime.returnTime")} *
+              </Label>
               <Select value={returnTime} onValueChange={onReturnTimeChange}>
                 <SelectTrigger
                   className={errors.returnTime ? "border-red-500" : ""}
                 >
                   <Clock className="mr-2 h-4 w-4" />
-                  <SelectValue placeholder="Select return time" />
+                  <SelectValue
+                    placeholder={t("bookings.form.dateTime.selectReturnTime")}
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {timeSlots.map((time) => (
@@ -646,7 +667,7 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
                       meetsMinimumDays ? "text-green-800" : "text-red-800"
                     )}
                   >
-                    Rental Duration
+                    {t("bookings.form.dateTime.rentalDuration")}
                   </span>
                 </div>
                 <div className="text-right">
@@ -656,14 +677,19 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
                       meetsMinimumDays ? "text-green-900" : "text-red-900"
                     )}
                   >
-                    {duration} {duration === 1 ? "Day" : "Days"}
+                    {duration}{" "}
+                    {duration === 1
+                      ? t("bookings.form.dateTime.day")
+                      : t("bookings.form.dateTime.days")}
                   </p>
                   {!meetsMinimumDays && (
-                    <p className="text-xs text-red-700">Need at least 2 days</p>
+                    <p className="text-xs text-red-700">
+                      {t("bookings.form.dateTime.needAtLeastDays")}
+                    </p>
                   )}
                   {isSameDay && meetsMinimumDays && (
                     <p className="text-xs text-green-700">
-                      Extended by time logic
+                      {t("bookings.form.dateTime.extendedByTimeLogic")}
                     </p>
                   )}
                 </div>
@@ -676,7 +702,7 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
               <div className="flex items-center gap-2 text-gray-600">
                 <Info className="h-4 w-4" />
                 <span className="text-sm">
-                  Please select a vehicle first to see availability
+                  {t("bookings.form.dateTime.selectVehicleFirst")}
                 </span>
               </div>
             </div>

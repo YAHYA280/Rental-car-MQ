@@ -1,4 +1,3 @@
-// src/components/dashboard/bookings/forms/sections/CustomerSelectionSection.tsx - Updated with unified types
 "use client";
 
 import React from "react";
@@ -32,28 +31,24 @@ const CustomerSelectionSection: React.FC<CustomerSelectionSectionProps> = ({
 }) => {
   const t = useTranslations("dashboard");
 
-  // Debug logging
-  console.log("CustomerSelectionSection:", {
-    usersCount: users.length,
-    selectedCustomerId,
-    selectedCustomer,
-    error,
-  });
-
   return (
     <Card>
       <CardContent className="p-4">
         <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
           <User className="h-5 w-5" />
-          Customer Information
+          {t("bookings.form.customerSelection.title")}
         </h3>
 
         <div className="space-y-4">
           <div>
-            <Label htmlFor="customerId">Select Customer *</Label>
+            <Label htmlFor="customerId">
+              {t("bookings.form.customerSelection.selectCustomer")} *
+            </Label>
             <Select value={selectedCustomerId} onValueChange={onCustomerChange}>
               <SelectTrigger className={error ? "border-red-500" : ""}>
-                <SelectValue placeholder="Choose a customer" />
+                <SelectValue
+                  placeholder={t("bookings.form.customerSelection.placeholder")}
+                />
               </SelectTrigger>
               <SelectContent>
                 {users.map((user) => (
@@ -66,9 +61,6 @@ const CustomerSelectionSection: React.FC<CustomerSelectionSectionProps> = ({
                       <div>
                         <p className="font-medium text-sm">
                           {user.firstName} {user.lastName}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {user.email || "No email provided"}
                         </p>
                       </div>
                     </div>
@@ -83,26 +75,33 @@ const CustomerSelectionSection: React.FC<CustomerSelectionSectionProps> = ({
           {selectedCustomer && (
             <div className="mt-4 p-3 bg-gray-50 rounded-lg">
               <h4 className="font-medium text-gray-900 mb-3">
-                Selected Customer
+                {t("bookings.form.customerSelection.selectedCustomer")}
               </h4>
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm">
                   <User className="h-4 w-4 text-gray-400" />
-                  <span className="text-gray-600">Name:</span>
+                  <span className="text-gray-600">
+                    {t("bookings.form.customerSelection.name")}:
+                  </span>
                   <span className="font-medium">
                     {selectedCustomer.firstName} {selectedCustomer.lastName}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <Mail className="h-4 w-4 text-gray-400" />
-                  <span className="text-gray-600">Email:</span>
+                  <span className="text-gray-600">
+                    {t("bookings.form.customerSelection.email")}:
+                  </span>
                   <span className="font-medium">
-                    {selectedCustomer.email || "No email provided"}
+                    {selectedCustomer.email ||
+                      t("bookings.form.customerSelection.noEmail")}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <Phone className="h-4 w-4 text-gray-400" />
-                  <span className="text-gray-600">Phone:</span>
+                  <span className="text-gray-600">
+                    {t("bookings.form.customerSelection.phone")}:
+                  </span>
                   <span className="font-medium">{selectedCustomer.phone}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
@@ -113,7 +112,9 @@ const CustomerSelectionSection: React.FC<CustomerSelectionSectionProps> = ({
                         : "bg-gray-400"
                     }`}
                   />
-                  <span className="text-gray-600">Status:</span>
+                  <span className="text-gray-600">
+                    {t("bookings.form.customerSelection.status")}:
+                  </span>
                   <span
                     className={`font-medium ${
                       selectedCustomer.status === "active"
@@ -122,8 +123,8 @@ const CustomerSelectionSection: React.FC<CustomerSelectionSectionProps> = ({
                     }`}
                   >
                     {selectedCustomer.status === "active"
-                      ? "Active"
-                      : "Inactive"}
+                      ? t("bookings.form.customerSelection.statusActive")
+                      : t("bookings.form.customerSelection.statusInactive")}
                   </span>
                 </div>
               </div>

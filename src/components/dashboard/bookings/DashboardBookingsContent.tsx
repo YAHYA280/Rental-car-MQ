@@ -1,4 +1,4 @@
-// src/components/dashboard/bookings/DashboardBookingsContent.tsx - Updated with real backend
+// src/components/dashboard/bookings/DashboardBookingsContent.tsx - Updated with real backend and translations
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -242,7 +242,7 @@ const DashboardBookingsContent = () => {
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <h3 className="text-lg font-semibold text-red-600 mb-2">
-              Error Loading Bookings
+              {t("bookings.content.errorLoadingTitle")}
             </h3>
             <p className="text-gray-600">{bookingsError}</p>
             <Button
@@ -250,7 +250,7 @@ const DashboardBookingsContent = () => {
               className="mt-4"
               variant="outline"
             >
-              Try Again
+              {t("bookings.content.tryAgain")}
             </Button>
           </div>
         </div>
@@ -275,7 +275,7 @@ const DashboardBookingsContent = () => {
           disabled={bookingsLoading}
         >
           <Plus className="h-4 w-4" />
-          Add New Booking
+          {t("bookings.content.addNewBooking")}
         </Button>
       </div>
 
@@ -290,7 +290,7 @@ const DashboardBookingsContent = () => {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
-                placeholder={t("common.searchBookings")}
+                placeholder={t("bookings.content.searchPlaceholder")}
                 value={searchTerm}
                 onChange={handleSearchChange}
                 className="pl-10"
@@ -312,7 +312,7 @@ const DashboardBookingsContent = () => {
       <Card className="border-0 shadow-md">
         <CardHeader>
           <CardTitle>
-            {t("overview.recentBookings")} ({filteredBookings.length})
+            {t("bookings.content.recentBookings")} ({filteredBookings.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -332,10 +332,9 @@ const DashboardBookingsContent = () => {
       <Dialog open={isAddBookingOpen} onOpenChange={setIsAddBookingOpen}>
         <DialogContent className="w-[min(1400px,95vw)] sm:max-w-[min(1400px,95vw)] max-h-[95vh] ">
           <DialogHeader>
-            <DialogTitle>Create New Booking</DialogTitle>
+            <DialogTitle>{t("bookings.content.createNewBooking")}</DialogTitle>
             <DialogDescription>
-              Create a new booking by selecting a customer and vehicle. Admin
-              bookings are automatically confirmed.
+              {t("bookings.content.createBookingDescription")}
             </DialogDescription>
           </DialogHeader>
 

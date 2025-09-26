@@ -1,4 +1,3 @@
-// src/components/dashboard/bookings/components/BookingDetailsModal.tsx - COMPLETE with Contract Download
 "use client";
 
 import React from "react";
@@ -21,7 +20,6 @@ import {
   getStatusColor,
 } from "@/components/types";
 
-// Import the ContractDownload component
 import ContractDownload from "../ContractDownload";
 
 interface BookingDetailsModalProps {
@@ -48,7 +46,7 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
         <Badge className={statusClass}>{statusText}</Badge>
         {source === "website" && (
           <Badge variant="outline" className="text-xs">
-            Website
+            {t("bookings.details.sourceWebsite")}
           </Badge>
         )}
         {source === "admin" && (
@@ -56,7 +54,7 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
             variant="outline"
             className="text-xs bg-blue-50 text-blue-700 border-blue-200"
           >
-            Admin Created
+            {t("bookings.details.sourceAdmin")}
           </Badge>
         )}
       </div>
@@ -68,7 +66,7 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
     if (booking.customer) {
       return `${booking.customer.firstName} ${booking.customer.lastName}`;
     }
-    return "Unknown Customer";
+    return t("bookings.details.unknownCustomer");
   };
 
   // Format vehicle name
@@ -76,7 +74,7 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
     if (booking.vehicle) {
       return `${booking.vehicle.brand} ${booking.vehicle.name}`;
     }
-    return "Unknown Vehicle";
+    return t("bookings.details.unknownVehicle");
   };
 
   // Format date
@@ -92,31 +90,29 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
         <DialogHeader className="flex-shrink-0 pb-4 border-b">
           <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl">
             <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
-            Booking Details
+            {t("bookings.details.title")}
           </DialogTitle>
           <DialogDescription className="text-sm sm:text-base">
-            View complete booking information and manage booking status
+            {t("bookings.details.description")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto px-1">
           <div className="space-y-4 sm:space-y-6 py-4">
-            {/* Header with Booking ID, Status, and Contract Download */}
             <div className="flex flex-col items-start justify-between p-3 sm:p-4 bg-gray-50 rounded-lg gap-3">
               <div className="w-full">
                 <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
-                  Booking {booking.bookingNumber}
+                  {t("bookings.details.bookingNumber")} {booking.bookingNumber}
                 </h3>
                 <p className="text-gray-600 text-sm sm:text-base">
-                  Created on {formatDate(booking.createdAt)}
+                  {t("bookings.details.createdOn")}{" "}
+                  {formatDate(booking.createdAt)}
                 </p>
               </div>
 
-              {/* Status and Contract Download Row */}
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:items-center sm:justify-between">
                 {getStatusBadge(booking.status, booking.source)}
 
-                {/* Contract Download Button */}
                 <ContractDownload
                   bookingId={booking.id}
                   bookingNumber={booking.bookingNumber}
@@ -125,13 +121,11 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
               </div>
             </div>
 
-            {/* Main Content Grid */}
             <div className="grid grid-cols-1 gap-4 sm:gap-6">
-              {/* Customer Information */}
               <div className="space-y-3 sm:space-y-4">
                 <h4 className="font-semibold text-gray-900 flex items-center gap-2 text-base sm:text-lg">
                   <User className="h-4 w-4 sm:h-5 sm:w-5" />
-                  Customer Information
+                  {t("bookings.details.customerInformation")}
                 </h4>
                 <div className="bg-white border-2 rounded-xl p-4 sm:p-6 space-y-4">
                   <div className="flex items-center gap-3 sm:gap-4">
@@ -144,7 +138,7 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
                         {getCustomerName(booking)}
                       </p>
                       <p className="text-xs sm:text-sm text-gray-500">
-                        Customer ID: {booking.customerId}
+                        {t("bookings.details.customerId")}: {booking.customerId}
                       </p>
                     </div>
                   </div>
@@ -155,7 +149,7 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
                         <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 flex-shrink-0" />
                         <div className="min-w-0 flex-1">
                           <span className="text-xs sm:text-sm text-gray-600 block">
-                            Email:
+                            {t("bookings.details.email")}:
                           </span>
                           <span className="font-medium text-gray-900 break-all text-sm sm:text-base">
                             {booking.customer.email}
@@ -168,7 +162,7 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
                         <Phone className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 flex-shrink-0" />
                         <div className="min-w-0 flex-1">
                           <span className="text-xs sm:text-sm text-gray-600 block">
-                            Phone:
+                            {t("bookings.details.phone")}:
                           </span>
                           <span className="font-medium text-gray-900 text-sm sm:text-base">
                             {booking.customer.phone}
@@ -180,11 +174,10 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
                 </div>
               </div>
 
-              {/* Vehicle Information */}
               <div className="space-y-3 sm:space-y-4">
                 <h4 className="font-semibold text-gray-900 flex items-center gap-2 text-base sm:text-lg">
                   <Car className="h-4 w-4 sm:h-5 sm:w-5" />
-                  Vehicle Information
+                  {t("bookings.details.vehicleInformation")}
                 </h4>
                 <div className="bg-white border-2 rounded-xl p-4 sm:p-6 space-y-4">
                   <div className="flex items-center gap-3 sm:gap-4">
@@ -196,7 +189,8 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
                         {getVehicleName(booking)}
                       </p>
                       <p className="text-xs sm:text-sm text-gray-500">
-                        {booking.vehicle?.year || "Unknown Year"}
+                        {booking.vehicle?.year ||
+                          t("bookings.details.unknownYear")}
                       </p>
                     </div>
                   </div>
@@ -204,7 +198,7 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
                   <div className="grid grid-cols-2 gap-3">
                     <div className="p-3 bg-gray-50 rounded-lg">
                       <span className="text-xs sm:text-sm text-gray-600 block">
-                        License Plate:
+                        {t("bookings.details.licensePlate")}:
                       </span>
                       <span className="font-semibold text-gray-900 text-sm sm:text-base">
                         {booking.vehicle?.licensePlate || "N/A"}
@@ -212,7 +206,7 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
                     </div>
                     <div className="p-3 bg-gray-50 rounded-lg">
                       <span className="text-xs sm:text-sm text-gray-600 block">
-                        Daily Rate:
+                        {t("bookings.details.dailyRate")}:
                       </span>
                       <span className="font-semibold text-gray-900 text-sm sm:text-base">
                         €{booking.dailyRate}
@@ -220,16 +214,16 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
                     </div>
                     <div className="p-3 bg-gray-50 rounded-lg">
                       <span className="text-xs sm:text-sm text-gray-600 block">
-                        Rental Days:
+                        {t("bookings.details.totalDays")}:
                       </span>
                       <span className="font-semibold text-gray-900 text-sm sm:text-base">
-                        {booking.totalDays} days
+                        {booking.totalDays} {t("bookings.details.days")}
                       </span>
                     </div>
                     {booking.vehicle?.whatsappNumber && (
                       <div className="p-3 bg-green-50 rounded-lg">
                         <span className="text-xs sm:text-sm text-gray-600 block">
-                          WhatsApp:
+                          {t("bookings.details.whatsappContact")}:
                         </span>
                         <a
                           href={`https://wa.me/${booking.vehicle.whatsappNumber.replace(
@@ -253,7 +247,7 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
               <div className="space-y-3 sm:space-y-4">
                 <h4 className="font-semibold text-gray-900 flex items-center gap-2 text-base sm:text-lg">
                   <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
-                  Rental Period
+                  {t("bookings.details.rentalPeriod")}
                 </h4>
                 <div className="bg-white border-2 rounded-xl p-4 sm:p-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -261,49 +255,48 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
                       <div className="flex items-center gap-2 mb-2">
                         <div className="w-2 h-2 sm:w-3 sm:h-3 bg-green-500 rounded-full"></div>
                         <span className="text-xs sm:text-sm font-medium text-green-800">
-                          Pickup
+                          {t("bookings.details.pickup")}
                         </span>
                       </div>
                       <p className="font-bold text-gray-900 text-base sm:text-lg">
                         {formatDate(booking.pickupDate)}
                       </p>
                       <p className="text-xs sm:text-sm text-gray-600">
-                        at {booking.pickupTime}
+                        {t("bookings.details.at")} {booking.pickupTime}
                       </p>
                     </div>
                     <div className="p-3 sm:p-4 bg-red-50 border border-red-200 rounded-lg">
                       <div className="flex items-center gap-2 mb-2">
                         <div className="w-2 h-2 sm:w-3 sm:h-3 bg-red-500 rounded-full"></div>
                         <span className="text-xs sm:text-sm font-medium text-red-800">
-                          Return
+                          {t("bookings.details.return")}
                         </span>
                       </div>
                       <p className="font-bold text-gray-900 text-base sm:text-lg">
                         {formatDate(booking.returnDate)}
                       </p>
                       <p className="text-xs sm:text-sm text-gray-600">
-                        at {booking.returnTime}
+                        {t("bookings.details.at")} {booking.returnTime}
                       </p>
                     </div>
                   </div>
                   <div className="mt-4 pt-4 border-t border-gray-200">
                     <div className="flex justify-between items-center">
                       <span className="text-gray-600 text-sm sm:text-base">
-                        Total Duration:
+                        {t("bookings.details.duration")}:
                       </span>
                       <span className="font-bold text-lg sm:text-xl text-blue-600">
-                        {booking.totalDays} day(s)
+                        {booking.totalDays} {t("bookings.details.daysUnit")}
                       </span>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Locations */}
               <div className="space-y-3 sm:space-y-4">
                 <h4 className="font-semibold text-gray-900 flex items-center gap-2 text-base sm:text-lg">
                   <MapPin className="h-4 w-4 sm:h-5 sm:w-5" />
-                  Locations
+                  {t("bookings.details.locations")}
                 </h4>
                 <div className="bg-white border-2 rounded-xl p-4 sm:p-6 space-y-4">
                   <div className="space-y-3">
@@ -311,7 +304,7 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
                       <div className="flex items-center gap-2 mb-2">
                         <div className="w-2 h-2 sm:w-3 sm:h-3 bg-green-500 rounded-full"></div>
                         <span className="text-xs sm:text-sm font-medium text-green-800">
-                          Pickup Location
+                          {t("bookings.details.pickupLocation")}
                         </span>
                       </div>
                       <p className="font-semibold text-gray-900 text-sm sm:text-base">
@@ -323,7 +316,7 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
                       <div className="flex items-center gap-2 mb-2">
                         <div className="w-2 h-2 sm:w-3 sm:h-3 bg-red-500 rounded-full"></div>
                         <span className="text-xs sm:text-sm font-medium text-red-800">
-                          Return Location
+                          {t("bookings.details.returnLocation")}
                         </span>
                       </div>
                       <p className="font-semibold text-gray-900 text-sm sm:text-base">
@@ -335,7 +328,7 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
                   {booking.pickupLocation !== booking.returnLocation && (
                     <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
                       <p className="text-xs sm:text-sm text-amber-800 font-medium">
-                        ⚠ Different pickup and return locations
+                        ⚠ {t("bookings.details.differentLocations")}
                       </p>
                     </div>
                   )}
@@ -343,16 +336,16 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
               </div>
             </div>
 
-            {/* Total Amount Section */}
             <div className="border-t-2 pt-4 sm:pt-6">
               <div className="bg-gradient-to-r from-gray-50 to-blue-50 border-2 border-gray-200 rounded-xl p-4 sm:p-6">
                 <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center sm:gap-4">
                   <div>
                     <span className="text-lg sm:text-xl font-semibold text-gray-900 block">
-                      Total Amount
+                      {t("bookings.details.totalAmount")}
                     </span>
                     <p className="text-xs sm:text-sm text-gray-600">
-                      {booking.totalDays} days × €{booking.dailyRate} per day
+                      {booking.totalDays} {t("bookings.details.days")} × €
+                      {booking.dailyRate} {t("bookings.details.perDay")}
                     </p>
                   </div>
                   <div className="text-left sm:text-right">
@@ -361,7 +354,7 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
                     </span>
                     <p className="text-xs sm:text-sm text-gray-500">
                       (€{Math.round(booking.totalAmount / booking.totalDays)}
-                      /day avg)
+                      {t("bookings.details.dayAvg")})
                     </p>
                   </div>
                 </div>
@@ -377,7 +370,7 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
             disabled={isLoading}
             className="w-full sm:w-auto"
           >
-            Close
+            {t("bookings.details.close")}
           </Button>
 
           {booking.status === "pending" && onConfirm && (
@@ -386,7 +379,9 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
               onClick={() => onConfirm(booking.id)}
               disabled={isLoading}
             >
-              {isLoading ? "Confirming..." : "Confirm Booking"}
+              {isLoading
+                ? t("bookings.details.confirming")
+                : t("bookings.details.confirmBooking")}
             </Button>
           )}
         </DialogFooter>

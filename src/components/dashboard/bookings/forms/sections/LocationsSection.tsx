@@ -1,4 +1,4 @@
-// src/components/dashboard/bookings/forms/sections/LocationsSection.tsx
+// src/components/dashboard/bookings/forms/sections/LocationsSection.tsx - Updated with translations
 "use client";
 
 import React from "react";
@@ -53,37 +53,37 @@ const LocationsSection: React.FC<LocationsSectionProps> = ({
   const locations = [
     {
       value: "Tangier Airport",
-      label: "Tangier Airport",
+      label: t("bookings.form.locations.tangierAirport"),
       icon: Plane,
-      description: "Ibn Battuta Airport (TNG)",
+      description: t("bookings.form.locations.tangierAirportDesc"),
       popular: true,
     },
     {
       value: "Tangier City Center",
-      label: "Tangier City Center",
+      label: t("bookings.form.locations.tangierCityCenter"),
       icon: Building2,
-      description: "Downtown area",
+      description: t("bookings.form.locations.tangierCityCenterDesc"),
       popular: true,
     },
     {
       value: "Tangier Port",
-      label: "Tangier Port",
+      label: t("bookings.form.locations.tangierPort"),
       icon: Anchor,
-      description: "Ferry terminal",
+      description: t("bookings.form.locations.tangierPortDesc"),
       popular: false,
     },
     {
       value: "Hotel Pickup",
-      label: "Hotel Pickup",
+      label: t("bookings.form.locations.hotelPickup"),
       icon: Hotel,
-      description: "At your accommodation",
+      description: t("bookings.form.locations.hotelPickupDesc"),
       popular: true,
     },
     {
       value: "Custom Location",
-      label: "Custom Location",
+      label: t("bookings.form.locations.customLocation"),
       icon: MapIcon,
-      description: "Specify during booking",
+      description: t("bookings.form.locations.customLocationDesc"),
       popular: false,
     },
   ];
@@ -105,13 +105,15 @@ const LocationsSection: React.FC<LocationsSectionProps> = ({
       <CardContent className="p-4">
         <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
           <MapPin className="h-5 w-5" />
-          Pickup & Return Locations
+          {t("bookings.form.locations.title")}
         </h3>
 
         <div className="space-y-4">
           {/* Pickup Location */}
           <div>
-            <Label htmlFor="pickupLocation">Pickup Location *</Label>
+            <Label htmlFor="pickupLocation">
+              {t("bookings.form.locations.pickupLocation")} *
+            </Label>
             <Select
               value={pickupLocation}
               onValueChange={onPickupLocationChange}
@@ -120,7 +122,11 @@ const LocationsSection: React.FC<LocationsSectionProps> = ({
                 className={errors.pickupLocation ? "border-red-500" : ""}
               >
                 <MapPin className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="Select pickup location" />
+                <SelectValue
+                  placeholder={t(
+                    "bookings.form.locations.selectPickupLocation"
+                  )}
+                />
               </SelectTrigger>
               <SelectContent>
                 {locations.map((location) => (
@@ -134,7 +140,7 @@ const LocationsSection: React.FC<LocationsSectionProps> = ({
                           </span>
                           {location.popular && (
                             <span className="text-xs bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded">
-                              Popular
+                              {t("bookings.form.locations.popular")}
                             </span>
                           )}
                         </div>
@@ -165,14 +171,16 @@ const LocationsSection: React.FC<LocationsSectionProps> = ({
                 onClick={() => onReturnLocationChange(pickupLocation)}
                 className="text-xs"
               >
-                Use same location for return
+                {t("bookings.form.locations.useSameLocation")}
               </Button>
             </div>
           )}
 
           {/* Return Location */}
           <div>
-            <Label htmlFor="returnLocation">Return Location *</Label>
+            <Label htmlFor="returnLocation">
+              {t("bookings.form.locations.returnLocation")} *
+            </Label>
             <Select
               value={returnLocation}
               onValueChange={onReturnLocationChange}
@@ -181,7 +189,11 @@ const LocationsSection: React.FC<LocationsSectionProps> = ({
                 className={errors.returnLocation ? "border-red-500" : ""}
               >
                 <MapPin className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="Select return location" />
+                <SelectValue
+                  placeholder={t(
+                    "bookings.form.locations.selectReturnLocation"
+                  )}
+                />
               </SelectTrigger>
               <SelectContent>
                 {locations.map((location) => (
@@ -195,7 +207,7 @@ const LocationsSection: React.FC<LocationsSectionProps> = ({
                           </span>
                           {location.popular && (
                             <span className="text-xs bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded">
-                              Popular
+                              {t("bookings.form.locations.popular")}
                             </span>
                           )}
                         </div>
@@ -214,6 +226,85 @@ const LocationsSection: React.FC<LocationsSectionProps> = ({
                 {errors.returnLocation}
               </p>
             )}
+          </div>
+
+          {/* Location Summary */}
+          {pickupLocation && returnLocation && (
+            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <h4 className="font-medium text-blue-900 mb-2 flex items-center gap-2">
+                <MapPin className="h-4 w-4" />
+                {t("bookings.form.locations.locationSummary")}
+              </h4>
+              <div className="flex items-center gap-2 text-sm">
+                <div className="flex items-center gap-1">
+                  {pickupDetails?.icon && (
+                    <pickupDetails.icon className="h-3 w-3 text-green-600" />
+                  )}
+                  <span className="text-green-700 font-medium">
+                    {pickupDetails?.label || pickupLocation}
+                  </span>
+                </div>
+                <ArrowRight className="h-3 w-3 text-gray-400" />
+                <div className="flex items-center gap-1">
+                  {returnDetails?.icon && (
+                    <returnDetails.icon className="h-3 w-3 text-red-600" />
+                  )}
+                  <span className="text-red-700 font-medium">
+                    {returnDetails?.label || returnLocation}
+                  </span>
+                </div>
+              </div>
+
+              {isDifferentLocation && (
+                <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded">
+                  <p className="text-xs text-amber-800 font-medium flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {t("bookings.form.locations.differentLocationWarning")}
+                  </p>
+                </div>
+              )}
+
+              {!isDifferentLocation && (
+                <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded">
+                  <p className="text-xs text-green-800 font-medium">
+                    ✓ {t("bookings.form.locations.sameLocationBenefit")}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Location Info */}
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+            <h4 className="font-medium text-gray-900 mb-2 text-sm">
+              {t("bookings.form.locations.locationInfo")}:
+            </h4>
+            <ul className="text-xs text-gray-600 space-y-1">
+              <li className="flex items-start gap-1">
+                <span className="text-blue-600">•</span>
+                <span>
+                  {t("bookings.form.locations.allLocationsInTangier")}
+                </span>
+              </li>
+              <li className="flex items-start gap-1">
+                <span className="text-blue-600">•</span>
+                <span>
+                  {t("bookings.form.locations.hotelPickupAdvanceNotice")}
+                </span>
+              </li>
+              <li className="flex items-start gap-1">
+                <span className="text-blue-600">•</span>
+                <span>
+                  {t("bookings.form.locations.customLocationApproval")}
+                </span>
+              </li>
+              <li className="flex items-start gap-1">
+                <span className="text-amber-600">⚠</span>
+                <span>
+                  {t("bookings.form.locations.differentLocationFees")}
+                </span>
+              </li>
+            </ul>
           </div>
         </div>
       </CardContent>

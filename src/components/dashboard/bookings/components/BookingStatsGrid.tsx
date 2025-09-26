@@ -1,4 +1,4 @@
-// src/components/dashboard/bookings/components/BookingStatsGrid.tsx - SIMPLIFIED VERSION
+// src/components/dashboard/bookings/components/BookingStatsGrid.tsx - Updated with translations
 "use client";
 
 import React from "react";
@@ -36,35 +36,35 @@ const BookingStatsGrid: React.FC<BookingStatsGridProps> = ({
   // SIMPLIFIED: Only show the 4 stats you requested
   const statsConfig = [
     {
-      title: "Total Bookings",
+      title: t("bookings.stats.totalBookings"),
       value: currentStats.totalBookings.toString(),
       icon: Calendar,
       color: "blue",
-      description: "All time bookings",
+      description: t("bookings.stats.totalBookingsDesc"),
       key: "totalBookings",
     },
     {
-      title: "Pending Approval",
+      title: t("bookings.stats.pendingBookings"),
       value: currentStats.pendingBookings.toString(),
       icon: Clock,
       color: "yellow",
-      description: "Awaiting confirmation",
+      description: t("bookings.stats.pendingBookingsDesc"),
       key: "pendingBookings",
     },
     {
-      title: "Active Rentals",
+      title: t("bookings.stats.activeBookings"),
       value: currentStats.activeBookings.toString(),
       icon: Car,
       color: "green",
-      description: "Vehicles currently out",
+      description: t("bookings.stats.activeBookingsDesc"),
       key: "activeBookings",
     },
     {
-      title: "Total Revenue",
+      title: t("bookings.stats.totalRevenue"),
       value: `€${currentStats.totalRevenue.toLocaleString()}`,
       icon: DollarSign,
       color: "purple",
-      description: "All time earnings",
+      description: t("bookings.stats.totalRevenueDesc"),
       key: "totalRevenue",
     },
   ];
@@ -159,23 +159,29 @@ const BookingStatsGrid: React.FC<BookingStatsGridProps> = ({
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  Quick Summary
+                  {t("bookings.stats.quickSummary")}
                 </h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                   <div>
-                    <span className="text-gray-600">Pending:</span>
+                    <span className="text-gray-600">
+                      {t("bookings.stats.pendingLabel")}:
+                    </span>
                     <span className="ml-1 font-semibold text-yellow-600">
                       {currentStats.pendingBookings}
                     </span>
                   </div>
                   <div>
-                    <span className="text-gray-600">Active:</span>
+                    <span className="text-gray-600">
+                      {t("bookings.stats.activeLabel")}:
+                    </span>
                     <span className="ml-1 font-semibold text-green-600">
                       {currentStats.activeBookings}
                     </span>
                   </div>
                   <div>
-                    <span className="text-gray-600">Revenue:</span>
+                    <span className="text-gray-600">
+                      {t("bookings.stats.revenueLabel")}:
+                    </span>
                     <span className="ml-1 font-semibold text-purple-600">
                       €{currentStats.totalRevenue.toLocaleString()}
                     </span>
@@ -183,11 +189,15 @@ const BookingStatsGrid: React.FC<BookingStatsGridProps> = ({
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-sm text-gray-600">Total Bookings</div>
+                <div className="text-sm text-gray-600">
+                  {t("bookings.stats.totalBookingsLabel")}
+                </div>
                 <div className="text-2xl font-bold text-indigo-600">
                   {currentStats.totalBookings}
                 </div>
-                <div className="text-xs text-gray-500">all time</div>
+                <div className="text-xs text-gray-500">
+                  {t("bookings.stats.allTime")}
+                </div>
               </div>
             </div>
           </CardContent>

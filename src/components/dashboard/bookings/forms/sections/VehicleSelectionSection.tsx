@@ -1,3 +1,4 @@
+// src/components/dashboard/bookings/forms/sections/VehicleSelectionSection.tsx - Updated with translations
 "use client";
 
 import React from "react";
@@ -62,15 +63,19 @@ const VehicleSelectionSection: React.FC<VehicleSelectionSectionProps> = ({
       <CardContent className="p-4">
         <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
           <Car className="h-5 w-5" />
-          Vehicle Selection
+          {t("bookings.form.vehicleSelection.title")}
         </h3>
 
         <div className="space-y-4">
           <div>
-            <Label htmlFor="carId">Select Vehicle *</Label>
+            <Label htmlFor="carId">
+              {t("bookings.form.vehicleSelection.selectVehicle")} *
+            </Label>
             <Select value={selectedCarId} onValueChange={onCarChange}>
               <SelectTrigger className={error ? "border-red-500" : ""}>
-                <SelectValue placeholder="Choose a vehicle" />
+                <SelectValue
+                  placeholder={t("bookings.form.vehicleSelection.placeholder")}
+                />
               </SelectTrigger>
               <SelectContent>
                 {cars.map((car) => (
@@ -86,12 +91,15 @@ const VehicleSelectionSection: React.FC<VehicleSelectionSectionProps> = ({
                           </p>
                           {car.available && (
                             <Badge className="bg-green-100 text-green-800 text-xs px-1 py-0">
-                              Available
+                              {t("bookings.form.vehicleSelection.available")}
                             </Badge>
                           )}
                         </div>
                         <div className="flex items-center gap-3 text-xs text-gray-500">
-                          <span>€{car.price}/day</span>
+                          <span>
+                            €{car.price}/
+                            {t("bookings.form.vehicleSelection.day")}
+                          </span>
                           <span>•</span>
                           <span>{car.licensePlate}</span>
                           <span>•</span>
@@ -111,27 +119,31 @@ const VehicleSelectionSection: React.FC<VehicleSelectionSectionProps> = ({
             <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
               <h4 className="font-medium text-blue-900 mb-3 flex items-center gap-2">
                 <Car className="h-4 w-4" />
-                Selected Vehicle Details
+                {t("bookings.form.vehicleSelection.selectedVehicleDetails")}
               </h4>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Basic Info */}
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-blue-700">Vehicle:</span>
+                    <span className="text-sm text-blue-700">
+                      {t("bookings.form.vehicleSelection.vehicle")}:
+                    </span>
                     <span className="font-semibold text-blue-900">
                       {selectedCar.brand} {selectedCar.name}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-blue-700">Year:</span>
+                    <span className="text-sm text-blue-700">
+                      {t("bookings.form.vehicleSelection.year")}:
+                    </span>
                     <span className="font-medium text-blue-800">
                       {selectedCar.year}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-blue-700">
-                      License Plate:
+                      {t("bookings.form.vehicleSelection.licensePlate")}:
                     </span>
                     <Badge
                       variant="outline"
@@ -140,6 +152,41 @@ const VehicleSelectionSection: React.FC<VehicleSelectionSectionProps> = ({
                       {selectedCar.licensePlate}
                     </Badge>
                   </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-blue-700">
+                      {t("bookings.form.vehicleSelection.transmission")}:
+                    </span>
+                    <span className="font-medium text-blue-800 flex items-center gap-1">
+                      <span>
+                        {getTransmissionIcon(selectedCar.transmission)}
+                      </span>
+                      {selectedCar.transmission === "automatic"
+                        ? t("bookings.form.vehicleSelection.automatic")
+                        : t("bookings.form.vehicleSelection.manual")}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-blue-700">
+                      {t("bookings.form.vehicleSelection.fuelType")}:
+                    </span>
+                    <span className="font-medium text-blue-800 flex items-center gap-1">
+                      <span>{getFuelIcon(selectedCar.fuelType)}</span>
+                      {t(
+                        `bookings.form.vehicleSelection.fuel.${selectedCar.fuelType?.toLowerCase()}`
+                      )}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-blue-700">
+                      {t("bookings.form.vehicleSelection.capacity")}:
+                    </span>
+                    <span className="font-medium text-blue-800">
+                      {selectedCar.seats}{" "}
+                      {t("bookings.form.vehicleSelection.seats")} •{" "}
+                      {selectedCar.doors}{" "}
+                      {t("bookings.form.vehicleSelection.doors")}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Pricing & Contact */}
@@ -147,14 +194,25 @@ const VehicleSelectionSection: React.FC<VehicleSelectionSectionProps> = ({
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-blue-700 flex items-center gap-1">
                       <CreditCard className="h-3 w-3" />
-                      Daily Rate:
+                      {t("bookings.form.vehicleSelection.dailyRate")}:
                     </span>
                     <span className="font-bold text-blue-900">
-                      €{selectedCar.price}/day
+                      €{selectedCar.price}/
+                      {t("bookings.form.vehicleSelection.day")}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-blue-700">Status:</span>
+                    <span className="text-sm text-blue-700">
+                      {t("bookings.form.vehicleSelection.securityDeposit")}:
+                    </span>
+                    <span className="font-bold text-amber-900">
+                      €{selectedCar.caution}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-blue-700">
+                      {t("bookings.form.vehicleSelection.status")}:
+                    </span>
                     <Badge
                       className={
                         selectedCar.available
@@ -162,14 +220,16 @@ const VehicleSelectionSection: React.FC<VehicleSelectionSectionProps> = ({
                           : "bg-red-100 text-red-800"
                       }
                     >
-                      {selectedCar.available ? "Available" : "Not Available"}
+                      {selectedCar.available
+                        ? t("bookings.form.vehicleSelection.available")
+                        : t("bookings.form.vehicleSelection.notAvailable")}
                     </Badge>
                   </div>
                   {selectedCar.whatsappNumber && (
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-blue-700 flex items-center gap-1">
                         <Phone className="h-3 w-3" />
-                        WhatsApp:
+                        {t("bookings.form.vehicleSelection.whatsapp")}:
                       </span>
                       <a
                         href={`https://wa.me/${selectedCar.whatsappNumber.replace(
@@ -184,8 +244,40 @@ const VehicleSelectionSection: React.FC<VehicleSelectionSectionProps> = ({
                       </a>
                     </div>
                   )}
+                  {selectedCar.mileage && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-blue-700">
+                        {t("bookings.form.vehicleSelection.mileage")}:
+                      </span>
+                      <span className="font-medium text-blue-800">
+                        {selectedCar.mileage.toLocaleString()} km
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
+
+              {/* Features Section */}
+              {selectedCar.features && selectedCar.features.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-blue-200">
+                  <h5 className="font-medium text-blue-900 mb-2 text-sm">
+                    {t("bookings.form.vehicleSelection.features")}:
+                  </h5>
+                  <div className="flex flex-wrap gap-1">
+                    {selectedCar.features.map((feature, index) => (
+                      <Badge
+                        key={index}
+                        variant="outline"
+                        className="text-xs bg-white text-blue-700 border-blue-300"
+                      >
+                        {t(
+                          `bookings.form.vehicleSelection.featuresList.${feature}`
+                        )}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -193,8 +285,10 @@ const VehicleSelectionSection: React.FC<VehicleSelectionSectionProps> = ({
           {cars.length > 0 && (
             <div className="mt-2 text-xs text-gray-500 flex items-center gap-1">
               <Car className="h-3 w-3" />
-              {cars.length} vehicle{cars.length !== 1 ? "s" : ""} available for
-              selection
+              {t("bookings.form.vehicleSelection.availableCount", {
+                count: cars.length,
+                plural: cars.length !== 1 ? "s" : "",
+              })}
             </div>
           )}
         </div>

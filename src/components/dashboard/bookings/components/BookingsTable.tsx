@@ -1,4 +1,3 @@
-// src/components/dashboard/bookings/components/BookingsTable.tsx - Updated with Contract Download
 "use client";
 
 import React from "react";
@@ -41,7 +40,6 @@ import {
   formatBookingStatus,
 } from "@/components/types";
 
-// Import the ContractDownload component
 import ContractDownload from "../ContractDownload";
 
 interface BookingsTableProps {
@@ -74,7 +72,7 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
         <Badge className={statusClass}>{statusText}</Badge>
         {source === "website" && (
           <Badge variant="outline" className="text-xs">
-            Website
+            {t("bookings.table.sourceWebsite")}
           </Badge>
         )}
         {source === "admin" && (
@@ -82,7 +80,7 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
             variant="outline"
             className="text-xs bg-blue-50 text-blue-700 border-blue-200"
           >
-            Admin
+            {t("bookings.table.sourceAdmin")}
           </Badge>
         )}
       </div>
@@ -93,14 +91,14 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
     if (booking.customer) {
       return `${booking.customer.firstName} ${booking.customer.lastName}`;
     }
-    return "Unknown Customer";
+    return t("bookings.table.unknownCustomer");
   };
 
   const formatVehicleName = (booking: BookingData) => {
     if (booking.vehicle) {
       return `${booking.vehicle.brand} ${booking.vehicle.name}`;
     }
-    return "Unknown Vehicle";
+    return t("bookings.table.unknownVehicle");
   };
 
   const formatDate = (dateString: string) => {
@@ -126,10 +124,10 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
       <div className="text-center py-12">
         <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
         <h3 className="text-lg font-medium text-gray-900 mb-2">
-          No bookings found
+          {t("bookings.table.noBookingsFound")}
         </h3>
         <p className="text-gray-500">
-          Try adjusting your search or filter criteria.
+          {t("bookings.table.tryAdjustingFilters")}
         </p>
       </div>
     );
@@ -140,16 +138,16 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Booking</TableHead>
-            <TableHead>Customer</TableHead>
-            <TableHead>Vehicle</TableHead>
-            <TableHead>WhatsApp Contact</TableHead>
-            <TableHead>Period</TableHead>
-            <TableHead>Locations</TableHead>
-            <TableHead>Amount</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Contract</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead>{t("bookings.table.booking")}</TableHead>
+            <TableHead>{t("bookings.table.customer")}</TableHead>
+            <TableHead>{t("bookings.table.vehicle")}</TableHead>
+            <TableHead>{t("bookings.table.whatsappContact")}</TableHead>
+            <TableHead>{t("bookings.table.period")}</TableHead>
+            <TableHead>{t("bookings.table.locations")}</TableHead>
+            <TableHead>{t("bookings.table.amount")}</TableHead>
+            <TableHead>{t("bookings.table.status")}</TableHead>
+            <TableHead>{t("bookings.table.contract")}</TableHead>
+            <TableHead>{t("bookings.table.actions")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -158,7 +156,6 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
               key={booking.id}
               className="hover:bg-gray-50 transition-colors"
             >
-              {/* Booking Number and Date */}
               <TableCell>
                 <div>
                   <p className="font-semibold text-gray-900">
@@ -168,12 +165,14 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
                     {formatDate(booking.createdAt)}
                   </p>
                   <p className="text-xs text-gray-500">
-                    {booking.totalDays} day{booking.totalDays > 1 ? "s" : ""}
+                    {booking.totalDays}{" "}
+                    {booking.totalDays > 1
+                      ? t("bookings.table.days")
+                      : t("bookings.table.day")}
                   </p>
                 </div>
               </TableCell>
 
-              {/* Customer Info */}
               <TableCell>
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-carbookers-red-600 flex items-center justify-center text-white font-semibold text-sm">
@@ -185,7 +184,7 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
                       {formatCustomerName(booking)}
                     </p>
                     <p className="text-sm text-gray-600">
-                      {booking.customer?.phone || "No phone"}
+                      {booking.customer?.phone || t("bookings.table.noPhone")}
                     </p>
                     {booking.customer?.email && (
                       <p className="text-xs text-gray-500 truncate max-w-32">
@@ -196,7 +195,6 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
                 </div>
               </TableCell>
 
-              {/* Vehicle Info */}
               <TableCell>
                 <div className="flex items-center gap-2">
                   <Car className="h-4 w-4 text-gray-400" />
@@ -205,10 +203,11 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
                       {formatVehicleName(booking)}
                     </p>
                     <p className="text-sm text-gray-600">
-                      €{booking.dailyRate}/day
+                      €{booking.dailyRate}/{t("bookings.table.day")}
                     </p>
                     <p className="text-xs text-gray-500">
-                      {booking.vehicle?.licensePlate || "No plate"}
+                      {booking.vehicle?.licensePlate ||
+                        t("bookings.table.noPlate")}
                     </p>
                   </div>
                 </div>
@@ -273,7 +272,7 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
                   </div>
                   {booking.pickupLocation !== booking.returnLocation && (
                     <p className="text-xs text-amber-600 mt-1">
-                      Different locations
+                      {t("bookings.table.differentLocations")}
                     </p>
                   )}
                 </div>
@@ -286,7 +285,7 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
                     €{booking.totalAmount.toLocaleString()}
                   </p>
                   <p className="text-xs text-gray-500">
-                    €{booking.dailyRate}/day
+                    €{booking.dailyRate}/{t("bookings.table.day")}
                   </p>
                 </div>
               </TableCell>
@@ -296,7 +295,7 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
                 {getStatusBadge(booking.status, booking.source)}
               </TableCell>
 
-              {/* Contract Download Column - NEW */}
+              {/* Contract Download Column */}
               <TableCell>
                 <ContractDownload
                   bookingId={booking.id}
@@ -314,13 +313,15 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                    <DropdownMenuLabel>
+                      {t("bookings.table.actionsLabel")}
+                    </DropdownMenuLabel>
                     <DropdownMenuSeparator />
 
                     {/* View Details - Always available */}
                     <DropdownMenuItem onClick={() => onViewDetails(booking)}>
                       <Eye className="mr-2 h-4 w-4" />
-                      View Details
+                      {t("bookings.actions.viewDetails")}
                     </DropdownMenuItem>
 
                     {/* Confirm Booking - Only for pending bookings */}
@@ -330,7 +331,7 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
                         onClick={() => onConfirmBooking(booking.id)}
                       >
                         <Check className="mr-2 h-4 w-4" />
-                        Confirm Booking
+                        {t("bookings.actions.confirmBooking")}
                       </DropdownMenuItem>
                     )}
 
@@ -341,18 +342,17 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
                         onClick={() => onPickupBooking(booking.id)}
                       >
                         <Truck className="mr-2 h-4 w-4" />
-                        Mark as Picked Up
+                        {t("bookings.actions.markAsPickedUp")}
                       </DropdownMenuItem>
                     )}
 
-                    {/* Complete Booking - Only for active bookings */}
                     {booking.status === "active" && onCompleteBooking && (
                       <DropdownMenuItem
                         className="text-purple-600"
                         onClick={() => onCompleteBooking(booking.id)}
                       >
                         <CheckCircle className="mr-2 h-4 w-4" />
-                        Complete Booking
+                        {t("bookings.actions.completeBooking")}
                       </DropdownMenuItem>
                     )}
 
@@ -366,7 +366,7 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
                           onClick={() => onCancelBooking(booking.id)}
                         >
                           <X className="mr-2 h-4 w-4" />
-                          Cancel Booking
+                          {t("bookings.actions.cancelBooking")}
                         </DropdownMenuItem>
                       </>
                     )}
@@ -388,7 +388,7 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
                             className="flex items-center"
                           >
                             <FileText className="mr-2 h-4 w-4" />
-                            Download Contract
+                            {t("bookings.actions.downloadContract")}
                           </a>
                         </DropdownMenuItem>
                       </>
@@ -401,15 +401,19 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
                         href={`https://wa.me/${booking.customer?.phone?.replace(
                           /[^0-9]/g,
                           ""
-                        )}?text=Hello ${formatCustomerName(
-                          booking
-                        )}, regarding your booking ${booking.bookingNumber}...`}
+                        )}?text=${encodeURIComponent(
+                          `${t(
+                            "bookings.actions.contactMessage"
+                          )} ${formatCustomerName(booking)}, ${t(
+                            "bookings.actions.regardingBooking"
+                          )} ${booking.bookingNumber}...`
+                        )}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center"
                       >
                         <User className="mr-2 h-4 w-4" />
-                        Contact Customer
+                        {t("bookings.actions.contactCustomer")}
                       </a>
                     </DropdownMenuItem>
                   </DropdownMenuContent>

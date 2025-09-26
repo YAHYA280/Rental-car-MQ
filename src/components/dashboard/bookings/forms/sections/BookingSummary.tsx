@@ -1,4 +1,3 @@
-// src/components/dashboard/bookings/forms/sections/BookingSummary.tsx
 "use client";
 
 import React from "react";
@@ -45,24 +44,12 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
 }) => {
   const t = useTranslations("dashboard");
 
-  // Debug logging
-  console.log("BookingSummary:", {
-    customer,
-    car,
-    days,
-    totalAmount,
-    pickupTime,
-    returnTime,
-  });
-
-  // Calculate breakdown
   const dailyRate = car.price;
   const subtotal = dailyRate * days;
   const discount = 0;
   const finalTotal = subtotal - discount;
-  const cautionAmount = Number(car.caution) || 0; // FIXED: Convert to number
+  const cautionAmount = Number(car.caution) || 0;
 
-  // Calculate time excess info
   const getTimeExcessInfo = () => {
     if (!pickupTime || !returnTime) return null;
 
@@ -84,7 +71,10 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
         hasExcess: true,
         excessHours,
         excessMinutes: remainingMinutes,
-        message: `+1 day added (${excessHours}h ${remainingMinutes}m beyond grace period)`,
+        message: t("bookings.summary.timeExcessMessage", {
+          hours: excessHours,
+          minutes: remainingMinutes,
+        }),
       };
     }
 
@@ -93,7 +83,6 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
 
   const timeExcessInfo = getTimeExcessInfo();
 
-  // Determine discount eligibility
   const isLongTerm = days >= 7;
   const isVeryLongTerm = days >= 30;
 
@@ -102,7 +91,7 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
       <CardContent className="p-4">
         <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-blue-900">
           <Receipt className="h-5 w-5" />
-          Booking Summary
+          {t("bookings.summary.title")}
         </h3>
 
         <div className="space-y-4">
@@ -110,7 +99,7 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
           <div className="bg-white border rounded-lg p-3">
             <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2 text-sm">
               <User className="h-4 w-4 text-blue-600" />
-              Customer
+              {t("bookings.summary.customer")}
             </h4>
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-carbookers-red-600 flex items-center justify-center text-white font-semibold text-xs">
@@ -131,7 +120,7 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
           <div className="bg-white border rounded-lg p-3">
             <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2 text-sm">
               <Car className="h-4 w-4 text-blue-600" />
-              Vehicle
+              {t("bookings.summary.vehicle")}
             </h4>
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded bg-blue-100 flex items-center justify-center">
@@ -146,10 +135,10 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
                 </p>
                 <div className="flex items-center gap-2 mt-1">
                   <Badge className="bg-green-100 text-green-800 text-xs px-1 py-0">
-                    Available
+                    {t("bookings.summary.available")}
                   </Badge>
                   <span className="text-xs text-blue-600 font-medium">
-                    €{car.price}/day
+                    €{car.price}/{t("bookings.summary.day")}
                   </span>
                 </div>
               </div>
@@ -160,23 +149,28 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
           <div className="bg-white border rounded-lg p-3">
             <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2 text-sm">
               <Calendar className="h-4 w-4 text-blue-600" />
-              Rental Duration
+              {t("bookings.summary.rentalDuration")}
             </h4>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-gray-400" />
-                  <span className="text-sm text-gray-600">Duration:</span>
+                  <span className="text-sm text-gray-600">
+                    {t("bookings.summary.duration")}:
+                  </span>
                 </div>
                 <div className="text-right">
                   <p className="font-bold text-gray-900">
-                    {days} {days === 1 ? "Day" : "Days"}
+                    {days}{" "}
+                    {days === 1
+                      ? t("bookings.summary.day")
+                      : t("bookings.summary.days")}
                   </p>
                   {isLongTerm && (
                     <p className="text-xs text-green-600">
                       {isVeryLongTerm
-                        ? "Monthly rate eligible"
-                        : "Weekly rate eligible"}
+                        ? t("bookings.summary.monthlyRateEligible")
+                        : t("bookings.summary.weeklyRateEligible")}
                     </p>
                   )}
                 </div>
@@ -186,21 +180,21 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
               {pickupTime && returnTime && (
                 <div className="text-xs text-gray-600 space-y-1 pt-2 border-t border-gray-200">
                   <div className="flex justify-between">
-                    <span>Pickup Time:</span>
+                    <span>{t("bookings.summary.pickupTime")}:</span>
                     <span className="font-medium">{pickupTime}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Return Time:</span>
+                    <span>{t("bookings.summary.returnTime")}:</span>
                     <span className="font-medium">{returnTime}</span>
                   </div>
                   {pickupDate && returnDate && (
                     <>
                       <div className="flex justify-between">
-                        <span>From:</span>
+                        <span>{t("bookings.summary.from")}:</span>
                         <span className="font-medium">{pickupDate}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>To:</span>
+                        <span>{t("bookings.summary.to")}:</span>
                         <span className="font-medium">{returnDate}</span>
                       </div>
                     </>
@@ -214,7 +208,7 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
                   <div className="flex items-center gap-2 text-amber-800">
                     <AlertCircle className="h-4 w-4" />
                     <span className="text-xs font-medium">
-                      Time Policy Applied
+                      {t("bookings.summary.timePolicyApplied")}
                     </span>
                   </div>
                   <p className="text-xs text-amber-700 mt-1">
@@ -229,14 +223,20 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
           <div className="bg-gray-50 border rounded-lg p-3">
             <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2 text-sm">
               <Calculator className="h-4 w-4 text-blue-600" />
-              Price Breakdown
+              {t("bookings.summary.priceBreakdown")}
             </h4>
 
             <div className="space-y-2">
               {/* Daily Rate */}
               <div className="flex justify-between items-center text-sm">
                 <span className="text-gray-600">
-                  Daily rate × {days} {days === 1 ? "day" : "days"}
+                  {t("bookings.summary.dailyRateCalculation", {
+                    days: days,
+                    dayText:
+                      days === 1
+                        ? t("bookings.summary.day")
+                        : t("bookings.summary.days"),
+                  })}
                 </span>
                 <span className="font-medium">
                   €{dailyRate} × {days} = €{subtotal}
@@ -248,7 +248,7 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
                 <div className="flex justify-between items-center text-sm text-amber-600">
                   <span className="flex items-center gap-1">
                     <Clock className="h-3 w-3" />
-                    Time excess (+1 day)
+                    {t("bookings.summary.timeExcess")}
                   </span>
                   <span>€{dailyRate}</span>
                 </div>
@@ -259,8 +259,8 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
                 <div className="flex justify-between items-center text-sm text-green-600">
                   <span>
                     {isVeryLongTerm
-                      ? "Monthly discount (15%)"
-                      : "Weekly discount (10%)"}
+                      ? t("bookings.summary.monthlyDiscount")
+                      : t("bookings.summary.weeklyDiscount")}
                   </span>
                   <span>
                     -€
@@ -271,15 +271,13 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
                 </div>
               )}
 
-              {/* Taxes */}
-
               {/* Divider */}
               <div className="border-t border-gray-300 my-2"></div>
 
               {/* Rental Total */}
               <div className="flex justify-between items-center">
                 <span className="font-semibold text-gray-900">
-                  Rental Total:
+                  {t("bookings.summary.rentalTotal")}:
                 </span>
                 <span className="font-bold text-xl text-carbookers-red-600">
                   €{totalAmount}
@@ -291,19 +289,16 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
                 <div className="flex justify-between items-center mb-2">
                   <span className="font-semibold text-amber-900 flex items-center gap-2">
                     <Shield className="h-4 w-4" />
-                    Security Deposit:
+                    {t("bookings.summary.securityDeposit")}:
                   </span>
                   <span className="font-bold text-xl text-amber-900">
                     €{cautionAmount}
                   </span>
                 </div>
                 <p className="text-xs text-amber-700">
-                  Refundable deposit required at vehicle pickup. Covers
-                  potential damages, fuel, and traffic violations.
+                  {t("bookings.summary.securityDepositDesc")}
                 </p>
               </div>
-
-              {/* Per day average */}
             </div>
           </div>
         </div>
