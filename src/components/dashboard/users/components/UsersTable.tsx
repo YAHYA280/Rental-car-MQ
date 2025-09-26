@@ -1,4 +1,3 @@
-// src/components/dashboard/users/components/UsersTable.tsx - UPDATED: Removed city, postal code, emergency contact, notes, and referral code
 "use client";
 
 import React from "react";
@@ -384,14 +383,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
                       Edit Customer
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="cursor-pointer">
-                      <Mail className="mr-2 h-4 w-4" />
-                      Send Email
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="cursor-pointer">
-                      <Phone className="mr-2 h-4 w-4" />
-                      Call Customer
-                    </DropdownMenuItem>
+
                     <DropdownMenuItem className="cursor-pointer">
                       <FileText className="mr-2 h-4 w-4" />
                       View Bookings

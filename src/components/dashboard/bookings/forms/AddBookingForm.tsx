@@ -1,4 +1,3 @@
-// src/components/dashboard/bookings/forms/AddBookingForm.tsx - UPDATED: Pass selectedCarId to DateTimeSection
 "use client";
 
 import React, { useState } from "react";

@@ -202,7 +202,7 @@ const DashboardUsersContent = () => {
             <Plus className="h-4 w-4" />
             {t("users.addNew")}
           </Button>
-          <DialogContent className="w-[min(800px,95vw)] sm:max-w-[min(800px,95vw)] max-h-[95vh] overflow-y-auto">
+          <DialogContent className="w-[min(800px,95vw)] sm:max-w-[min(800px,95vw)] max-h-[95vh] ">
             <DialogHeader>
               <DialogTitle>{t("users.form.title")}</DialogTitle>
               <DialogDescription>

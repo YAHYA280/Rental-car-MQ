@@ -1,5 +1,3 @@
-// STEP 1B: Replace the entire DashboardCarsContent.tsx file
-
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
@@ -330,7 +328,7 @@ const DashboardCarsContent = () => {
             <Plus className="h-4 w-4" />
             {t("addNew")}
           </Button>
-          <DialogContent className="w-[min(1400px,95vw)] sm:max-w-[min(1400px,95vw)] max-h-[95vh] overflow-y-auto">
+          <DialogContent className="w-[min(1400px,95vw)] sm:max-w-[min(1400px,95vw)] max-h-[95vh] ">
             <DialogHeader>
               <DialogTitle>{t("form.title")}</DialogTitle>
               <DialogDescription>{t("form.description")}</DialogDescription>

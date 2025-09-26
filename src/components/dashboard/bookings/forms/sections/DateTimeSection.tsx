@@ -1,4 +1,4 @@
-// src/components/dashboard/bookings/forms/sections/DateTimeSection.tsx - FIXED: Integrated vehicle calendar
+// src/components/dashboard/bookings/forms/sections/DateTimeSection.tsx - FIXED: Working calendar with minimum 2 days
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -32,14 +32,13 @@ import { cn } from "@/lib/utils";
 import { FormValidationState } from "@/components/types";
 import { bookingService } from "@/services/bookingService";
 import { toast } from "sonner";
-import { DateRange } from "react-day-picker";
 
 interface DateTimeSectionProps {
   pickupDate: Date | undefined;
   returnDate: Date | undefined;
   pickupTime: string;
   returnTime: string;
-  selectedCarId: string; // NEW: Vehicle ID for calendar loading
+  selectedCarId: string;
   onPickupDateChange: (date: Date | undefined) => void;
   onReturnDateChange: (date: Date | undefined) => void;
   onPickupTimeChange: (time: string) => void;
@@ -52,7 +51,7 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
   returnDate,
   pickupTime,
   returnTime,
-  selectedCarId, // NEW
+  selectedCarId,
   onPickupDateChange,
   onReturnDateChange,
   onPickupTimeChange,
@@ -61,7 +60,7 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
 }) => {
   const t = useTranslations("dashboard");
 
-  // NEW: State for vehicle calendar
+  // State for vehicle calendar
   const [isLoadingCalendar, setIsLoadingCalendar] = useState(false);
   const [blockedDates, setBlockedDates] = useState<string[]>([]);
   const [vehicleAvailability, setVehicleAvailability] = useState<{
@@ -70,27 +69,6 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
     upcomingBooking?: any;
     nextAvailableDate?: string;
   }>({ available: true });
-
-  // NEW: Date range state for better UX
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
-    if (pickupDate && returnDate) {
-      return {
-        from: pickupDate,
-        to: returnDate,
-      };
-    }
-    return undefined;
-  });
-
-  // Debug logging
-  console.log("DateTimeSection:", {
-    pickupDate,
-    returnDate,
-    pickupTime,
-    returnTime,
-    selectedCarId,
-    errors,
-  });
 
   // Generate time slots
   const timeSlots = React.useMemo(() => {
@@ -106,18 +84,17 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
     return slots;
   }, []);
 
-  // NEW: Load vehicle calendar when vehicle is selected
+  // Load vehicle calendar when vehicle is selected
   useEffect(() => {
     if (selectedCarId) {
       loadVehicleCalendar(selectedCarId);
     } else {
-      // Clear calendar data when no vehicle selected
       setBlockedDates([]);
       setVehicleAvailability({ available: true });
     }
   }, [selectedCarId]);
 
-  // NEW: Load vehicle calendar and blocked dates from backend
+  // Load vehicle calendar and blocked dates from backend
   const loadVehicleCalendar = async (vehicleId: string) => {
     try {
       setIsLoadingCalendar(true);
@@ -126,8 +103,6 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
       const endDate = new Date();
       endDate.setDate(today.getDate() + 90);
 
-      console.log(`Loading calendar for vehicle: ${vehicleId}`);
-
       const response = await bookingService.getVehicleCalendar(
         vehicleId,
         format(today, "yyyy-MM-dd"),
@@ -135,8 +110,6 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
       );
 
       if (response.success && response.data) {
-        console.log("Calendar data loaded:", response.data);
-
         setBlockedDates(response.data.blockedDates || []);
         setVehicleAvailability({
           available: response.data.available,
@@ -145,19 +118,11 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
           upcomingBooking: response.data.upcomingBooking,
         });
 
-        // Show availability status
         if (!response.data.available && response.data.nextAvailableDate) {
           toast.info("Vehicle availability updated", {
             description: `Next available: ${format(
               new Date(response.data.nextAvailableDate),
               "MMM dd, yyyy"
-            )}`,
-          });
-        } else if (response.data.available && response.data.upcomingBooking) {
-          toast.info("Vehicle availability loaded", {
-            description: `Available until ${format(
-              new Date(response.data.upcomingBooking.pickupDate),
-              "MMM dd"
             )}`,
           });
         }
@@ -172,46 +137,72 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
     }
   };
 
-  // NEW: Check if a date is blocked
+  // Check if a date is blocked
   const isDateBlocked = (date: Date): boolean => {
     const dateStr = format(date, "yyyy-MM-dd");
     return blockedDates.includes(dateStr);
   };
 
-  // NEW: Enhanced date range selection with blocking validation
-  const handleDateRangeSelect = (range: DateRange | undefined) => {
-    if (!range) {
-      setDateRange(undefined);
-      onPickupDateChange(undefined);
-      onReturnDateChange(undefined);
-      return;
-    }
+  // FIXED: Simple date change handlers (like your old working code)
+  const handlePickupDateChange = (date: Date | undefined) => {
+    onPickupDateChange(date);
 
-    // If only 'from' date is selected, allow it
-    if (range.from && !range.to) {
-      // Check if pickup date is blocked
-      if (isDateBlocked(range.from)) {
-        toast.error("Selected pickup date is not available", {
-          description: "Please choose an available date",
+    // If we have both dates, validate minimum 2 days
+    if (date && returnDate) {
+      const pickupUTC = new Date(
+        Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
+      );
+      const returnUTC = new Date(
+        Date.UTC(
+          returnDate.getFullYear(),
+          returnDate.getMonth(),
+          returnDate.getDate()
+        )
+      );
+      const diffDays = Math.ceil(
+        (returnUTC.getTime() - pickupUTC.getTime()) / (1000 * 60 * 60 * 24)
+      );
+
+      if (diffDays < 2) {
+        toast.error("Minimum rental period is 2 days", {
+          description: "Please select at least 2 days for your rental",
+          duration: 4000,
+        });
+      }
+    }
+  };
+
+  const handleReturnDateChange = (date: Date | undefined) => {
+    if (date && pickupDate) {
+      // Check minimum 2 days
+      const pickupUTC = new Date(
+        Date.UTC(
+          pickupDate.getFullYear(),
+          pickupDate.getMonth(),
+          pickupDate.getDate()
+        )
+      );
+      const returnUTC = new Date(
+        Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
+      );
+      const diffDays = Math.ceil(
+        (returnUTC.getTime() - pickupUTC.getTime()) / (1000 * 60 * 60 * 24)
+      );
+
+      if (diffDays < 2) {
+        toast.error("Minimum rental period is 2 days", {
+          description: "Please select at least 2 days for your rental",
+          duration: 4000,
         });
         return;
       }
 
-      setDateRange(range);
-      onPickupDateChange(range.from);
-      onReturnDateChange(undefined);
-      return;
-    }
-
-    // Check if any date in the range is blocked
-    if (range.from && range.to) {
-      const currentDate = new Date(range.from);
-      const endDate = new Date(range.to);
-
+      // Check for blocked dates in range
+      const currentDate = new Date(pickupDate);
       let hasBlockedDate = false;
       let blockedDate = "";
 
-      while (currentDate <= endDate) {
+      while (currentDate <= date) {
         if (isDateBlocked(currentDate)) {
           hasBlockedDate = true;
           blockedDate = format(currentDate, "MMM dd, yyyy");
@@ -226,52 +217,95 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
         });
         return;
       }
-    }
 
-    // If we get here, the selection is valid
-    setDateRange(range);
-    if (range.from) {
-      onPickupDateChange(range.from);
-    }
-    if (range.to) {
-      onReturnDateChange(range.to);
-
-      toast.success("Dates selected successfully!", {
+      // Success message
+      toast.success(`${diffDays} days selected successfully!`, {
+        description: `From ${format(pickupDate, "MMM dd")} to ${format(
+          date,
+          "MMM dd"
+        )}`,
         duration: 2000,
       });
     }
+
+    onReturnDateChange(date);
   };
 
-  // Calculate rental duration with time logic
-  const calculateDuration = () => {
-    if (pickupDate && returnDate && pickupTime && returnTime) {
-      // Basic day calculation
-      const diffTime = Math.abs(returnDate.getTime() - pickupDate.getTime());
-      const basicDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  // FIXED: Proper rental duration calculation
+  const calculateDuration = (): number => {
+    if (!pickupDate || !returnDate || !pickupTime || !returnTime) {
+      return 0;
+    }
+
+    try {
+      // Calculate basic day difference using UTC
+      const pickupUTC = new Date(
+        Date.UTC(
+          pickupDate.getFullYear(),
+          pickupDate.getMonth(),
+          pickupDate.getDate()
+        )
+      );
+      const returnUTC = new Date(
+        Date.UTC(
+          returnDate.getFullYear(),
+          returnDate.getMonth(),
+          returnDate.getDate()
+        )
+      );
+      const basicDays = Math.ceil(
+        (returnUTC.getTime() - pickupUTC.getTime()) / (1000 * 60 * 60 * 24)
+      );
 
       // Apply time logic
       const [pickupHour, pickupMin] = pickupTime.split(":").map(Number);
       const [returnHour, returnMin] = returnTime.split(":").map(Number);
 
+      if (
+        isNaN(pickupHour) ||
+        isNaN(pickupMin) ||
+        isNaN(returnHour) ||
+        isNaN(returnMin)
+      ) {
+        return Math.max(2, basicDays);
+      }
+
       const pickupMinutes = pickupHour * 60 + pickupMin;
       const returnMinutes = returnHour * 60 + returnMin;
-
-      // Your logic: if return time is more than 1 hour after pickup time, add 1 day
       const timeDifference = returnMinutes - pickupMinutes;
       const oneHourInMinutes = 60;
 
       let rentalDays = basicDays;
-
       if (timeDifference > oneHourInMinutes) {
         rentalDays += 1;
       }
 
-      return Math.max(1, rentalDays);
+      return Math.max(2, rentalDays);
+    } catch (error) {
+      console.error("Error calculating duration:", error);
+      const pickupUTC = new Date(
+        Date.UTC(
+          pickupDate.getFullYear(),
+          pickupDate.getMonth(),
+          pickupDate.getDate()
+        )
+      );
+      const returnUTC = new Date(
+        Date.UTC(
+          returnDate.getFullYear(),
+          returnDate.getMonth(),
+          returnDate.getDate()
+        )
+      );
+      const fallbackDays = Math.ceil(
+        (returnUTC.getTime() - pickupUTC.getTime()) / (1000 * 60 * 60 * 24)
+      );
+      return Math.max(2, fallbackDays);
     }
-    return 0;
   };
 
   const duration = calculateDuration();
+  const meetsMinimumDays = duration >= 2;
 
   // Check if same day booking
   const isSameDay =
@@ -279,33 +313,45 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
     returnDate &&
     pickupDate.toDateString() === returnDate.toDateString();
 
-  // Get time excess info for display
+  // Get time excess info
   const getTimeExcessInfo = () => {
     if (!pickupTime || !returnTime) return null;
 
-    const [pickupHour, pickupMin] = pickupTime.split(":").map(Number);
-    const [returnHour, returnMin] = returnTime.split(":").map(Number);
+    try {
+      const [pickupHour, pickupMin] = pickupTime.split(":").map(Number);
+      const [returnHour, returnMin] = returnTime.split(":").map(Number);
 
-    const pickupMinutes = pickupHour * 60 + pickupMin;
-    const returnMinutes = returnHour * 60 + returnMin;
+      if (
+        isNaN(pickupHour) ||
+        isNaN(pickupMin) ||
+        isNaN(returnHour) ||
+        isNaN(returnMin)
+      ) {
+        return null;
+      }
 
-    const timeDifference = returnMinutes - pickupMinutes;
-    const oneHourInMinutes = 60;
+      const pickupMinutes = pickupHour * 60 + pickupMin;
+      const returnMinutes = returnHour * 60 + returnMin;
+      const timeDifference = returnMinutes - pickupMinutes;
+      const oneHourInMinutes = 60;
 
-    if (timeDifference > oneHourInMinutes) {
-      const excessMinutes = timeDifference - oneHourInMinutes;
-      const excessHours = Math.floor(excessMinutes / 60);
-      const remainingMinutes = excessMinutes % 60;
+      if (timeDifference > oneHourInMinutes) {
+        const excessMinutes = timeDifference - oneHourInMinutes;
+        const excessHours = Math.floor(excessMinutes / 60);
+        const remainingMinutes = excessMinutes % 60;
 
-      return {
-        hasExcess: true,
-        excessHours,
-        excessMinutes: remainingMinutes,
-        message: `+1 day will be added (${excessHours}h ${remainingMinutes}m beyond grace period)`,
-      };
+        return {
+          hasExcess: true,
+          excessHours,
+          excessMinutes: remainingMinutes,
+          message: `+1 day will be added (${excessHours}h ${remainingMinutes}m beyond grace period)`,
+        };
+      }
+
+      return { hasExcess: false };
+    } catch (error) {
+      return null;
     }
-
-    return { hasExcess: false };
   };
 
   const timeExcessInfo = getTimeExcessInfo();
@@ -316,10 +362,13 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
         <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
           <CalendarIcon className="h-5 w-5" />
           Rental Period
+          <span className="text-sm font-normal text-blue-600 bg-blue-50 px-2 py-1 rounded">
+            Minimum 2 days
+          </span>
         </h3>
 
         <div className="space-y-4">
-          {/* NEW: Vehicle Availability Status */}
+          {/* Vehicle Availability Status */}
           {selectedCarId && (
             <div className="mb-4">
               {isLoadingCalendar ? (
@@ -365,112 +414,163 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
             </div>
           )}
 
-          {/* Date Selection - ENHANCED */}
-          <div>
-            <Label>Select Rental Period *</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal mt-1",
-                    !dateRange && "text-muted-foreground",
-                    errors.pickupDate && "border-red-500",
-                    isLoadingCalendar && "opacity-50"
-                  )}
-                  disabled={isLoadingCalendar || !selectedCarId}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {isLoadingCalendar ? (
-                    <span className="flex items-center gap-2">
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                      Loading calendar...
-                    </span>
-                  ) : dateRange?.from && dateRange?.to ? (
-                    <>
-                      {format(dateRange.from, "MMM dd")} -{" "}
-                      {format(dateRange.to, "MMM dd, yyyy")}
-                      {duration > 0 && (
-                        <span className="ml-auto text-xs text-gray-500">
-                          {duration}d
-                        </span>
-                      )}
-                    </>
-                  ) : dateRange?.from ? (
-                    format(dateRange.from, "MMM dd, yyyy")
-                  ) : (
-                    "Select pickup and return dates"
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="range"
-                  selected={dateRange}
-                  onSelect={handleDateRangeSelect}
-                  disabled={(date) => {
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    if (date < today) {
-                      return true;
-                    }
-                    return isDateBlocked(date);
-                  }}
-                  modifiers={{
-                    booked: (date) => isDateBlocked(date),
-                  }}
-                  modifiersStyles={{
-                    booked: {
-                      backgroundColor: "#fef2f2",
-                      color: "#dc2626",
-                      textDecoration: "line-through",
-                      opacity: 0.4,
-                      cursor: "not-allowed",
-                    },
-                  }}
-                  initialFocus
-                  numberOfMonths={2}
-                />
+          {/* FIXED: Separate Pickup and Return Date Selection (like your old working code) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Pickup Date */}
+            <div>
+              <Label>Pickup Date *</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal mt-1",
+                      !pickupDate && "text-muted-foreground",
+                      errors.pickupDate && "border-red-500"
+                    )}
+                    disabled={isLoadingCalendar || !selectedCarId}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {pickupDate
+                      ? format(pickupDate, "PPP")
+                      : "Select pickup date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={pickupDate}
+                    onSelect={handlePickupDateChange}
+                    disabled={(date) => {
+                      const today = new Date();
+                      today.setHours(0, 0, 0, 0);
+                      if (date < today) return true;
+                      return isDateBlocked(date);
+                    }}
+                    modifiers={{
+                      booked: (date) => isDateBlocked(date),
+                    }}
+                    modifiersStyles={{
+                      booked: {
+                        backgroundColor: "#fef2f2",
+                        color: "#dc2626",
+                        textDecoration: "line-through",
+                        opacity: 0.4,
+                      },
+                    }}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              {errors.pickupDate && (
+                <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {errors.pickupDate}
+                </p>
+              )}
+            </div>
 
-                {/* Calendar Legend */}
-                <div className="p-3 border-t border-gray-200 bg-gray-50">
-                  <div className="flex items-center justify-between text-xs mb-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-green-100 border border-green-300 rounded"></div>
-                      <span>Available</span>
+            {/* Return Date */}
+            <div>
+              <Label>Return Date *</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal mt-1",
+                      !returnDate && "text-muted-foreground",
+                      errors.returnDate && "border-red-500"
+                    )}
+                    disabled={
+                      isLoadingCalendar || !selectedCarId || !pickupDate
+                    }
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {returnDate
+                      ? format(returnDate, "PPP")
+                      : "Select return date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={returnDate}
+                    onSelect={handleReturnDateChange}
+                    disabled={(date) => {
+                      if (!pickupDate) return true;
+
+                      // Must be at least 2 days after pickup
+                      const pickupUTC = new Date(
+                        Date.UTC(
+                          pickupDate.getFullYear(),
+                          pickupDate.getMonth(),
+                          pickupDate.getDate()
+                        )
+                      );
+                      const dateUTC = new Date(
+                        Date.UTC(
+                          date.getFullYear(),
+                          date.getMonth(),
+                          date.getDate()
+                        )
+                      );
+                      const diffDays = Math.ceil(
+                        (dateUTC.getTime() - pickupUTC.getTime()) /
+                          (1000 * 60 * 60 * 24)
+                      );
+
+                      if (diffDays < 2) return true;
+                      return isDateBlocked(date);
+                    }}
+                    modifiers={{
+                      booked: (date) => isDateBlocked(date),
+                    }}
+                    modifiersStyles={{
+                      booked: {
+                        backgroundColor: "#fef2f2",
+                        color: "#dc2626",
+                        textDecoration: "line-through",
+                        opacity: 0.4,
+                      },
+                    }}
+                    initialFocus
+                  />
+
+                  {/* Calendar Legend */}
+                  <div className="p-3 border-t border-gray-200 bg-gray-50">
+                    <div className="flex items-center justify-between text-xs mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-green-100 border border-green-300 rounded"></div>
+                        <span>Available</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-red-100 border border-red-300 rounded opacity-40"></div>
+                        <span>Booked</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-red-100 border border-red-300 rounded opacity-40"></div>
-                      <span>Booked</span>
+                    <div className="bg-blue-50 border border-blue-200 rounded p-2">
+                      <div className="flex items-center gap-1 text-blue-800">
+                        <CalendarIcon className="h-3 w-3" />
+                        <span className="text-xs font-medium">
+                          Minimum 2 days required
+                        </span>
+                      </div>
                     </div>
                   </div>
-                  {blockedDates.length > 0 && (
-                    <p className="text-xs text-gray-600">
-                      {blockedDates.length} blocked date
-                      {blockedDates.length !== 1 ? "s" : ""} in this period
-                    </p>
-                  )}
-                </div>
-              </PopoverContent>
-            </Popover>
-
-            {errors.pickupDate && (
-              <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                <AlertCircle className="h-3 w-3" />
-                {errors.pickupDate}
-              </p>
-            )}
-            {errors.returnDate && (
-              <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                <AlertCircle className="h-3 w-3" />
-                {errors.returnDate}
-              </p>
-            )}
+                </PopoverContent>
+              </Popover>
+              {errors.returnDate && (
+                <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {errors.returnDate}
+                </p>
+              )}
+            </div>
           </div>
 
           {/* Time Selection */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Pickup Time */}
             <div>
               <Label htmlFor="pickupTime">Pickup Time *</Label>
               <Select value={pickupTime} onValueChange={onPickupTimeChange}>
@@ -496,7 +596,6 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
               )}
             </div>
 
-            {/* Return Time */}
             <div>
               <Label htmlFor="returnTime">Return Time *</Label>
               <Select value={returnTime} onValueChange={onReturnTimeChange}>
@@ -525,55 +624,53 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
 
           {/* Duration Summary */}
           {duration > 0 && (
-            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+            <div
+              className={cn(
+                "mt-4 p-3 border rounded-lg",
+                meetsMinimumDays
+                  ? "bg-green-50 border-green-200"
+                  : "bg-red-50 border-red-200"
+              )}
+            >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <CalendarIcon className="h-4 w-4 text-green-600" />
-                  <span className="text-sm font-medium text-green-800">
+                  <CalendarIcon
+                    className={cn(
+                      "h-4 w-4",
+                      meetsMinimumDays ? "text-green-600" : "text-red-600"
+                    )}
+                  />
+                  <span
+                    className={cn(
+                      "text-sm font-medium",
+                      meetsMinimumDays ? "text-green-800" : "text-red-800"
+                    )}
+                  >
                     Rental Duration
                   </span>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold text-green-900">
+                  <p
+                    className={cn(
+                      "font-bold",
+                      meetsMinimumDays ? "text-green-900" : "text-red-900"
+                    )}
+                  >
                     {duration} {duration === 1 ? "Day" : "Days"}
                   </p>
-                  {isSameDay && (
-                    <p className="text-xs text-green-700">Same day rental</p>
+                  {!meetsMinimumDays && (
+                    <p className="text-xs text-red-700">Need at least 2 days</p>
+                  )}
+                  {isSameDay && meetsMinimumDays && (
+                    <p className="text-xs text-green-700">
+                      Extended by time logic
+                    </p>
                   )}
                 </div>
               </div>
             </div>
           )}
 
-          {/* Time Policy Warning */}
-          {timeExcessInfo?.hasExcess && (
-            <div className="bg-amber-50 border border-amber-200 rounded p-3">
-              <div className="flex items-center gap-2 text-amber-800">
-                <AlertCircle className="h-4 w-4" />
-                <span className="text-sm font-medium">Time Policy Applied</span>
-              </div>
-              <p className="text-sm text-amber-700 mt-1">
-                {timeExcessInfo.message}
-              </p>
-            </div>
-          )}
-
-          {/* Time Policy Explanation */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <div className="flex items-start gap-2">
-              <Info className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
-              <div className="text-xs text-blue-800">
-                <p className="font-medium mb-1">Time Policy:</p>
-                <ul className="space-y-1">
-                  <li>• 1-hour grace period after pickup time</li>
-                  <li>• Return after grace period = +1 day charge</li>
-                  <li>• Example: Pickup 10:00, Return 11:30+ = +1 day</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          {/* No Vehicle Selected Warning */}
           {!selectedCarId && (
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
               <div className="flex items-center gap-2 text-gray-600">
