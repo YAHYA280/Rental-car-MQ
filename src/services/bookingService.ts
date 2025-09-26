@@ -1,7 +1,5 @@
-// src/services/bookingService.ts - FIXED with better error handling
 import { ApiResponse } from "@/components/types";
 
-// Booking types
 export interface BookingData {
   id: string;
   bookingNumber: string;
@@ -21,7 +19,6 @@ export interface BookingData {
   createdAt: string;
   updatedAt: string;
 
-  // Relations
   customer?: {
     id: string;
     firstName: string;
@@ -49,7 +46,6 @@ export interface BookingData {
   };
 }
 
-// Website booking form data (includes customer info)
 export interface WebsiteBookingFormData {
   // Customer information
   firstName: string;
@@ -93,7 +89,6 @@ export interface BookingFilters {
   order?: "ASC" | "DESC";
 }
 
-// FIXED: Enhanced booking stats interface
 export interface BookingStats {
   totalBookings: number;
   pendingBookings: number;
@@ -104,7 +99,6 @@ export interface BookingStats {
   totalRevenue: number;
   averageBookingValue: number;
   monthlyRevenue: number;
-  // Additional fallback fields
   revenueStats?: {
     total: number;
     monthly: number;
@@ -119,7 +113,7 @@ class BookingService {
   private baseUrl =
     process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
-  // FIXED: Enhanced error handling for API calls
+  // Enhanced error handling for API calls
   private async makeRequest<T>(
     url: string,
     options: RequestInit = {}
@@ -160,11 +154,16 @@ class BookingService {
       if (!response.ok) {
         console.error("API Error Response:", result);
 
-        // Enhanced error message handling
-        const errorMessage =
+        // Enhanced error message handling for booking conflicts
+        let errorMessage =
           result?.message ||
           result?.error ||
           `HTTP ${response.status}: ${response.statusText}`;
+
+        // Parse same-day conflict errors for better UI handling
+        if (errorMessage.includes("Same-day conflicts:")) {
+          errorMessage = this.parseSameDayConflictError(errorMessage);
+        }
 
         throw new Error(errorMessage);
       }
@@ -174,7 +173,6 @@ class BookingService {
     } catch (error) {
       console.error("API Request error:", error);
 
-      // Return structured error response
       if (error instanceof Error) {
         return {
           success: false,
@@ -189,6 +187,125 @@ class BookingService {
         data: null as any,
       };
     }
+  }
+
+  // NEW: Parse same-day conflict errors for better UI display
+  private parseSameDayConflictError(errorMessage: string): string {
+    try {
+      // Extract time and date information from backend error
+      const timeMatch = errorMessage.match(
+        /start after (\d{2}:\d{2}:\d{2}) on (\d{4}-\d{2}-\d{2})/
+      );
+
+      if (timeMatch) {
+        const requiredTime = timeMatch[1].substring(0, 5); // Remove seconds
+        const conflictDate = new Date(timeMatch[2]).toLocaleDateString();
+
+        return `Vehicle is not available at that time. Please select ${requiredTime} or later on ${conflictDate}.`;
+      }
+
+      // Fallback to original message if parsing fails
+      return errorMessage;
+    } catch (error) {
+      console.error("Error parsing same-day conflict:", error);
+      return errorMessage;
+    }
+  }
+
+  // UPDATED: Client-side validation before API call
+  private validateBookingData(
+    data: AdminBookingFormData | WebsiteBookingFormData
+  ): {
+    isValid: boolean;
+    errors: string[];
+  } {
+    const errors: string[] = [];
+
+    // UPDATED: Validate minimum 2 days
+    if (data.pickupDate && data.returnDate) {
+      const pickupDate = new Date(data.pickupDate);
+      const returnDate = new Date(data.returnDate);
+
+      // Calculate days difference
+      const diffTime = returnDate.getTime() - pickupDate.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays < 2) {
+        errors.push("Minimum rental period is 2 days");
+      }
+
+      // Apply time logic if times are provided
+      if (data.pickupTime && data.returnTime && diffDays >= 2) {
+        const [pickupHour, pickupMin] = data.pickupTime.split(":").map(Number);
+        const [returnHour, returnMin] = data.returnTime.split(":").map(Number);
+
+        if (
+          !isNaN(pickupHour) &&
+          !isNaN(pickupMin) &&
+          !isNaN(returnHour) &&
+          !isNaN(returnMin)
+        ) {
+          const pickupMinutes = pickupHour * 60 + pickupMin;
+          const returnMinutes = returnHour * 60 + returnMin;
+          const timeDifference = returnMinutes - pickupMinutes;
+
+          // Calculate final days with time logic
+          let finalDays = diffDays;
+          if (timeDifference > 60) {
+            // More than 1 hour difference
+            finalDays += 1;
+          }
+
+          const actualDays = Math.max(2, finalDays);
+
+          if (actualDays < 2) {
+            errors.push(
+              "Rental period with time logic must be at least 2 days"
+            );
+          }
+        }
+      }
+    }
+
+    // Validate required fields
+    if (!data.vehicleId) errors.push("Vehicle selection is required");
+    if (!data.pickupDate) errors.push("Pickup date is required");
+    if (!data.returnDate) errors.push("Return date is required");
+    if (!data.pickupTime) errors.push("Pickup time is required");
+    if (!data.returnTime) errors.push("Return time is required");
+    if (!data.pickupLocation) errors.push("Pickup location is required");
+    if (!data.returnLocation) errors.push("Return location is required");
+
+    // Validate time format
+    const timePattern = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+    if (data.pickupTime && !timePattern.test(data.pickupTime)) {
+      errors.push("Invalid pickup time format");
+    }
+    if (data.returnTime && !timePattern.test(data.returnTime)) {
+      errors.push("Invalid return time format");
+    }
+
+    // Validate dates
+    if (data.pickupDate && data.returnDate) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const pickup = new Date(data.pickupDate);
+      const returnD = new Date(data.returnDate);
+
+      if (pickup < today) {
+        errors.push("Pickup date cannot be in the past");
+      }
+
+      if (returnD <= pickup) {
+        errors.push("Return date must be after pickup date");
+      }
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors,
+    };
   }
 
   // Get all bookings with filtering and pagination (Admin only)
@@ -244,11 +361,21 @@ class BookingService {
     );
   }
 
-  // Create website booking (Public)
+  // UPDATED: Create website booking with validation
   async createWebsiteBooking(
     bookingData: WebsiteBookingFormData
   ): Promise<ApiResponse<BookingData>> {
     console.log("Creating website booking with data:", bookingData);
+
+    // Client-side validation
+    const validation = this.validateBookingData(bookingData);
+    if (!validation.isValid) {
+      return {
+        success: false,
+        message: `Validation failed: ${validation.errors.join(", ")}`,
+        data: null as any,
+      };
+    }
 
     return await this.makeRequest<BookingData>(
       `${this.baseUrl}/bookings/website`,
@@ -259,12 +386,22 @@ class BookingService {
     );
   }
 
-  // Create admin booking (Admin only)
+  // UPDATED: Create admin booking with validation
   async createAdminBooking(
     bookingData: AdminBookingFormData
   ): Promise<ApiResponse<BookingData>> {
     const token = localStorage.getItem("token");
     console.log("Creating admin booking with data:", bookingData);
+
+    // Client-side validation
+    const validation = this.validateBookingData(bookingData);
+    if (!validation.isValid) {
+      return {
+        success: false,
+        message: `Validation failed: ${validation.errors.join(", ")}`,
+        data: null as any,
+      };
+    }
 
     return await this.makeRequest<BookingData>(`${this.baseUrl}/bookings`, {
       method: "POST",
@@ -370,7 +507,7 @@ class BookingService {
     );
   }
 
-  // FIXED: Enhanced booking stats with fallback handling
+  // Enhanced booking stats with fallback handling
   async getBookingStats(): Promise<ApiResponse<BookingStats>> {
     try {
       const token = localStorage.getItem("token");
@@ -384,11 +521,9 @@ class BookingService {
         }
       );
 
-      // If API call fails, provide fallback stats
       if (!response.success || !response.data) {
         console.warn("Stats API failed, providing fallback stats");
 
-        // Try to get basic bookings and calculate stats manually
         const bookingsResponse = await this.getBookings({ limit: 1000 });
 
         if (bookingsResponse.success && bookingsResponse.data) {
@@ -402,7 +537,6 @@ class BookingService {
           };
         }
 
-        // Ultimate fallback - return zero stats
         return {
           success: true,
           message: "Using default stats due to API unavailability",
@@ -424,7 +558,6 @@ class BookingService {
     } catch (error) {
       console.error("BookingService.getBookingStats error:", error);
 
-      // Return fallback stats on error
       return {
         success: true,
         message: "Using fallback stats due to error",
@@ -443,7 +576,6 @@ class BookingService {
     }
   }
 
-  // FIXED: Helper method to calculate fallback stats
   private calculateFallbackStats(bookings: BookingData[]): BookingStats {
     const stats: BookingStats = {
       totalBookings: bookings.length,
@@ -457,14 +589,12 @@ class BookingService {
       monthlyRevenue: 0,
     };
 
-    // Calculate status counts and revenue
     let totalRevenue = 0;
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
     let monthlyRevenue = 0;
 
     bookings.forEach((booking) => {
-      // Count by status
       switch (booking.status) {
         case "pending":
           stats.pendingBookings++;
@@ -483,11 +613,9 @@ class BookingService {
           break;
       }
 
-      // Calculate revenue (only for completed bookings)
       if (booking.status === "completed" && booking.totalAmount) {
         totalRevenue += booking.totalAmount;
 
-        // Check if booking is from current month
         const bookingDate = new Date(booking.createdAt);
         if (
           bookingDate.getMonth() === currentMonth &&
@@ -506,7 +634,6 @@ class BookingService {
     return stats;
   }
 
-  // Check vehicle availability (Admin only)
   async checkVehicleAvailability(
     vehicleId: string,
     pickupDate: string,
@@ -528,7 +655,6 @@ class BookingService {
     );
   }
 
-  // Get customer bookings (Admin only)
   async getCustomerBookings(
     customerId: string,
     page = 1,
@@ -550,7 +676,6 @@ class BookingService {
     );
   }
 
-  // FIXED: Enhanced vehicle calendar with better error handling
   async getVehicleCalendar(
     vehicleId: string,
     startDate?: string,
@@ -572,7 +697,6 @@ class BookingService {
         method: "GET",
       });
 
-      // If successful, return the response
       if (response.success) {
         console.log("Vehicle calendar data:", response.data);
         return response;
@@ -582,7 +706,6 @@ class BookingService {
     } catch (error) {
       console.error("BookingService.getVehicleCalendar error:", error);
 
-      // Return safe fallback calendar data
       return {
         success: true,
         message: "Using fallback calendar data due to API error",
@@ -606,8 +729,6 @@ class BookingService {
       };
     }
   }
-
-  // Helper to format booking data for display
   formatBookingForDisplay(booking: BookingData) {
     return {
       ...booking,
@@ -625,7 +746,6 @@ class BookingService {
     };
   }
 
-  // Helper to validate booking dates
   validateBookingDates(
     pickupDate: string,
     returnDate: string
@@ -634,7 +754,6 @@ class BookingService {
     const returnD = new Date(returnDate);
     const today = new Date();
 
-    // Reset time to start of day for comparison
     today.setHours(0, 0, 0, 0);
     pickup.setHours(0, 0, 0, 0);
     returnD.setHours(0, 0, 0, 0);
@@ -650,11 +769,50 @@ class BookingService {
     const diffTime = returnD.getTime() - pickup.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    if (diffDays < 1) {
-      return { isValid: false, error: "Minimum rental period is 1 day" };
+    if (diffDays < 2) {
+      return { isValid: false, error: "Minimum rental period is 2 days" };
     }
 
     return { isValid: true };
+  }
+
+  calculateRentalDays(
+    pickupDate: string,
+    returnDate: string,
+    pickupTime?: string,
+    returnTime?: string
+  ): number {
+    try {
+      const pickup = new Date(pickupDate);
+      const returnD = new Date(returnDate);
+      const diffTime = Math.abs(returnD.getTime() - pickup.getTime());
+      let basicDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      if (pickupTime && returnTime) {
+        const [pickupHour, pickupMin] = pickupTime.split(":").map(Number);
+        const [returnHour, returnMin] = returnTime.split(":").map(Number);
+
+        if (
+          !isNaN(pickupHour) &&
+          !isNaN(pickupMin) &&
+          !isNaN(returnHour) &&
+          !isNaN(returnMin)
+        ) {
+          const pickupMinutes = pickupHour * 60 + pickupMin;
+          const returnMinutes = returnHour * 60 + returnMin;
+          const timeDifference = returnMinutes - pickupMinutes;
+
+          if (timeDifference > 60) {
+            basicDays += 1;
+          }
+        }
+      }
+
+      return Math.max(2, basicDays);
+    } catch (error) {
+      console.error("Error calculating rental days:", error);
+      return 2;
+    }
   }
 }
 

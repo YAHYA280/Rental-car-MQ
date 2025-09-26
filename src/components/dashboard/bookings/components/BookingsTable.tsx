@@ -373,7 +373,8 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
 
                     {/* Download Contract - For confirmed/active bookings */}
                     {(booking.status === "confirmed" ||
-                      booking.status === "active") && (
+                      booking.status === "active" ||
+                      booking.status === "completed") && (
                       <>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem asChild>

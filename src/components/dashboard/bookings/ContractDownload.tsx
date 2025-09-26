@@ -19,7 +19,11 @@ const ContractDownload: React.FC<ContractDownloadProps> = ({
   const [isGenerating, setIsGenerating] = useState(false);
 
   const downloadContract = async () => {
-    if (status !== "confirmed" && status !== "active") {
+    if (
+      status !== "confirmed" &&
+      status !== "active" &&
+      status !== "completed"
+    ) {
       toast.error("Contract unavailable", {
         description: "Contract can only be generated for confirmed bookings",
       });
@@ -77,7 +81,7 @@ const ContractDownload: React.FC<ContractDownloadProps> = ({
   };
 
   // Only show download button for confirmed/active bookings
-  if (status !== "confirmed" && status !== "active") {
+  if (status !== "confirmed" && status !== "active" && status !== "completed") {
     return (
       <Button variant="outline" size="sm" disabled>
         <FileText className="h-4 w-4 mr-2" />
