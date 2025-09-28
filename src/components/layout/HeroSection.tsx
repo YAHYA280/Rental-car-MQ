@@ -50,7 +50,7 @@ const HeroSection = () => {
   };
 
   return (
-    <section className="relative min-h-screen bg-black text-white overflow-hidden">
+    <section className="relative h-[80vh] bg-black text-white overflow-hidden">
       {/* Background Image Slideshow */}
       <div className="absolute inset-0">
         <AnimatePresence mode="wait">
@@ -84,49 +84,20 @@ const HeroSection = () => {
                 <span className="block text-white mb-2">MELHOR QUE NADA</span>
                 <span className="bg-gradient-to-r from-carbookers-red-400 via-carbookers-red-500 to-carbookers-red-600 bg-clip-text text-transparent">
                   {locale === "fr"
-                    ? "Location Voiture Tanger"
+                    ? "Location Voiture Maroc"
                     : "Car Rental Morocco"}
                 </span>
               </h1>
-
-              {/* H2 with supporting keywords and brand reinforcement */}
-              <h2 className="text-xl md:text-2xl text-gray-200 max-w-4xl mx-auto leading-relaxed font-medium">
-                {locale === "fr"
-                  ? "MELHOR QUE NADA - Votre expert en location de voiture au Maroc. Véhicules premium et service de qualité à Tanger depuis notre agence RUE 8 ENNASR LOT 635."
-                  : "MELHOR QUE NADA - Your premium car rental expert in Morocco. Luxury vehicles and quality service in Tangier from our RUE 8 ENNASR LOT 635 location."}
-              </h2>
-
-              {/* Additional brand-focused description */}
-              <p className="text-lg text-gray-300 max-w-3xl mx-auto">
-                {locale === "fr"
-                  ? "Découvrez pourquoi MELHOR QUE NADA est le choix privilégié pour la location voiture maroc. Notre expertise et notre flotte premium vous garantissent une expérience exceptionnelle."
-                  : "Discover why MELHOR QUE NADA is the preferred choice for car rental in Morocco. Our expertise and premium fleet guarantee you an exceptional experience."}
-              </p>
             </div>
           </AnimatedContainer>
-
-          {/* Call to Action Button */}
-          <AnimatedContainer direction="up" delay={0.4}>
-            <Button
-              size="lg"
-              className="bg-gradient-to-r from-carbookers-red-600 to-carbookers-red-500 hover:from-carbookers-red-700 hover:to-carbookers-red-600 text-white px-8 py-4 text-lg font-semibold rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border-0"
-            >
-              {locale === "fr"
-                ? "Découvrir MELHOR QUE NADA"
-                : "Discover MELHOR QUE NADA"}
-            </Button>
-          </AnimatedContainer>
-
           {/* Search Component */}
           <AnimatedContainer direction="up" delay={0.6}>
             <CarSearchComponent
-              className="max-w-5xl mx-auto"
+              className="max-w-7xl mx-auto"
               onSearch={handleSearch}
             />
           </AnimatedContainer>
-
-          {/* Additional SEO Content - Trust Indicators */}
-          <AnimatedContainer direction="up" delay={0.8}>
+          {/* <AnimatedContainer direction="up" delay={0.8}>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 text-center">
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6">
                 <h3 className="text-2xl font-bold text-white mb-2">
@@ -140,7 +111,7 @@ const HeroSection = () => {
               </div>
 
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6">
-                <h3 className="text-2xl font-bold text-white mb-2">40+</h3>
+                <h3 className="text-2xl font-bold text-white mb-2">100+</h3>
                 <p className="text-gray-200 text-sm">
                   {locale === "fr" ? "Véhicules Premium" : "Premium Vehicles"}
                 </p>
@@ -155,7 +126,7 @@ const HeroSection = () => {
                 </p>
               </div>
             </div>
-          </AnimatedContainer>
+          </AnimatedContainer> */}
         </div>
       </div>
 

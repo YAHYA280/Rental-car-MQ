@@ -28,8 +28,6 @@ const Navbar = () => {
     if (newLocale === locale || isPending) return;
 
     startTransition(() => {
-      // Use window.location to handle all routes consistently
-      // This avoids TypeScript typing issues with dynamic routes
       const currentPath = window.location.pathname;
       const pathWithoutLocale = currentPath.replace(/^\/[a-z]{2}(?=\/|$)/, "");
       const newPath = `/${newLocale}${pathWithoutLocale}`;
@@ -94,9 +92,6 @@ const Navbar = () => {
                   </SelectContent>
                 </Select>
               </div>
-              <Button className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6">
-                {t("signIn")}
-              </Button>
             </div>
 
             {/* Mobile Language Switcher - Between logo and hamburger */}
@@ -153,14 +148,6 @@ const Navbar = () => {
                     {item.label}
                   </Link>
                 ))}
-
-                {/* Mobile Sign In Button */}
-                <Button
-                  className="bg-red-600 hover:bg-red-700 text-white w-fit font-semibold mt-4"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {t("signIn")}
-                </Button>
               </div>
             </div>
           )}

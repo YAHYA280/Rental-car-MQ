@@ -903,6 +903,15 @@
       }
     },
     "bookings": {
+      "content": {
+        "errorLoadingTitle": "Erreur de Chargement des Réservations",
+        "tryAgain": "Réessayer",
+        "addNewBooking": "Ajouter Nouvelle Réservation",
+        "searchPlaceholder": "Rechercher réservations par client, véhicule ou ID réservation...",
+        "recentBookings": "Réservations Récentes",
+        "createNewBooking": "Créer Nouvelle Réservation",
+        "createBookingDescription": "Créez une nouvelle réservation en sélectionnant un client et un véhicule. Les réservations admin sont automatiquement confirmées."
+      },
       "title": "Gestion des Réservations",
       "subtitle": "Gérez les réservations et les plannings de location",
       "recent": "Réservations Récentes",
@@ -1012,15 +1021,7 @@
           "customerNotified": "Le client sera notifié par email/WhatsApp",
           "vehicleReserved": "Le véhicule sera réservé immédiatement"
         },
-        "content": {
-          "errorLoadingTitle": "Erreur de Chargement des Réservations",
-          "tryAgain": "Réessayer",
-          "addNewBooking": "Ajouter Nouvelle Réservation",
-          "searchPlaceholder": "Rechercher réservations par client, véhicule ou ID réservation...",
-          "recentBookings": "Réservations Récentes",
-          "createNewBooking": "Créer Nouvelle Réservation",
-          "createBookingDescription": "Créez une nouvelle réservation en sélectionnant un client et un véhicule. Les réservations admin sont automatiquement confirmées."
-        },
+
         "selectCustomer": "Sélectionner Client",
         "selectVehicle": "Sélectionner Véhicule",
         "pickupDate": "Date de Prise",
