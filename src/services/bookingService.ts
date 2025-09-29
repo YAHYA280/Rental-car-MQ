@@ -230,8 +230,8 @@ class BookingService {
       const diffTime = returnDate.getTime() - pickupDate.getTime();
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-      if (diffDays < 2) {
-        errors.push("Minimum rental period is 2 days");
+      if (diffDays < 1) {
+        errors.push("Minimum rental period is 1 days");
       }
 
       // Apply time logic if times are provided
@@ -769,8 +769,8 @@ class BookingService {
     const diffTime = returnD.getTime() - pickup.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    if (diffDays < 2) {
-      return { isValid: false, error: "Minimum rental period is 2 days" };
+    if (diffDays < 1) {
+      return { isValid: false, error: "Minimum rental period is 1 days" };
     }
 
     return { isValid: true };

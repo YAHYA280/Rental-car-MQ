@@ -1,4 +1,3 @@
-// src/components/dashboard/bookings/forms/sections/DateTimeSection.tsx - Updated with translations
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -68,6 +67,7 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
     currentBooking?: any;
     upcomingBooking?: any;
     nextAvailableDate?: string;
+    nextAvailableTime?: string;
   }>({ available: true });
 
   // Generate time slots
@@ -114,6 +114,7 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
         setVehicleAvailability({
           available: response.data.available,
           nextAvailableDate: response.data.nextAvailableDate,
+          nextAvailableTime: response.data.nextAvailableTime,
           currentBooking: response.data.currentBooking,
           upcomingBooking: response.data.upcomingBooking,
         });
@@ -165,7 +166,7 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
         (returnUTC.getTime() - pickupUTC.getTime()) / (1000 * 60 * 60 * 24)
       );
 
-      if (diffDays < 2) {
+      if (diffDays < 1) {
         toast.error(t("bookings.form.dateTime.minimumRentalError"), {
           description: t("bookings.form.dateTime.minimumRentalDesc"),
           duration: 4000,
@@ -191,7 +192,7 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
         (returnUTC.getTime() - pickupUTC.getTime()) / (1000 * 60 * 60 * 24)
       );
 
-      if (diffDays < 2) {
+      if (diffDays < 1) {
         toast.error(t("bookings.form.dateTime.minimumRentalError"), {
           description: t("bookings.form.dateTime.minimumRentalDesc"),
           duration: 4000,
@@ -246,74 +247,52 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
     }
 
     try {
-      // Calculate basic day difference using UTC
-      const pickupUTC = new Date(
-        Date.UTC(
-          pickupDate.getFullYear(),
-          pickupDate.getMonth(),
-          pickupDate.getDate()
-        )
-      );
-      const returnUTC = new Date(
-        Date.UTC(
-          returnDate.getFullYear(),
-          returnDate.getMonth(),
-          returnDate.getDate()
-        )
-      );
-      const basicDays = Math.ceil(
-        (returnUTC.getTime() - pickupUTC.getTime()) / (1000 * 60 * 60 * 24)
-      );
+      const pickup = new Date(pickupDate);
+      const returnD = new Date(returnDate);
 
-      // Apply time logic
-      const [pickupHour, pickupMin] = pickupTime.split(":").map(Number);
-      const [returnHour, returnMin] = returnTime.split(":").map(Number);
+      // Basic day calculation
+      const diffTime = Math.abs(returnD.getTime() - pickup.getTime());
+      let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-      if (
-        isNaN(pickupHour) ||
-        isNaN(pickupMin) ||
-        isNaN(returnHour) ||
-        isNaN(returnMin)
-      ) {
-        return Math.max(2, basicDays);
+      // If same day, calculate based on hours
+      if (diffDays === 0 && pickupTime && returnTime) {
+        const [pickupHour, pickupMin] = pickupTime.split(":").map(Number);
+        const [returnHour, returnMin] = returnTime.split(":").map(Number);
+
+        if (!isNaN(pickupHour) && !isNaN(returnHour)) {
+          const pickupMinutes = pickupHour * 60 + pickupMin;
+          const returnMinutes = returnHour * 60 + returnMin;
+          const hoursDiff = (returnMinutes - pickupMinutes) / 60;
+
+          return 1; // Same day rental = 1 day
+        }
       }
 
-      const pickupMinutes = pickupHour * 60 + pickupMin;
-      const returnMinutes = returnHour * 60 + returnMin;
-      const timeDifference = returnMinutes - pickupMinutes;
-      const oneHourInMinutes = 60;
+      // For multi-day rentals, apply time logic
+      if (pickupTime && returnTime && diffDays > 0) {
+        const [pickupHour, pickupMin] = pickupTime.split(":").map(Number);
+        const [returnHour, returnMin] = returnTime.split(":").map(Number);
 
-      let rentalDays = basicDays;
-      if (timeDifference > oneHourInMinutes) {
-        rentalDays += 1;
+        if (!isNaN(pickupHour) && !isNaN(returnHour)) {
+          const timeDifference =
+            returnHour * 60 + returnMin - (pickupHour * 60 + pickupMin);
+
+          if (timeDifference > 60) {
+            // More than 1 hour later
+            diffDays += 1;
+          }
+        }
       }
 
-      return Math.max(2, rentalDays);
+      return Math.max(1, diffDays); // Minimum 1 day
     } catch (error) {
       console.error("Error calculating duration:", error);
-      const pickupUTC = new Date(
-        Date.UTC(
-          pickupDate.getFullYear(),
-          pickupDate.getMonth(),
-          pickupDate.getDate()
-        )
-      );
-      const returnUTC = new Date(
-        Date.UTC(
-          returnDate.getFullYear(),
-          returnDate.getMonth(),
-          returnDate.getDate()
-        )
-      );
-      const fallbackDays = Math.ceil(
-        (returnUTC.getTime() - pickupUTC.getTime()) / (1000 * 60 * 60 * 24)
-      );
-      return Math.max(2, fallbackDays);
+      return 1;
     }
   };
 
   const duration = calculateDuration();
-  const meetsMinimumDays = duration >= 2;
+  const meetsMinimumDays = duration >= 1;
 
   // Check if same day booking
   const isSameDay =
@@ -364,8 +343,6 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
       return null;
     }
   };
-
-  const timeExcessInfo = getTimeExcessInfo();
 
   return (
     <Card>
@@ -533,7 +510,7 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
                           (1000 * 60 * 60 * 24)
                       );
 
-                      if (diffDays < 2) return true;
+                      if (diffDays < 1) return true;
                       return isDateBlocked(date);
                     }}
                     modifiers={{

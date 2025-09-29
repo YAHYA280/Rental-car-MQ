@@ -160,7 +160,6 @@ const LocationsSection: React.FC<LocationsSectionProps> = ({
               </p>
             )}
           </div>
-
           {/* Quick Action: Same as Pickup */}
           {pickupLocation && (
             <div className="flex justify-center">
@@ -175,7 +174,6 @@ const LocationsSection: React.FC<LocationsSectionProps> = ({
               </Button>
             </div>
           )}
-
           {/* Return Location */}
           <div>
             <Label htmlFor="returnLocation">
@@ -227,7 +225,6 @@ const LocationsSection: React.FC<LocationsSectionProps> = ({
               </p>
             )}
           </div>
-
           {/* Location Summary */}
           {pickupLocation && returnLocation && (
             <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
@@ -273,39 +270,6 @@ const LocationsSection: React.FC<LocationsSectionProps> = ({
               )}
             </div>
           )}
-
-          {/* Location Info */}
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-            <h4 className="font-medium text-gray-900 mb-2 text-sm">
-              {t("bookings.form.locations.locationInfo")}:
-            </h4>
-            <ul className="text-xs text-gray-600 space-y-1">
-              <li className="flex items-start gap-1">
-                <span className="text-blue-600">•</span>
-                <span>
-                  {t("bookings.form.locations.allLocationsInTangier")}
-                </span>
-              </li>
-              <li className="flex items-start gap-1">
-                <span className="text-blue-600">•</span>
-                <span>
-                  {t("bookings.form.locations.hotelPickupAdvanceNotice")}
-                </span>
-              </li>
-              <li className="flex items-start gap-1">
-                <span className="text-blue-600">•</span>
-                <span>
-                  {t("bookings.form.locations.customLocationApproval")}
-                </span>
-              </li>
-              <li className="flex items-start gap-1">
-                <span className="text-amber-600">⚠</span>
-                <span>
-                  {t("bookings.form.locations.differentLocationFees")}
-                </span>
-              </li>
-            </ul>
-          </div>
         </div>
       </CardContent>
     </Card>

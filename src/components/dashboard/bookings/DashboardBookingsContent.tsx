@@ -64,7 +64,7 @@ const DashboardBookingsContent = () => {
     users,
     loading: usersLoading,
     getUsers,
-  } = useUsers({ status: "active" }); // Only get active users
+  } = useUsers({ status: "active" });
 
   const {
     cars,

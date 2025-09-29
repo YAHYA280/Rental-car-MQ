@@ -993,13 +993,7 @@
           "selected": "Selected",
           "pending": "Pending"
         },
-        "adminNotice": {
-          "title": "Admin Booking Benefits",
-          "autoConfirmed": "This booking will be automatically confirmed",
-          "noPaymentRequired": "No payment processing required",
-          "customerNotified": "Customer will be notified via email/WhatsApp",
-          "vehicleReserved": "Vehicle will be reserved immediately"
-        },
+
         "locationSelection": "Location Selection",
         "additionalNotes": "Additional Notes",
         "bookingSummary": "Booking Summary",
@@ -1051,7 +1045,7 @@
         },
         "dateTime": {
           "title": "Rental Period",
-          "minimumDays": "Minimum 2 days",
+          "minimumDays": "Minimum 1 days",
           "loadingAvailability": "Loading vehicle availability...",
           "vehicleAvailabilityUpdated": "Vehicle availability updated",
           "nextAvailable": "Next available",
@@ -1060,8 +1054,8 @@
           "vehicleNotAvailable": "Vehicle Not Available",
           "errorLoadingAvailability": "Failed to load vehicle availability",
           "datesNotAccurate": "Some dates might not be accurate",
-          "minimumRentalError": "Minimum rental period is 2 days",
-          "minimumRentalDesc": "Please select at least 2 days for your rental",
+          "minimumRentalError": "Minimum rental period is 1 days",
+          "minimumRentalDesc": "Please select at least 1 days for your rental",
           "dateNotAvailable": "{date} is not available",
           "selectAvailableDates": "Please select only available dates",
           "daysSelectedSuccess": "{days} days selected successfully!",
@@ -1076,11 +1070,11 @@
           "selectReturnTime": "Select return time",
           "available": "Available",
           "booked": "Booked",
-          "minimumDaysRequired": "Minimum 2 days required",
+          "minimumDaysRequired": "Minimum 1 days required",
           "rentalDuration": "Rental Duration",
           "day": "Day",
           "days": "Days",
-          "needAtLeastDays": "Need at least 2 days",
+          "needAtLeastDays": "Need at least 1 days",
           "extendedByTimeLogic": "Extended by time logic",
           "selectVehicleFirst": "Please select a vehicle first to see availability",
           "timeExcessMessage": "+1 day will be added ({hours}h {minutes}m beyond grace period)"

@@ -295,9 +295,6 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
                     €{cautionAmount}
                   </span>
                 </div>
-                <p className="text-xs text-amber-700">
-                  {t("bookings.summary.securityDepositDesc")}
-                </p>
               </div>
             </div>
           </div>

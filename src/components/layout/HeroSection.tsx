@@ -50,7 +50,7 @@ const HeroSection = () => {
   };
 
   return (
-    <section className="relative h-[80vh] bg-black text-white overflow-hidden">
+    <section className="relative   md:h-[80vh] bg-black text-white overflow-hidden">
       {/* Background Image Slideshow */}
       <div className="absolute inset-0">
         <AnimatePresence mode="wait">
@@ -80,7 +80,7 @@ const HeroSection = () => {
           <AnimatedContainer direction="down" delay={0.2}>
             <div className="space-y-6">
               {/* H1 tag with primary brand keywords */}
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
                 <span className="block text-white mb-2">MELHOR QUE NADA</span>
                 <span className="bg-gradient-to-r from-carbookers-red-400 via-carbookers-red-500 to-carbookers-red-600 bg-clip-text text-transparent">
                   {locale === "fr"

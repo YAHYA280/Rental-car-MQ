@@ -54,7 +54,7 @@
       "pickupTimeRequired": "Heure de prise requise",
       "returnTimeRequired": "Heure de retour requise",
       "dropoffLocationRequired": "Lieu de retour requis",
-      "minimumRental": "Minimum 2 jours de location requis",
+      "minimumRental": "Minimum 1 jours de location requis",
       "fixErrors": "Veuillez corriger les erreurs suivantes:",
       "completeAllFields": "Complétez tous les champs requis (*) pour continuer"
     },
@@ -1014,13 +1014,6 @@
           "selected": "Sélectionné",
           "pending": "En attente"
         },
-        "adminNotice": {
-          "title": "Avantages Réservation Admin",
-          "autoConfirmed": "Cette réservation sera automatiquement confirmée",
-          "noPaymentRequired": "Aucun traitement de paiement requis",
-          "customerNotified": "Le client sera notifié par email/WhatsApp",
-          "vehicleReserved": "Le véhicule sera réservé immédiatement"
-        },
 
         "selectCustomer": "Sélectionner Client",
         "selectVehicle": "Sélectionner Véhicule",
@@ -1069,7 +1062,7 @@
         },
         "dateTime": {
           "title": "Période de Location",
-          "minimumDays": "Minimum 2 jours",
+          "minimumDays": "Minimum 1 jours",
           "loadingAvailability": "Chargement de la disponibilité du véhicule...",
           "vehicleAvailabilityUpdated": "Disponibilité du véhicule mise à jour",
           "nextAvailable": "Prochaine disponibilité",
@@ -1078,8 +1071,8 @@
           "vehicleNotAvailable": "Véhicule Non Disponible",
           "errorLoadingAvailability": "Échec du chargement de la disponibilité du véhicule",
           "datesNotAccurate": "Certaines dates peuvent ne pas être exactes",
-          "minimumRentalError": "La période minimale de location est de 2 jours",
-          "minimumRentalDesc": "Veuillez sélectionner au moins 2 jours pour votre location",
+          "minimumRentalError": "La période minimale de location est de 1 jours",
+          "minimumRentalDesc": "Veuillez sélectionner au moins 1 jours pour votre location",
           "dateNotAvailable": "{date} n'est pas disponible",
           "selectAvailableDates": "Veuillez sélectionner uniquement les dates disponibles",
           "daysSelectedSuccess": "{days} jours sélectionnés avec succès !",
@@ -1094,7 +1087,7 @@
           "selectReturnTime": "Sélectionner l'heure de retour",
           "available": "Disponible",
           "booked": "Réservé",
-          "minimumDaysRequired": "Minimum 2 jours requis",
+          "minimumDaysRequired": "Minimum 1 jours requis",
           "rentalDuration": "Durée de Location",
           "day": "Jour",
           "days": "Jours",

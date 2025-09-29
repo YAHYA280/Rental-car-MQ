@@ -1,4 +1,3 @@
-// src/components/dashboard/bookings/forms/AddBookingForm.tsx - Updated with translations
 "use client";
 
 import React, { useState } from "react";
@@ -165,16 +164,6 @@ const AddBookingForm: React.FC<AddBookingFormProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Form Header */}
-      <div className="mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">
-          {t("bookings.form.title")}
-        </h2>
-        <p className="text-gray-600 text-sm">
-          {t("bookings.form.description")}
-        </p>
-      </div>
-
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left Column */}
@@ -323,33 +312,6 @@ const AddBookingForm: React.FC<AddBookingFormProps> = ({
                   </span>
                 </div>
               </div>
-            </div>
-
-            {/* Admin Booking Notice */}
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <h4 className="font-medium text-green-900 mb-2">
-                {t("bookings.form.adminNotice.title")}
-              </h4>
-              <ul className="text-sm text-green-800 space-y-1">
-                <li className="flex items-start gap-2">
-                  <span className="text-green-600">•</span>
-                  <span>{t("bookings.form.adminNotice.autoConfirmed")}</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-green-600">•</span>
-                  <span>
-                    {t("bookings.form.adminNotice.noPaymentRequired")}
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-green-600">•</span>
-                  <span>{t("bookings.form.adminNotice.customerNotified")}</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-green-600">•</span>
-                  <span>{t("bookings.form.adminNotice.vehicleReserved")}</span>
-                </li>
-              </ul>
             </div>
           </div>
         </div>
