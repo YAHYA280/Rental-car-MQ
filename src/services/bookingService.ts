@@ -715,6 +715,7 @@ class BookingService {
           currentBooking: null,
           upcomingBooking: null,
           nextAvailableDate: null,
+          nextAvailableTime: null,
           blockedDates: [],
           bookedPeriods: [],
           searchPeriod: {

@@ -109,24 +109,42 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
         format(endDate, "yyyy-MM-dd")
       );
 
+      console.log("📅 Calendar API Response:", response); // ADD THIS
+
       if (response.success && response.data) {
+        console.log("📅 Calendar Data:", {
+          available: response.data.available,
+          nextAvailableDate: response.data.nextAvailableDate,
+          nextAvailableTime: response.data.nextAvailableTime, // ADD THIS
+          currentBooking: response.data.currentBooking,
+        });
+
         setBlockedDates(response.data.blockedDates || []);
         setVehicleAvailability({
           available: response.data.available,
           nextAvailableDate: response.data.nextAvailableDate,
-          nextAvailableTime: response.data.nextAvailableTime,
+          nextAvailableTime: response.data.nextAvailableTime, // MAKE SURE THIS IS HERE
           currentBooking: response.data.currentBooking,
           upcomingBooking: response.data.upcomingBooking,
         });
 
         if (!response.data.available && response.data.nextAvailableDate) {
+          const dateStr = format(
+            new Date(response.data.nextAvailableDate),
+            "MMM dd, yyyy"
+          );
+          const timeStr = response.data.nextAvailableTime || "any time";
+
+          console.log(
+            "🚗 Vehicle not available until:",
+            dateStr,
+            "at",
+            timeStr
+          ); // ADD THIS
+
           toast.info(t("bookings.form.dateTime.vehicleAvailabilityUpdated"), {
-            description: `${t(
-              "bookings.form.dateTime.nextAvailable"
-            )}: ${format(
-              new Date(response.data.nextAvailableDate),
-              "MMM dd, yyyy"
-            )}`,
+            description: `Next available: ${dateStr} at ${timeStr}`,
+            duration: 5000,
           });
         }
       }
@@ -383,7 +401,7 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
                   </span>
                 </div>
               ) : (
-                <div className="flex flex-col items-center gap-1 text-red-600 bg-red-50 rounded-lg px-3 py-2">
+                <div className="flex flex-col gap-2 text-red-600 bg-red-50 rounded-lg px-3 py-2">
                   <div className="flex items-center gap-2">
                     <AlertCircle className="h-4 w-4" />
                     <span className="text-sm font-medium">
@@ -391,13 +409,35 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
                     </span>
                   </div>
                   {vehicleAvailability.nextAvailableDate && (
-                    <span className="text-xs text-red-700">
-                      {t("bookings.form.dateTime.nextAvailable")}:{" "}
-                      {format(
-                        new Date(vehicleAvailability.nextAvailableDate),
-                        "MMM dd, yyyy"
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-2 text-xs">
+                        <CalendarIcon className="h-3 w-3" />
+                        <span className="font-medium">
+                          Disponible à partir du :{" "}
+                          {format(
+                            new Date(vehicleAvailability.nextAvailableDate),
+                            "dd MMM yyyy"
+                          )}
+                        </span>
+                      </div>
+                      {vehicleAvailability.nextAvailableTime && (
+                        <div className="flex items-center gap-2 text-xs">
+                          <Clock className="h-3 w-3" />
+                          <span className="font-medium">
+                            Dès : {vehicleAvailability.nextAvailableTime}
+                          </span>
+                        </div>
                       )}
-                    </span>
+                      <div className="mt-1 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800">
+                        💡 Le véhicule sera disponible le{" "}
+                        {format(
+                          new Date(vehicleAvailability.nextAvailableDate),
+                          "EEEE dd MMM"
+                        )}{" "}
+                        à{" "}
+                        {vehicleAvailability.nextAvailableTime || "toute heure"}
+                      </div>
+                    </div>
                   )}
                 </div>
               )}
