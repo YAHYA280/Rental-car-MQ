@@ -1,18 +1,26 @@
 // src/hooks/useCars.ts - Cars Management Hook
 import { useState, useEffect, useCallback } from "react";
-import { Car, CarFormData, CarFilters } from "@/lib/api";
 import { toast } from "sonner";
 import { carService } from "@/services/carService";
+import { CarData, CarFilters } from "@/components/types";
 
 interface UseCarsReturn {
-  cars: Car[];
+  cars: CarData[];
   loading: boolean;
   error: string | null;
   total: number;
-  pagination: any;
+  pagination: {
+    page: number;
+    limit: number;
+    pages: number;
+    current: number;
+    totalPages: number;
+    next?: { page: number; limit: number };
+    prev?: { page: number; limit: number };
+  } | null;
   getCars: (filters?: CarFilters) => Promise<void>;
-  createCar: (carData: CarFormData) => Promise<boolean>;
-  updateCar: (id: string, carData: Partial<CarFormData>) => Promise<boolean>;
+  createCar: (carData: FormData) => Promise<boolean>;
+  updateCar: (id: string, carData: FormData) => Promise<boolean>;
   deleteCar: (id: string) => Promise<boolean>;
   updateCarStatus: (
     id: string,
@@ -22,11 +30,12 @@ interface UseCarsReturn {
 }
 
 export const useCars = (initialFilters: CarFilters = {}): UseCarsReturn => {
-  const [cars, setCars] = useState<Car[]>([]);
+  const [cars, setCars] = useState<CarData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [total, setTotal] = useState(0);
-  const [pagination, setPagination] = useState<any>(null);
+  const [pagination, setPagination] =
+    useState<UseCarsReturn["pagination"]>(null);
   const [filters, setFilters] = useState<CarFilters>(initialFilters);
 
   const getCars = useCallback(
@@ -45,9 +54,9 @@ export const useCars = (initialFilters: CarFilters = {}): UseCarsReturn => {
         if (newFilters) {
           setFilters(newFilters);
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         const errorMessage =
-          err.response?.data?.message || "Failed to fetch cars";
+          err instanceof Error ? err.message : "Failed to fetch cars";
         setError(errorMessage);
         console.error("Error fetching cars:", err);
       } finally {
@@ -58,7 +67,7 @@ export const useCars = (initialFilters: CarFilters = {}): UseCarsReturn => {
   );
 
   const createCar = useCallback(
-    async (carData: CarFormData): Promise<boolean> => {
+    async (carData: FormData): Promise<boolean> => {
       try {
         const response = await carService.createCar(carData);
 
@@ -70,9 +79,9 @@ export const useCars = (initialFilters: CarFilters = {}): UseCarsReturn => {
           toast.error(response.message || "Failed to create car");
           return false;
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         const errorMessage =
-          err.response?.data?.message || "Failed to create car";
+          err instanceof Error ? err.message : "Failed to create car";
         toast.error(errorMessage);
         console.error("Error creating car:", err);
         return false;
@@ -82,7 +91,7 @@ export const useCars = (initialFilters: CarFilters = {}): UseCarsReturn => {
   );
 
   const updateCar = useCallback(
-    async (id: string, carData: Partial<CarFormData>): Promise<boolean> => {
+    async (id: string, carData: FormData): Promise<boolean> => {
       try {
         const response = await carService.updateCar(id, carData);
 
@@ -94,9 +103,9 @@ export const useCars = (initialFilters: CarFilters = {}): UseCarsReturn => {
           toast.error(response.message || "Failed to update car");
           return false;
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         const errorMessage =
-          err.response?.data?.message || "Failed to update car";
+          err instanceof Error ? err.message : "Failed to update car";
         toast.error(errorMessage);
         console.error("Error updating car:", err);
         return false;
@@ -118,9 +127,9 @@ export const useCars = (initialFilters: CarFilters = {}): UseCarsReturn => {
           toast.error(response.message || "Failed to delete car");
           return false;
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         const errorMessage =
-          err.response?.data?.message || "Failed to delete car";
+          err instanceof Error ? err.message : "Failed to delete car";
         toast.error(errorMessage);
         console.error("Error deleting car:", err);
         return false;
@@ -145,9 +154,9 @@ export const useCars = (initialFilters: CarFilters = {}): UseCarsReturn => {
           toast.error(response.message || "Failed to update car status");
           return false;
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         const errorMessage =
-          err.response?.data?.message || "Failed to update car status";
+          err instanceof Error ? err.message : "Failed to update car status";
         toast.error(errorMessage);
         console.error("Error updating car status:", err);
         return false;
@@ -161,6 +170,7 @@ export const useCars = (initialFilters: CarFilters = {}): UseCarsReturn => {
   // Initial load
   useEffect(() => {
     getCars();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return {

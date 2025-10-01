@@ -90,7 +90,6 @@ const CarStatsGrid: React.FC<CarStatsGridProps> = ({ cars }) => {
                   <p className="text-3xl font-bold text-gray-900 mb-1">
                     {stat.value}
                   </p>
-                  <p className="text-xs text-gray-500">{stat.description}</p>
                 </div>
                 <div className="ml-4">
                   <div

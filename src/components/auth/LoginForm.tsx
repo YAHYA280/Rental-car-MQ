@@ -187,14 +187,6 @@ const LoginForm: React.FC = () => {
               t("signIn")
             )}
           </Button>
-
-          {/* Default Credentials Hint */}
-          <div className="bg-blue-900/20 border border-blue-800 rounded-lg p-3 text-center">
-            <p className="text-blue-300 text-xs">
-              <strong className="text-blue-200">Default:</strong>{" "}
-              admin@melhorquenada.com / AdminPassword123!
-            </p>
-          </div>
         </form>
       </CardContent>
     </Card>

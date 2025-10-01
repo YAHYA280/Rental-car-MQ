@@ -1,4 +1,5 @@
 // src/types/index.ts - UPDATED: Added all new customer fields for passport, CIN, and enhanced information
+
 export interface CarData {
   id: string;
   name: string;
@@ -809,3 +810,66 @@ export const VEHICLE_BRANDS = [
   "SEAT",
   "Volkswagen",
 ] as const;
+
+// Add this to your src/components/types/index.ts file
+
+// Temporary mock vehicle type (simpler structure for mock data)
+export interface Vehicle {
+  id: string;
+  name: string;
+  brand: string;
+  model: string;
+  year: number;
+  image: string;
+  images: string[];
+  price: number;
+  transmission: string;
+  fuelType: string;
+  seats: number;
+  doors: number;
+  airConditioning: boolean;
+  location: string;
+  features: string[];
+  rating: number;
+  available: boolean;
+  description: string;
+  mileage: number;
+  bookings: number;
+}
+
+// Optional: Helper to convert Vehicle to CarData when needed
+export function vehicleToCarData(vehicle: Vehicle): Partial<CarData> {
+  return {
+    id: vehicle.id,
+    name: vehicle.name,
+    brand: vehicle.brand as any, // Will need proper type casting based on BRANDS
+    year: vehicle.year,
+    image: vehicle.image,
+    images: vehicle.images.map((url) => ({
+      dataUrl: url,
+      name: url.split("/").pop() || "image",
+    })),
+    price: vehicle.price,
+    transmission: vehicle.transmission.toLowerCase() as "manual" | "automatic",
+    fuelType: vehicle.fuelType.toLowerCase() as
+      | "petrol"
+      | "diesel"
+      | "electric"
+      | "hybrid",
+    seats: vehicle.seats,
+    doors: vehicle.doors,
+    available: vehicle.available,
+    rating: vehicle.rating,
+    totalBookings: vehicle.bookings,
+    mileage: vehicle.mileage,
+    description: vehicle.description,
+    // You can add default values for required fields that aren't in Vehicle
+    licensePlate: `${String(vehicle.id).padStart(5, "0")}A`,
+    caution: 1000,
+    whatsappNumber: "0612345678",
+    status: "active",
+    features: vehicle.airConditioning ? ["airConditioning"] : [],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+}

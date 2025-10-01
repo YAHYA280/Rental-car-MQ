@@ -1,4 +1,4 @@
-// src/components/dashboard/overview/DashboardOverview.tsx - SIMPLIFIED VERSION
+// src/components/dashboard/overview/DashboardOverview.tsx - FIXED VERSION
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -79,15 +79,14 @@ const DashboardOverview = () => {
         // Calculate client stats
         const totalClients = users.length;
 
-        // Get booking stats from API
+        // FIXED: Get booking stats directly from data (no .overview property)
         let totalBookings = 0;
         let monthlyRevenue = 0;
 
         if (bookingStatsResponse.success && bookingStatsResponse.data) {
-          totalBookings =
-            bookingStatsResponse.data.overview?.totalBookings || 0;
-          monthlyRevenue =
-            bookingStatsResponse.data.overview?.totalRevenue || 0;
+          // Access properties directly - they're at root level of BookingStats
+          totalBookings = bookingStatsResponse.data.totalBookings || 0;
+          monthlyRevenue = bookingStatsResponse.data.monthlyRevenue || 0;
         }
 
         setStats({

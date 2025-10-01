@@ -1,4 +1,4 @@
-// src/hooks/useBookings.ts - Booking Management Hook
+// src/hooks/useBookings.ts - FIXED: Removed .overview references
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import {
@@ -297,6 +297,7 @@ export const useBookings = (
     []
   );
 
+  // FIXED: Removed .overview and access properties directly
   const getBookingStats = useCallback(async () => {
     try {
       console.log("Fetching booking stats..."); // Debug log
@@ -304,20 +305,17 @@ export const useBookings = (
       console.log("Stats API response:", response); // Debug log
 
       if (response.success && response.data) {
-        // SIMPLIFIED: Transform backend stats to match frontend expectations
+        // FIXED: Access properties directly from response.data (no .overview)
         const transformedStats: BookingStats = {
-          // Required stats (the 4 you want)
-          totalBookings: response.data.overview?.totalBookings || 0,
-          pendingBookings: response.data.overview?.pendingBookings || 0,
-          activeBookings: response.data.overview?.activeBookings || 0,
-          totalRevenue: response.data.overview?.totalRevenue || 0,
-
-          // Optional stats (set to 0 since we don't need them)
-          confirmedBookings: 0,
-          completedBookings: 0,
-          cancelledBookings: 0,
-          averageBookingValue: 0,
-          monthlyRevenue: 0,
+          totalBookings: response.data.totalBookings || 0,
+          pendingBookings: response.data.pendingBookings || 0,
+          confirmedBookings: response.data.confirmedBookings || 0,
+          activeBookings: response.data.activeBookings || 0,
+          completedBookings: response.data.completedBookings || 0,
+          cancelledBookings: response.data.cancelledBookings || 0,
+          totalRevenue: response.data.totalRevenue || 0,
+          averageBookingValue: response.data.averageBookingValue || 0,
+          monthlyRevenue: response.data.monthlyRevenue || 0,
         };
 
         console.log("Transformed stats:", transformedStats); // Debug log

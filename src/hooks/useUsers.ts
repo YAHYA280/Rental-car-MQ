@@ -1,16 +1,24 @@
 // src/hooks/useUsers.ts - Users Management Hook
 import { useState, useEffect, useCallback } from "react";
-import { User, UserFormData, UserFilters } from "@/lib/api";
 import { toast } from "sonner";
 import { userService } from "@/services/userService";
+import { UserData, UserFormData, UserFiltersType } from "@/components/types";
 
 interface UseUsersReturn {
-  users: User[];
+  users: UserData[];
   loading: boolean;
   error: string | null;
   total: number;
-  pagination: any;
-  getUsers: (filters?: UserFilters) => Promise<void>;
+  pagination: {
+    page: number;
+    limit: number;
+    pages: number;
+    current: number;
+    totalPages: number;
+    next?: { page: number; limit: number };
+    prev?: { page: number; limit: number };
+  } | null;
+  getUsers: (filters?: UserFiltersType) => Promise<void>;
   createUser: (userData: UserFormData) => Promise<boolean>;
   updateUser: (id: string, userData: Partial<UserFormData>) => Promise<boolean>;
   deleteUser: (id: string) => Promise<boolean>;
@@ -22,16 +30,19 @@ interface UseUsersReturn {
   refreshUsers: () => Promise<void>;
 }
 
-export const useUsers = (initialFilters: UserFilters = {}): UseUsersReturn => {
-  const [users, setUsers] = useState<User[]>([]);
+export const useUsers = (
+  initialFilters: UserFiltersType = {}
+): UseUsersReturn => {
+  const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [total, setTotal] = useState(0);
-  const [pagination, setPagination] = useState<any>(null);
-  const [filters, setFilters] = useState<UserFilters>(initialFilters);
+  const [pagination, setPagination] =
+    useState<UseUsersReturn["pagination"]>(null);
+  const [filters, setFilters] = useState<UserFiltersType>(initialFilters);
 
   const getUsers = useCallback(
-    async (newFilters?: UserFilters) => {
+    async (newFilters?: UserFiltersType) => {
       setLoading(true);
       setError(null);
 
@@ -46,9 +57,9 @@ export const useUsers = (initialFilters: UserFilters = {}): UseUsersReturn => {
         if (newFilters) {
           setFilters(newFilters);
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         const errorMessage =
-          err.response?.data?.message || "Failed to fetch users";
+          err instanceof Error ? err.message : "Failed to fetch users";
         setError(errorMessage);
         console.error("Error fetching users:", err);
       } finally {
@@ -71,9 +82,9 @@ export const useUsers = (initialFilters: UserFilters = {}): UseUsersReturn => {
           toast.error(response.message || "Failed to create user");
           return false;
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         const errorMessage =
-          err.response?.data?.message || "Failed to create user";
+          err instanceof Error ? err.message : "Failed to create user";
         toast.error(errorMessage);
         console.error("Error creating user:", err);
         return false;
@@ -95,9 +106,9 @@ export const useUsers = (initialFilters: UserFilters = {}): UseUsersReturn => {
           toast.error(response.message || "Failed to update user");
           return false;
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         const errorMessage =
-          err.response?.data?.message || "Failed to update user";
+          err instanceof Error ? err.message : "Failed to update user";
         toast.error(errorMessage);
         console.error("Error updating user:", err);
         return false;
@@ -119,9 +130,9 @@ export const useUsers = (initialFilters: UserFilters = {}): UseUsersReturn => {
           toast.error(response.message || "Failed to delete user");
           return false;
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         const errorMessage =
-          err.response?.data?.message || "Failed to delete user";
+          err instanceof Error ? err.message : "Failed to delete user";
         toast.error(errorMessage);
         console.error("Error deleting user:", err);
         return false;
@@ -146,9 +157,9 @@ export const useUsers = (initialFilters: UserFilters = {}): UseUsersReturn => {
           toast.error(response.message || "Failed to update user status");
           return false;
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         const errorMessage =
-          err.response?.data?.message || "Failed to update user status";
+          err instanceof Error ? err.message : "Failed to update user status";
         toast.error(errorMessage);
         console.error("Error updating user status:", err);
         return false;
@@ -170,9 +181,11 @@ export const useUsers = (initialFilters: UserFilters = {}): UseUsersReturn => {
           toast.error(response.message || "Failed to upload driver license");
           return false;
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         const errorMessage =
-          err.response?.data?.message || "Failed to upload driver license";
+          err instanceof Error
+            ? err.message
+            : "Failed to upload driver license";
         toast.error(errorMessage);
         console.error("Error uploading driver license:", err);
         return false;
@@ -186,6 +199,7 @@ export const useUsers = (initialFilters: UserFilters = {}): UseUsersReturn => {
   // Initial load
   useEffect(() => {
     getUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return {
