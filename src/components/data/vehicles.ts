@@ -1,5 +1,5 @@
 // src/data/vehicles.ts - Updated with new car data structure
-import { Vehicle } from "@/components/types/vehicle";
+import { Vehicle } from "@/components/types";
 
 export const vehiclesData: Vehicle[] = [
   {

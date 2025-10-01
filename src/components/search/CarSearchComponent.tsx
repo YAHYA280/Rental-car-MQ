@@ -1,4 +1,3 @@
-// src/components/search/CarSearchComponent.tsx - With search validation
 "use client";
 
 import React, { useState, useMemo } from "react";
@@ -46,17 +45,23 @@ interface SearchFormData {
 interface CarSearchProps {
   className?: string;
   onSearch?: (data: SearchFormData) => void;
-  compact?: boolean;
 }
 
 const CarSearchComponent: React.FC<CarSearchProps> = ({
   className = "",
   onSearch,
-  compact = false,
 }) => {
   const t = useTranslations("search");
   const locale = useLocale();
   const router = useRouter();
+
+  const PICKUP_LOCATIONS = [
+    "Tangier Airport",
+    "Tangier City Center",
+    "Tangier Port",
+    "Hotel Pickup",
+    "Custom Location",
+  ];
 
   const [searchData, setSearchData] = useState<SearchFormData>({
     pickupLocation: "",
@@ -100,11 +105,11 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
       const timeDiff = returnDateObj.getTime() - pickupDateObj.getTime();
       rentalDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
 
-      if (rentalDays < 2) {
+      if (rentalDays < 1) {
         errors.push(
           locale === "fr"
-            ? "Minimum 2 jours de location"
-            : "Minimum 2 days rental"
+            ? "Minimum 1 jour de location"
+            : "Minimum 1 day rental"
         );
         isValid = false;
       }
@@ -156,25 +161,23 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
       onSearch(searchData);
     }
 
-    // Navigate to vehicles page with search parameters (only if not compact)
-    if (!compact) {
-      const query: Record<string, string> = {};
+    // Navigate to vehicles page with search parameters
+    const query: Record<string, string> = {};
 
-      if (searchData.pickupLocation) query.pickup = searchData.pickupLocation;
-      if (searchData.dropoffLocation)
-        query.dropoff = searchData.dropoffLocation;
-      if (searchData.pickupDate) query.pickupDate = searchData.pickupDate;
-      if (searchData.pickupTime) query.pickupTime = searchData.pickupTime;
-      if (searchData.returnDate) query.returnDate = searchData.returnDate;
-      if (searchData.returnTime) query.returnTime = searchData.returnTime;
-      if (searchData.differentDropoff) query.differentDropoff = "true";
-      if (searchData.driverAge) query.driverAge = searchData.driverAge;
+    // Map search parameters to backend expected format
+    if (searchData.pickupLocation) query.pickup = searchData.pickupLocation;
+    if (searchData.dropoffLocation) query.dropoff = searchData.dropoffLocation;
+    if (searchData.pickupDate) query.pickupDate = searchData.pickupDate;
+    if (searchData.pickupTime) query.pickupTime = searchData.pickupTime;
+    if (searchData.returnDate) query.returnDate = searchData.returnDate;
+    if (searchData.returnTime) query.returnTime = searchData.returnTime;
+    if (searchData.differentDropoff) query.differentDropoff = "true";
+    if (searchData.driverAge) query.driverAge = searchData.driverAge;
 
-      router.push({
-        pathname: "/vehicles",
-        query: Object.keys(query).length > 0 ? query : undefined,
-      });
-    }
+    router.push({
+      pathname: "/vehicles",
+      query: Object.keys(query).length > 0 ? query : undefined,
+    });
   };
 
   const handleInputChange = (
@@ -218,12 +221,12 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
 
   const getDateRangeText = () => {
     if (dateRange?.from && dateRange?.to) {
-      return `${format(dateRange.from, "MMM dd")} - ${format(
+      return `${format(dateRange.from, "dd MMM")} - ${format(
         dateRange.to,
-        "MMM dd, yyyy"
+        "dd MMM"
       )}`;
     } else if (dateRange?.from) {
-      return format(dateRange.from, "MMM dd, yyyy");
+      return format(dateRange.from, "dd MMM, yyyy");
     }
     return t("selectPeriod");
   };
@@ -256,486 +259,415 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
     );
   };
 
-  // Search Button Component
-  const SearchButton = () => (
+  const SearchButton = ({ fullHeight = false }: { fullHeight?: boolean }) => (
     <Button
       type="submit"
       disabled={!validation.isValid}
-      className={`w-full font-bold text-lg px-12 py-4 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 border-0 flex items-center gap-3 ${
+      className={`font-bold px-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-0 flex items-center justify-center gap-2 ${
+        fullHeight ? "w-full h-full" : "w-full py-3"
+      } ${
         validation.isValid
           ? "bg-gradient-to-r from-carbookers-red-600 to-carbookers-red-500 hover:from-carbookers-red-700 hover:to-carbookers-red-600 text-white transform hover:scale-105"
           : "bg-gray-300 text-gray-500 cursor-not-allowed"
       }`}
     >
-      <Search className="h-6 w-6" />
-      {t("searchButton")}
-      {validation.rentalDays > 0 && validation.isValid && (
-        <span className="text-sm opacity-90">
-          ({validation.rentalDays} {locale === "fr" ? "jours" : "days"})
-        </span>
-      )}
+      <Search className="h-5 w-5" />
+      Rechercher
     </Button>
   );
 
-  // Compact version for vehicle detail page
-  if (compact) {
-    return (
-      <div className={`bg-gray-50 rounded-xl p-4 ${className}`}>
-        <form onSubmit={handleSearchSubmit} className="space-y-4">
-          <ValidationMessage />
-
-          <div className="grid grid-cols-1 gap-3">
-            {/* Pickup Location */}
-            <div>
-              <Label className="text-xs font-medium mb-1 block">
-                {t("pickupLocation")} *
-              </Label>
-              <div
-                className={`flex items-center gap-2 p-2 bg-white rounded-md border ${
-                  showValidation && !searchData.pickupLocation.trim()
-                    ? "border-red-300"
-                    : "border-gray-300"
-                }`}
-              >
-                <MapPin className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                <Input
-                  type="text"
-                  placeholder={t("placeholders.pickupLocation")}
-                  value={searchData.pickupLocation}
-                  onChange={(e) =>
-                    handleInputChange("pickupLocation", e.target.value)
-                  }
-                  className="border-0 p-0 text-sm"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Date Range */}
-            <div>
-              <Label className="text-xs font-medium mb-1 block">
-                {t("rentalPeriod")} * (min. 2{" "}
-                {locale === "fr" ? "jours" : "days"})
-              </Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={`w-full justify-start text-left font-normal p-2 h-auto ${
-                      showValidation && validation.rentalDays < 2
-                        ? "border-red-300"
-                        : "border-gray-300"
-                    }`}
-                  >
-                    <CalendarIcon className="h-4 w-4 mr-2" />
-                    <span className="text-sm">{getDateRangeText()}</span>
-                    {validation.rentalDays > 0 && (
-                      <span className="ml-auto text-xs text-gray-500">
-                        {validation.rentalDays} {locale === "fr" ? "j" : "d"}
-                      </span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    initialFocus
-                    mode="range"
-                    defaultMonth={dateRange?.from}
-                    selected={dateRange}
-                    onSelect={handleDateRangeSelect}
-                    numberOfMonths={1}
-                    disabled={(date) => date < new Date()}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            {/* Times */}
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <Label className="text-xs font-medium mb-1 block">
-                  {t("pickupTime")} *
-                </Label>
-                <Select
-                  value={searchData.pickupTime}
-                  onValueChange={(value) =>
-                    handleInputChange("pickupTime", value)
-                  }
-                >
-                  <SelectTrigger
-                    className={`h-8 ${
-                      showValidation && !searchData.pickupTime
-                        ? "border-red-300"
-                        : ""
-                    }`}
-                  >
-                    <SelectValue placeholder={t("placeholders.selectTime")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {timeOptions.map((time) => (
-                      <SelectItem key={time.value} value={time.value}>
-                        {time.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="text-xs font-medium mb-1 block">
-                  {t("returnTime")} *
-                </Label>
-                <Select
-                  value={searchData.returnTime}
-                  onValueChange={(value) =>
-                    handleInputChange("returnTime", value)
-                  }
-                >
-                  <SelectTrigger
-                    className={`h-8 ${
-                      showValidation && !searchData.returnTime
-                        ? "border-red-300"
-                        : ""
-                    }`}
-                  >
-                    <SelectValue placeholder={t("placeholders.selectTime")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {timeOptions.map((time) => (
-                      <SelectItem key={time.value} value={time.value}>
-                        {time.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-
-          {/* Search Button */}
-          <div className="pt-2">
-            <Button
-              type="submit"
-              disabled={!validation.isValid}
-              className={`w-full flex items-center gap-2 ${
-                validation.isValid
-                  ? "bg-carbookers-red-600 hover:bg-carbookers-red-700 text-white"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              }`}
-            >
-              <Search className="h-4 w-4" />
-              {t("searchButton")}
-              {validation.rentalDays > 0 && validation.isValid && (
-                <span className="text-xs opacity-90">
-                  ({validation.rentalDays}
-                  {locale === "fr" ? "j" : "d"})
-                </span>
-              )}
-            </Button>
-          </div>
-        </form>
-      </div>
-    );
-  }
-
-  // Full version for hero section
   return (
     <div className={`relative ${className}`}>
-      {/* Glass Morphism Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-carbookers-red-950/30 via-carbookers-red-900/20 to-carbookers-red-800/30 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl"></div>
+      <div className="space-y-4">
+        {/* Main Search Container */}
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-carbookers-red-950/30 via-carbookers-red-900/20 to-carbookers-red-800/30 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl"></div>
 
-      <div className="relative z-10 p-8">
-        <form onSubmit={handleSearchSubmit} className="space-y-8">
-          {/* Title */}
-          <div className="text-center mb-8">
-            <h3 className="text-3xl lg:text-4xl font-bold text-white mb-3">
-              <span className="text-white">{t("title")}</span>
-            </h3>
-            <p className="text-gray-200 text-lg opacity-90">{t("subtitle")}</p>
-          </div>
+          <div className="relative z-10 p-4">
+            <ValidationMessage />
 
-          {/* Validation Message */}
-          <ValidationMessage />
-
-          {/* Main Search Container */}
-          <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl border border-white/20 overflow-hidden">
-            {/* Desktop Layout */}
-            <div className="hidden lg:grid lg:grid-cols-4 divide-x divide-gray-200/50">
-              {/* Pickup Location */}
-              <div className="p-6 flex flex-col justify-between h-24">
-                <Label className="text-xs text-carbookers-red-800 uppercase tracking-wide mb-2 block font-semibold">
-                  {t("pickupLocation")} *
-                </Label>
-                <div className="flex items-center gap-3">
-                  <MapPin className="h-5 w-5 text-carbookers-red-600 flex-shrink-0" />
-                  <Input
-                    type="text"
-                    placeholder={t("placeholders.pickupLocation")}
-                    value={searchData.pickupLocation}
-                    onChange={(e) =>
-                      handleInputChange("pickupLocation", e.target.value)
-                    }
-                    className={`border-0 p-0 text-gray-900 placeholder:text-gray-500 focus:ring-0 font-medium bg-transparent text-sm w-full ${
-                      showValidation && !searchData.pickupLocation.trim()
-                        ? "text-red-600"
-                        : ""
-                    }`}
-                    required
-                  />
-                </div>
+            <form onSubmit={handleSearchSubmit} className="space-y-4">
+              {/* Title */}
+              <div className="text-center mb-6 lg:hidden">
+                <h3 className="text-2xl lg:text-3xl font-bold text-white mb-2">
+                  <span className="text-white">{t("title")}</span>
+                </h3>
               </div>
 
-              {/* Date Range Picker */}
-              <div className="p-6 flex flex-col justify-between h-24">
-                <Label className="text-xs text-carbookers-red-800 uppercase tracking-wide mb-2 block font-semibold">
-                  {t("rentalPeriod")} * (min. 2{" "}
-                  {locale === "fr" ? "jours" : "days"})
-                </Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className={cn(
-                        "w-full justify-start text-left font-medium p-0 h-auto bg-transparent hover:bg-gray-50 text-sm",
-                        !dateRange && "text-gray-500",
-                        showValidation &&
-                          validation.rentalDays < 2 &&
-                          "text-red-600"
-                      )}
-                    >
-                      <CalendarIcon className="h-5 w-5 text-carbookers-red-600 mr-3 flex-shrink-0" />
-                      <span className="text-gray-900 font-medium truncate">
-                        {getDateRangeText()}
-                      </span>
-                      {validation.rentalDays > 0 && (
-                        <span className="ml-auto text-xs text-gray-500">
-                          {validation.rentalDays}{" "}
-                          {locale === "fr" ? "jours" : "days"}
-                        </span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      initialFocus
-                      mode="range"
-                      defaultMonth={dateRange?.from}
-                      selected={dateRange}
-                      onSelect={handleDateRangeSelect}
-                      numberOfMonths={2}
-                      disabled={(date) => date < new Date()}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
+              <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden min-h-20">
+                {/* Desktop Layout - Single Row */}
+                <div className="hidden lg:flex items-stretch divide-x divide-gray-200 h-20">
+                  {/* Pickup Location */}
+                  <div className="flex-1 p-3 flex flex-col justify-center">
+                    <Label className="text-[10px] text-gray-500 uppercase tracking-wide font-medium mb-1 leading-none">
+                      {t("pickupLocation")} *
+                    </Label>
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-carbookers-red-600 flex-shrink-0" />
+                      <Select
+                        value={searchData.pickupLocation}
+                        onValueChange={(value) =>
+                          handleInputChange("pickupLocation", value)
+                        }
+                      >
+                        <SelectTrigger className="border-0 p-0 text-gray-900 focus:ring-0 font-medium h-auto bg-transparent text-sm w-full">
+                          <SelectValue
+                            placeholder={t("placeholders.pickupLocation")}
+                          />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {PICKUP_LOCATIONS.map((location) => (
+                            <SelectItem key={location} value={location}>
+                              {location}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
 
-              {/* Pickup Time */}
-              <div className="p-6 flex flex-col justify-between h-24">
-                <Label className="text-xs text-carbookers-red-800 uppercase tracking-wide mb-2 block font-semibold">
-                  {t("pickupTime")} *
-                </Label>
-                <div className="flex items-center gap-3">
-                  <Clock className="h-5 w-5 text-carbookers-red-600 flex-shrink-0" />
-                  <Select
-                    value={searchData.pickupTime}
-                    onValueChange={(value) =>
-                      handleInputChange("pickupTime", value)
-                    }
-                  >
-                    <SelectTrigger className="border-0 p-0 text-gray-900 focus:ring-0 font-medium h-auto bg-transparent text-sm w-full">
-                      <SelectValue placeholder={t("placeholders.selectTime")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {timeOptions.map((time) => (
-                        <SelectItem key={time.value} value={time.value}>
-                          {time.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+                  {/* Dropoff Location (when enabled) */}
+                  {searchData.differentDropoff && (
+                    <div className="flex-1 p-3 flex flex-col justify-center">
+                      <Label className="text-[10px] text-gray-500 uppercase tracking-wide font-medium mb-1 leading-none">
+                        {t("dropoffLocation")} *
+                      </Label>
+                      <div className="flex items-center gap-2">
+                        <RotateCcw className="h-4 w-4 text-carbookers-red-600 flex-shrink-0" />
+                        <Select
+                          value={searchData.dropoffLocation}
+                          onValueChange={(value) =>
+                            handleInputChange("dropoffLocation", value)
+                          }
+                        >
+                          <SelectTrigger className="border-0 p-0 text-gray-900 focus:ring-0 font-medium h-auto bg-transparent text-sm w-full">
+                            <SelectValue
+                              placeholder={t("placeholders.dropoffLocation")}
+                            />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {PICKUP_LOCATIONS.map((location) => (
+                              <SelectItem key={location} value={location}>
+                                {location}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  )}
 
-              {/* Return Time */}
-              <div className="p-6 flex flex-col justify-between h-24">
-                <Label className="text-xs text-carbookers-red-800 uppercase tracking-wide mb-2 block font-semibold">
-                  {t("returnTime")} *
-                </Label>
-                <div className="flex items-center gap-3">
-                  <Clock className="h-5 w-5 text-carbookers-red-600 flex-shrink-0" />
-                  <Select
-                    value={searchData.returnTime}
-                    onValueChange={(value) =>
-                      handleInputChange("returnTime", value)
-                    }
-                  >
-                    <SelectTrigger className="border-0 p-0 text-gray-900 focus:ring-0 font-medium h-auto bg-transparent text-sm w-full">
-                      <SelectValue placeholder={t("placeholders.selectTime")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {timeOptions.map((time) => (
-                        <SelectItem key={time.value} value={time.value}>
-                          {time.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
-
-            {/* Mobile Layout */}
-            <div className="lg:hidden p-6 space-y-6">
-              {/* Pickup Location */}
-              <div>
-                <Label className="text-xs text-carbookers-red-800 uppercase tracking-wide mb-3 block font-semibold">
-                  {t("pickupLocation")} *
-                </Label>
-                <div
-                  className={`flex items-center gap-3 p-3 bg-gray-50 rounded-lg min-h-[48px] ${
-                    showValidation && !searchData.pickupLocation.trim()
-                      ? "border border-red-300"
-                      : ""
-                  }`}
-                >
-                  <MapPin className="h-5 w-5 text-carbookers-red-600 flex-shrink-0" />
-                  <Input
-                    type="text"
-                    placeholder={t("placeholders.pickupLocation")}
-                    value={searchData.pickupLocation}
-                    onChange={(e) =>
-                      handleInputChange("pickupLocation", e.target.value)
-                    }
-                    className="border-0 p-0 text-gray-900 placeholder:text-gray-500 focus:ring-0 font-medium bg-transparent text-sm w-full min-w-0"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Date Range Picker - Mobile */}
-              <div>
-                <Label className="text-xs text-carbookers-red-800 uppercase tracking-wide mb-3 block font-semibold">
-                  {t("rentalPeriod")} * (min. 2{" "}
-                  {locale === "fr" ? "jours" : "days"})
-                </Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className={cn(
-                        "w-full justify-start text-left font-medium p-3 bg-gray-50 rounded-lg min-h-[48px] hover:bg-gray-100 transition-colors",
-                        !dateRange && "text-gray-500",
-                        showValidation &&
-                          validation.rentalDays < 2 &&
-                          "border border-red-300"
-                      )}
-                    >
-                      <CalendarIcon className="h-5 w-5 text-carbookers-red-600 mr-3 flex-shrink-0" />
-                      <span className="text-gray-900 font-medium text-sm">
-                        {getDateRangeText()}
-                      </span>
-                      {validation.rentalDays > 0 && (
-                        <span className="ml-auto text-xs text-gray-500">
-                          {validation.rentalDays} {locale === "fr" ? "j" : "d"}
-                        </span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="center">
-                    <Calendar
-                      initialFocus
-                      mode="range"
-                      defaultMonth={dateRange?.from}
-                      selected={dateRange}
-                      onSelect={handleDateRangeSelect}
-                      numberOfMonths={1}
-                      disabled={(date) => date < new Date()}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-
-              {/* Time Row */}
-              <div className="grid grid-cols-2 gap-4">
-                {/* Pickup Time */}
-                <div>
-                  <Label className="text-xs text-carbookers-red-800 uppercase tracking-wide mb-3 block font-semibold">
-                    {t("pickupTime")} *
-                  </Label>
-                  <div
-                    className={`flex items-center gap-2 p-3 bg-gray-50 rounded-lg min-h-[48px] ${
-                      showValidation && !searchData.pickupTime
-                        ? "border border-red-300"
-                        : ""
-                    }`}
-                  >
-                    <Clock className="h-4 w-4 text-carbookers-red-600 flex-shrink-0" />
-                    <Select
-                      value={searchData.pickupTime}
-                      onValueChange={(value) =>
-                        handleInputChange("pickupTime", value)
-                      }
-                    >
-                      <SelectTrigger className="border-0 p-0 text-gray-900 focus:ring-0 font-medium h-auto bg-transparent text-sm w-full min-w-0">
-                        <SelectValue
-                          placeholder={t("placeholders.selectTime")}
+                  {/* Date Range */}
+                  <div className="flex-none w-48 p-3 flex flex-col justify-center">
+                    <Label className="text-[10px] text-gray-500 uppercase tracking-wide font-medium mb-1 leading-none">
+                      {t("rentalPeriod")} *
+                    </Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          className={cn(
+                            "w-full justify-start text-left font-medium p-0 h-auto bg-transparent hover:bg-transparent text-sm",
+                            !dateRange && "text-gray-500"
+                          )}
+                        >
+                          <CalendarIcon className="h-4 w-4 text-carbookers-red-600 mr-2 flex-shrink-0" />
+                          <span className="text-gray-900 font-medium truncate">
+                            {getDateRangeText()}
+                          </span>
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          initialFocus
+                          mode="range"
+                          defaultMonth={dateRange?.from}
+                          selected={dateRange}
+                          onSelect={handleDateRangeSelect}
+                          numberOfMonths={2}
+                          disabled={(date) => date < new Date()}
                         />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {timeOptions.map((time) => (
-                          <SelectItem key={time.value} value={time.value}>
-                            {time.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  {/* Pickup Time */}
+                  <div className="flex-none w-24 p-3 flex flex-col justify-center">
+                    <Label className="text-[10px] text-gray-500 uppercase tracking-wide font-medium mb-1 leading-none">
+                      {t("pickupTime")} *
+                    </Label>
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-4 w-4 text-carbookers-red-600 flex-shrink-0" />
+                      <Select
+                        value={searchData.pickupTime}
+                        onValueChange={(value) =>
+                          handleInputChange("pickupTime", value)
+                        }
+                      >
+                        <SelectTrigger className="border-0 p-0 text-gray-900 focus:ring-0 font-medium h-auto bg-transparent text-sm w-full">
+                          <SelectValue placeholder="17:00" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {timeOptions.map((time) => (
+                            <SelectItem key={time.value} value={time.value}>
+                              {time.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {/* Return Time */}
+                  <div className="flex-none w-24 p-3 flex flex-col justify-center">
+                    <Label className="text-[10px] text-gray-500 uppercase tracking-wide font-medium mb-1 leading-none">
+                      {t("returnTime")} *
+                    </Label>
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-4 w-4 text-carbookers-red-600 flex-shrink-0" />
+                      <Select
+                        value={searchData.returnTime}
+                        onValueChange={(value) =>
+                          handleInputChange("returnTime", value)
+                        }
+                      >
+                        <SelectTrigger className="border-0 p-0 text-gray-900 focus:ring-0 font-medium h-auto bg-transparent text-sm w-full">
+                          <SelectValue placeholder="17:00" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {timeOptions.map((time) => (
+                            <SelectItem key={time.value} value={time.value}>
+                              {time.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {/* Search Button */}
+                  <div className="flex-none w-36 p-3">
+                    <div className="h-full flex items-center">
+                      <SearchButton fullHeight={false} />
+                    </div>
                   </div>
                 </div>
 
-                {/* Return Time */}
-                <div>
-                  <Label className="text-xs text-carbookers-red-800 uppercase tracking-wide mb-3 block font-semibold">
-                    {t("returnTime")} *
-                  </Label>
-                  <div
-                    className={`flex items-center gap-2 p-3 bg-gray-50 rounded-lg min-h-[48px] ${
-                      showValidation && !searchData.returnTime
-                        ? "border border-red-300"
-                        : ""
-                    }`}
-                  >
-                    <Clock className="h-4 w-4 text-carbookers-red-600 flex-shrink-0" />
-                    <Select
-                      value={searchData.returnTime}
-                      onValueChange={(value) =>
-                        handleInputChange("returnTime", value)
-                      }
-                    >
-                      <SelectTrigger className="border-0 p-0 text-gray-900 focus:ring-0 font-medium h-auto bg-transparent text-sm w-full min-w-0">
-                        <SelectValue
-                          placeholder={t("placeholders.selectTime")}
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {timeOptions.map((time) => (
-                          <SelectItem key={time.value} value={time.value}>
-                            {time.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                {/* Mobile/Tablet Layout */}
+                <div className="lg:hidden bg-white">
+                  {/* Pickup Location */}
+                  <div className="p-4 bg-white">
+                    <Label className="text-xs text-gray-500 uppercase tracking-wide mb-2 block font-medium">
+                      Pick-up office
+                    </Label>
+                    <div className="flex items-center gap-3">
+                      <MapPin className="h-5 w-5 text-carbookers-red-600 flex-shrink-0" />
+                      <Select
+                        value={searchData.pickupLocation}
+                        onValueChange={(value) =>
+                          handleInputChange("pickupLocation", value)
+                        }
+                      >
+                        <SelectTrigger className="border-0 p-0 text-gray-900 focus:ring-0 font-medium h-auto bg-transparent text-base w-full">
+                          <SelectValue placeholder="Airport, city ..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {PICKUP_LOCATIONS.map((location) => (
+                            <SelectItem key={location} value={location}>
+                              {location}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {/* Dropoff Location (when enabled) */}
+                  {searchData.differentDropoff && (
+                    <div className="p-4 bg-white border-t border-gray-200">
+                      <Label className="text-xs text-gray-500 uppercase tracking-wide mb-2 block font-medium">
+                        Drop-off office
+                      </Label>
+                      <div className="flex items-center gap-3">
+                        <MapPin className="h-5 w-5 text-carbookers-red-600 flex-shrink-0" />
+                        <Select
+                          value={searchData.dropoffLocation}
+                          onValueChange={(value) =>
+                            handleInputChange("dropoffLocation", value)
+                          }
+                        >
+                          <SelectTrigger className="border-0 p-0 text-gray-900 focus:ring-0 font-medium h-auto bg-transparent text-base w-full">
+                            <SelectValue placeholder="Airport, city ..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {PICKUP_LOCATIONS.map((location) => (
+                              <SelectItem key={location} value={location}>
+                                {location}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Return to Different Office Toggle */}
+                  <div className="p-4 bg-gray-50">
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        id="different-office-mobile"
+                        checked={searchData.differentDropoff}
+                        onChange={(e) =>
+                          handleInputChange(
+                            "differentDropoff",
+                            e.target.checked
+                          )
+                        }
+                        className="w-5 h-5 rounded bg-white border-gray-300 text-carbookers-red-600 focus:ring-carbookers-red-500 focus:ring-2"
+                      />
+                      <label
+                        htmlFor="different-office-mobile"
+                        className="text-sm text-gray-700 font-medium cursor-pointer"
+                      >
+                        Return to a different office
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Date and Times Grid */}
+                  <div className="grid grid-cols-2 gap-0">
+                    {/* Pickup Date */}
+                    <div className="p-4 bg-white border-r border-gray-200">
+                      <Label className="text-xs text-gray-500 uppercase tracking-wide mb-2 block font-medium">
+                        Pick-up
+                      </Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            className="w-full justify-start text-left font-medium p-0 h-auto bg-transparent hover:bg-transparent text-base"
+                          >
+                            <CalendarIcon className="h-5 w-5 text-carbookers-red-600 mr-3 flex-shrink-0" />
+                            <span className="text-gray-900 font-semibold">
+                              {searchData.pickupDate
+                                ? format(
+                                    new Date(searchData.pickupDate),
+                                    "dd MMM"
+                                  )
+                                : "28 SEP"}
+                            </span>
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="center">
+                          <Calendar
+                            initialFocus
+                            mode="range"
+                            defaultMonth={dateRange?.from}
+                            selected={dateRange}
+                            onSelect={handleDateRangeSelect}
+                            numberOfMonths={1}
+                            disabled={(date) => date < new Date()}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+
+                    {/* Pickup Time */}
+                    <div className="p-4 bg-white">
+                      <Label className="text-xs text-gray-500 uppercase tracking-wide mb-2 block font-medium">
+                        Time
+                      </Label>
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-5 w-5 text-carbookers-red-600 flex-shrink-0" />
+                        <Select
+                          value={searchData.pickupTime}
+                          onValueChange={(value) =>
+                            handleInputChange("pickupTime", value)
+                          }
+                        >
+                          <SelectTrigger className="border-0 p-0 text-gray-900 focus:ring-0 font-semibold h-auto bg-transparent text-base w-full">
+                            <SelectValue placeholder="17:00" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {timeOptions.map((time) => (
+                              <SelectItem key={time.value} value={time.value}>
+                                {time.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    {/* Return Date */}
+                    <div className="p-4 bg-white border-r border-gray-200 border-t">
+                      <Label className="text-xs text-gray-500 uppercase tracking-wide mb-2 block font-medium">
+                        Return
+                      </Label>
+                      <div className="flex items-center gap-2">
+                        <CalendarIcon className="h-5 w-5 text-carbookers-red-600 flex-shrink-0" />
+                        <span className="text-gray-900 font-semibold text-base">
+                          {searchData.returnDate
+                            ? format(new Date(searchData.returnDate), "dd MMM")
+                            : "01 OCT"}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Return Time */}
+                    <div className="p-4 bg-white border-t border-gray-200">
+                      <Label className="text-xs text-gray-500 uppercase tracking-wide mb-2 block font-medium">
+                        Time
+                      </Label>
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-5 w-5 text-carbookers-red-600 flex-shrink-0" />
+                        <Select
+                          value={searchData.returnTime}
+                          onValueChange={(value) =>
+                            handleInputChange("returnTime", value)
+                          }
+                        >
+                          <SelectTrigger className="border-0 p-0 text-gray-900 focus:ring-0 font-semibold h-auto bg-transparent text-base w-full">
+                            <SelectValue placeholder="17:00" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {timeOptions.map((time) => (
+                              <SelectItem key={time.value} value={time.value}>
+                                {time.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Search Button */}
+                  <div className="p-4 bg-gray-50">
+                    <div className="space-y-3">
+                      <Button
+                        type="submit"
+                        disabled={!validation.isValid}
+                        className={`w-full h-16 font-bold text-lg px-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 border-0 flex items-center justify-center gap-3 ${
+                          validation.isValid
+                            ? "bg-gradient-to-r from-carbookers-red-600 to-carbookers-red-500 hover:from-carbookers-red-700 hover:to-carbookers-red-600 text-white transform hover:scale-105"
+                            : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        }`}
+                      >
+                        <Search className="h-6 w-6" />
+                        Rechercher
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </form>
           </div>
+        </div>
 
-          {/* Search Button */}
-          <div className="flex justify-center">
-            <SearchButton />
-          </div>
-
-          {/* Secondary Options */}
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-6 text-white">
+        <div className="hidden lg:block   ">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
             {/* Return to Different Office Toggle */}
             <div className="flex items-center gap-3">
               <input
@@ -745,11 +677,11 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
                 onChange={(e) =>
                   handleInputChange("differentDropoff", e.target.checked)
                 }
-                className="w-5 h-5 rounded bg-white/20 border-white/30 text-carbookers-red-600 focus:ring-carbookers-red-600 focus:ring-2"
+                className="w-4 h-4 rounded bg-white border-gray-300 text-carbookers-red-600 focus:ring-carbookers-red-600 focus:ring-2"
               />
               <label
                 htmlFor="different-office"
-                className="text-sm text-gray-200 font-medium cursor-pointer"
+                className="text-sm text-white font-medium cursor-pointer"
               >
                 {t("differentDropoff")}
               </label>
@@ -757,7 +689,7 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
 
             {/* Driver's Age Selection */}
             <div className="flex flex-col sm:flex-row items-center gap-4">
-              <span className="text-sm text-gray-200 font-medium">
+              <span className="text-sm text-white font-medium">
                 {t("driverAge")}:
               </span>
               <div className="flex gap-2">
@@ -766,10 +698,10 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
                     key={age.value}
                     type="button"
                     onClick={() => handleInputChange("driverAge", age.value)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
                       searchData.driverAge === age.value
                         ? "bg-gradient-to-r from-carbookers-red-700 to-carbookers-red-600 text-white shadow-lg"
-                        : "bg-white/20 text-white hover:bg-white/30 border border-white/30"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300"
                     }`}
                   >
                     {age.label}
@@ -778,44 +710,7 @@ const CarSearchComponent: React.FC<CarSearchProps> = ({
               </div>
             </div>
           </div>
-
-          {/* Dropoff Location (when different office is selected) */}
-          {searchData.differentDropoff && (
-            <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-lg">
-              <Label className="text-xs text-carbookers-red-800 uppercase tracking-wide mb-3 block font-semibold">
-                {t("dropoffLocation")} *
-              </Label>
-              <div className="flex items-center gap-3">
-                <RotateCcw className="h-5 w-5 text-carbookers-red-600" />
-                <Input
-                  type="text"
-                  placeholder={t("placeholders.dropoffLocation")}
-                  value={searchData.dropoffLocation}
-                  onChange={(e) =>
-                    handleInputChange("dropoffLocation", e.target.value)
-                  }
-                  className={`border-0 p-0 text-gray-900 placeholder:text-gray-500 focus:ring-0 font-medium bg-transparent ${
-                    showValidation &&
-                    searchData.differentDropoff &&
-                    !searchData.dropoffLocation.trim()
-                      ? "text-red-600"
-                      : ""
-                  }`}
-                  required={searchData.differentDropoff}
-                />
-              </div>
-              {showValidation &&
-                searchData.differentDropoff &&
-                !searchData.dropoffLocation.trim() && (
-                  <p className="text-xs text-red-600 mt-1">
-                    {locale === "fr"
-                      ? "Lieu de retour requis"
-                      : "Dropoff location required"}
-                  </p>
-                )}
-            </div>
-          )}
-        </form>
+        </div>
       </div>
     </div>
   );

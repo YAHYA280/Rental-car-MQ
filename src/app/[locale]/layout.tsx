@@ -1,10 +1,12 @@
+// src/app/[locale]/layout.tsx - Updated with AuthProvider
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages, getTranslations } from "next-intl/server"; // ADD getTranslations
+import { getMessages, getTranslations } from "next-intl/server";
 import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing, isValidLocale } from "@/i18n/routing";
+import { AuthProvider } from "@/contexts/AuthContext";
 import "../globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -23,20 +25,20 @@ export async function generateMetadata({
   // Enable static rendering for metadata
   setRequestLocale(locale);
 
-  // GET SEO TRANSLATIONS - ADD THESE LINES
+  // GET SEO TRANSLATIONS
   const tSeo = await getTranslations("seo");
 
   // Use translations instead of hardcoded strings
   const metadata = {
     en: {
-      title: tSeo("homeTitle"), // Uses translation
+      title: tSeo("homeTitle"),
       description:
         "MELHOR QUE NADA premium car rental in Tangier, Morocco. Luxury vehicles, reliable service, and competitive rates. Located at RUE 8 ENNASR LOT 635 TANGER.",
       keywords:
         "MELHOR QUE NADA, Melhor Que Nada, Melhor Que, Melhor, car rental Morocco, rental cars Tangier, luxury car rental Morocco, location voiture maroc",
     },
     fr: {
-      title: tSeo("homeTitle"), // Uses translation
+      title: tSeo("homeTitle"),
       description:
         "MELHOR QUE NADA location de voiture premium à Tanger, Maroc. Véhicules de luxe, service fiable et tarifs compétitifs. Situés au RUE 8 ENNASR LOT 635 TANGER.",
       keywords:
@@ -69,7 +71,7 @@ export async function generateMetadata({
           url: "https://www.melhorquenada.com/Logo.png",
           width: 1200,
           height: 630,
-          alt: `${tSeo("brandName")} - Premium Car Rental Morocco`, // USE TRANSLATION
+          alt: `${tSeo("brandName")} - Premium Car Rental Morocco`,
         },
       ],
     },
@@ -97,9 +99,9 @@ export async function generateMetadata({
       },
     },
 
-    // Verification for search engines (you'll need to get these codes)
+    // Verification for search engines
     verification: {
-      google: "XOzwAyuy0DZYEOCc0J44HOu4hGtbcdDzSeK2s5HQgQg", // Replace with actual verification code from Google Search Console
+      google: "XOzwAyuy0DZYEOCc0J44HOu4hGtbcdDzSeK2s5HQgQg",
     },
 
     // Enhanced structured data for local business
@@ -114,9 +116,8 @@ export async function generateMetadata({
       "business:contact_data:postal_code": "90000",
       "business:contact_data:country_name": "Morocco",
       "business:contact_data:phone_number": "+212612077309",
-      // Add brand-specific meta tags
-      "application-name": tSeo("brandName"), // USE TRANSLATION
-      "apple-mobile-web-app-title": tSeo("brandName"), // USE TRANSLATION
+      "application-name": tSeo("brandName"),
+      "apple-mobile-web-app-title": tSeo("brandName"),
       "theme-color": "#dc2626",
     },
 
@@ -130,7 +131,6 @@ export async function generateMetadata({
       },
     },
 
-    // Category for app stores
     category: "travel",
   };
 }
@@ -149,10 +149,10 @@ export default async function LocaleLayout({
     notFound();
   }
 
-  // Enable static rendering - THIS IS THE KEY FIX
+  // Enable static rendering
   setRequestLocale(locale);
 
-  // GET TRANSLATIONS FOR SCHEMA - ADD THESE LINES
+  // GET TRANSLATIONS FOR SCHEMA
   const tSeo = await getTranslations("seo");
 
   let messages;
@@ -174,7 +174,7 @@ export default async function LocaleLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "CarRental",
-              name: tSeo("brandName"), // USE TRANSLATION
+              name: tSeo("brandName"),
               alternateName: ["Melhor Que Nada", "Melhor Que", "Melhor"],
               description:
                 locale === "fr"
@@ -200,7 +200,7 @@ export default async function LocaleLayout({
                 longitude: "-5.830611",
               },
               openingHours: "Mo-Su 09:00-18:00",
-              priceRange: "$$",
+              priceRange: "$",
               image: "https://www.melhorquenada.com/Logo.png",
               logo: "https://www.melhorquenada.com/Logo.png",
               sameAs: [
@@ -232,7 +232,7 @@ export default async function LocaleLayout({
                         locale === "fr" ? "Voitures de Luxe" : "Luxury Cars",
                       description: `Premium luxury vehicles by ${tSeo(
                         "brandName"
-                      )}`, // USE TRANSLATION
+                      )}`,
                     },
                   },
                   {
@@ -278,7 +278,7 @@ export default async function LocaleLayout({
               "@context": "https://schema.org",
               "@type": "LocalBusiness",
               "@id": "https://www.melhorquenada.com",
-              name: tSeo("brandName"), // USE TRANSLATION
+              name: tSeo("brandName"),
               image: "https://www.melhorquenada.com/Logo.png",
               telephone: "+212612077309",
               address: {
@@ -315,7 +315,7 @@ export default async function LocaleLayout({
       </head>
       <body className={`${inter.className} m-0 p-0`}>
         <NextIntlClientProvider messages={messages}>
-          {children}
+          <AuthProvider>{children}</AuthProvider>
         </NextIntlClientProvider>
       </body>
     </html>
