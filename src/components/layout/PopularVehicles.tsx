@@ -1,24 +1,77 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Star, ArrowRight } from "lucide-react";
+import { Star, ArrowRight, Loader2 } from "lucide-react";
 import AnimatedContainer from "@/components/ui/animated-container";
-import { vehiclesData } from "@/components/data/vehicles";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
+import { CarData } from "@/components/types";
+import { carService } from "@/services/carService";
 
 const PopularVehicles = () => {
   const t = useTranslations("vehicles");
 
-  // Get all vehicles for the infinite scroll
-  const allVehicles = vehiclesData;
+  const [vehicles, setVehicles] = useState<CarData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch vehicles from API
+  useEffect(() => {
+    const fetchVehicles = async () => {
+      try {
+        setLoading(true);
+        const response = await carService.getCars({
+          page: 1,
+          limit: 12, // Get 12 vehicles for a good scroll experience
+          available: true, // Only show available vehicles
+        });
+
+        if (response.success && response.data) {
+          setVehicles(response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching vehicles:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchVehicles();
+  }, []);
 
   // Triple vehicles for seamless infinite scroll
-  const duplicatedVehicles = [...allVehicles, ...allVehicles, ...allVehicles];
+  const duplicatedVehicles =
+    vehicles.length > 0 ? [...vehicles, ...vehicles, ...vehicles] : [];
+
+  if (loading) {
+    return (
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-carbookers-red-600" />
+              <p className="text-gray-600">{t("loading")}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (vehicles.length === 0) {
+    return (
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center py-12">
+            <p className="text-gray-600">{t("noVehicles")}</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-20 bg-white">
@@ -58,8 +111,16 @@ const PopularVehicles = () => {
                     {/* Car Image */}
                     <div className="h-64 relative overflow-hidden">
                       <Image
-                        src={vehicle.image}
-                        alt={`${vehicle.brand} ${vehicle.name}`}
+                        src={
+                          typeof vehicle.mainImage === "string"
+                            ? vehicle.mainImage
+                            : vehicle.mainImage?.dataUrl ||
+                              (typeof vehicle.images?.[0] === "string"
+                                ? vehicle.images[0]
+                                : vehicle.images?.[0]?.dataUrl) ||
+                              "/placeholder-car.jpg"
+                        }
+                        alt={`${vehicle.brand} ${vehicle.model}`}
                         fill
                         className="object-cover group-hover:scale-110 transition-transform duration-500"
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -83,14 +144,6 @@ const PopularVehicles = () => {
                     <Badge className="absolute top-4 left-4 bg-white text-gray-900 font-semibold shadow-lg">
                       {vehicle.brand}
                     </Badge>
-
-                    {/* Rating */}
-                    <div className="absolute top-4 right-4 flex items-center bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 shadow-lg">
-                      <Star className="h-4 w-4 text-yellow-400 fill-current mr-1" />
-                      <span className="text-sm font-semibold text-gray-900">
-                        {vehicle.rating}
-                      </span>
-                    </div>
                   </div>
 
                   <CardContent className="p-6">
@@ -98,11 +151,9 @@ const PopularVehicles = () => {
                     <div className="flex justify-between items-start mb-4">
                       <div>
                         <h3 className="text-xl font-bold text-gray-900 mb-1">
-                          {vehicle.brand} {vehicle.name}
+                          {vehicle.brand} {vehicle.model}
                         </h3>
-                        <p className="text-gray-600 text-sm">
-                          {vehicle.model} {vehicle.year}
-                        </p>
+                        <p className="text-gray-600 text-sm">{vehicle.year}</p>
                       </div>
                       <div className="text-right">
                         <div className="text-2xl font-bold text-gray-900">
@@ -113,21 +164,23 @@ const PopularVehicles = () => {
                     </div>
 
                     {/* Features */}
-                    <div className="mb-6">
-                      <div className="flex flex-wrap gap-2">
-                        {vehicle.features
-                          .slice(0, 2)
-                          .map((feature: string, idx: number) => (
-                            <Badge
-                              key={idx}
-                              variant="outline"
-                              className="text-xs"
-                            >
-                              {feature}
-                            </Badge>
-                          ))}
+                    {vehicle.features && vehicle.features.length > 0 && (
+                      <div className="mb-6">
+                        <div className="flex flex-wrap gap-2">
+                          {vehicle.features
+                            .slice(0, 2)
+                            .map((feature: string, idx: number) => (
+                              <Badge
+                                key={idx}
+                                variant="outline"
+                                className="text-xs"
+                              >
+                                {feature}
+                              </Badge>
+                            ))}
+                        </div>
                       </div>
-                    </div>
+                    )}
 
                     {/* Action Button */}
                     <Link
