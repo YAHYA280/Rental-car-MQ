@@ -113,8 +113,8 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
   }, [car]);
 
   const validateLicensePlate = (plate: string): boolean => {
-    const plateRegex = /^\d{5}[A-Z]$/;
-    return plateRegex.test(plate.toUpperCase());
+    const trimmedPlate = plate.trim();
+    return trimmedPlate.length >= 1 && trimmedPlate.length <= 20;
   };
 
   const validateWhatsAppNumber = (number: string): boolean => {
@@ -167,12 +167,12 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
         break;
 
       case "licensePlate":
-        if (!value) {
+        if (!value.trim()) {
           newErrors.licensePlate = t(
             "cars.form.validation.licensePlateRequired"
           );
         } else if (!validateLicensePlate(value)) {
-          newErrors.licensePlate = t("cars.form.validation.licensePlateFormat");
+          newErrors.licensePlate = "License plate must be between 1 and 20 characters";
         } else {
           delete newErrors.licensePlate;
         }
@@ -343,11 +343,11 @@ const EditCarForm: React.FC<EditCarFormProps> = ({
       hasErrors = true;
     }
 
-    if (!formData.licensePlate) {
+    if (!formData.licensePlate.trim()) {
       newErrors.licensePlate = t("cars.form.validation.licensePlateRequired");
       hasErrors = true;
     } else if (!validateLicensePlate(formData.licensePlate)) {
-      newErrors.licensePlate = t("cars.form.validation.licensePlateFormat");
+      newErrors.licensePlate = "License plate must be between 1 and 20 characters";
       hasErrors = true;
     }
 

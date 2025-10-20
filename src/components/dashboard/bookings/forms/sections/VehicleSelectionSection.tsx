@@ -80,6 +80,12 @@ const VehicleSelectionSection: React.FC<VehicleSelectionSectionProps> = ({
                           <p className="font-medium text-sm">
                             {car.brand} {car.name}
                           </p>
+                          <Badge
+                            variant="outline"
+                            className="text-blue-800 border-blue-300 text-xs px-1.5 py-0"
+                          >
+                            {car.licensePlate}
+                          </Badge>
                           {car.available && (
                             <Badge className="bg-green-100 text-green-800 text-xs px-1 py-0">
                               {t("bookings.form.vehicleSelection.available")}
