@@ -577,8 +577,8 @@ export const PICKUP_LOCATIONS = [
 
 // Form validation helpers
 export const isValidLicensePlate = (plate: string): boolean => {
-  const plateRegex = /^\d{5}[A-Z]$/;
-  return plateRegex.test(plate.toUpperCase());
+  const trimmedPlate = plate.trim();
+  return trimmedPlate.length >= 1 && trimmedPlate.length <= 20;
 };
 
 export const isValidWhatsAppNumber = (number: string): boolean => {

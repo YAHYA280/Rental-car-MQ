@@ -699,7 +699,7 @@
           "selectSeats": "Select seats",
           "selectDoors": "Select doors",
           "selectDate": "Select date",
-          "licensePlateFormat": "Format: 5 digits + 1 letter (ex: 12345A)",
+          "licensePlate": "Enter license plate number",
           "whatsappNumber": "+212612345678"
         },
         "transmissions": {
@@ -730,7 +730,7 @@
           "modelRequired": "Model is required",
           "yearRequired": "Year is required",
           "licensePlateRequired": "License plate is required",
-          "licensePlateFormat": "Invalid format (ex: 12345A)",
+          "licensePlateFormat": "License plate must be between 1 and 20 characters",
           "transmissionRequired": "Transmission is required",
           "fuelTypeRequired": "Fuel type is required",
           "seatsRequired": "Number of seats is required",

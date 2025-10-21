@@ -699,7 +699,7 @@
           "selectSeats": "Sélectionner places",
           "selectDoors": "Sélectionner portes",
           "selectDate": "Sélectionner date",
-          "licensePlateFormat": "Format: 5 chiffres + 1 lettre (ex: 12345A)",
+          "licensePlate": "Entrez le numéro de plaque d'immatriculation",
           "whatsappNumber": "+212612345678"
         },
         "transmissions": {
@@ -730,7 +730,7 @@
           "modelRequired": "Le modèle est requis",
           "yearRequired": "L'année est requise",
           "licensePlateRequired": "La plaque d'immatriculation est requise",
-          "licensePlateFormat": "Format invalide (ex: 12345A)",
+          "licensePlateFormat": "La plaque d'immatriculation doit contenir entre 1 et 20 caractères",
           "transmissionRequired": "La transmission est requise",
           "fuelTypeRequired": "Le type de carburant est requis",
           "seatsRequired": "Le nombre de places est requis",
