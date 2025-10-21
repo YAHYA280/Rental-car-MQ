@@ -119,17 +119,12 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
     onInputChange("whatsappNumber", cleaned); // Store unformatted for validation
   };
 
-  // Format license plate as user types
+  // Handle license plate input
   const handleLicensePlateChange = (value: string) => {
-    // Remove all non-alphanumeric characters
-    let cleaned = value.replace(/[^0-9A-Za-z]/g, "").toUpperCase();
-
-    // Limit to 6 characters (5 digits + 1 letter)
-    if (cleaned.length > 6) {
-      cleaned = cleaned.substring(0, 6);
+    // Limit to 20 characters
+    if (value.length <= 20) {
+      onInputChange("licensePlate", value);
     }
-
-    onInputChange("licensePlate", cleaned);
   };
 
   // Handle year input with validation
@@ -324,9 +319,9 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
               name="licensePlate"
               value={formData.licensePlate}
               onChange={(e) => handleLicensePlateChange(e.target.value)}
-              placeholder="12345A"
+              placeholder={t("form.placeholders.licensePlate")}
               className={getFieldClass("licensePlate")}
-              maxLength={6}
+              maxLength={20}
             />
             <p className="text-xs text-gray-500 mt-1">
               {t("form.placeholders.licensePlateFormat")}
