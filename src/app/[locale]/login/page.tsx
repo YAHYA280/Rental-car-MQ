@@ -18,7 +18,7 @@ export default async function LoginPage({ params }: Props) {
 
       <div className="relative z-10 w-full max-w-md">
         <div className="bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl p-8">
-          {/* Logo Section */}
+          {/* Logo Section fg */}
           <div className="text-center mb-8">
             <div className="mb-6">
               <Image
