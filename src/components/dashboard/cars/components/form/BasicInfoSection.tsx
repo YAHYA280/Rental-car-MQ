@@ -323,9 +323,7 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
               className={getFieldClass("licensePlate")}
               maxLength={20}
             />
-            <p className="text-xs text-gray-500 mt-1">
-              {t("form.placeholders.licensePlateFormat")}
-            </p>
+
             {shouldShowError("licensePlate") && (
               <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
                 <AlertCircle className="h-3 w-3" />
