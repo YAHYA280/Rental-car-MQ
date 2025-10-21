@@ -1,9 +1,11 @@
+// src/components/dashboard/bookings/forms/sections/DateTimeSection.tsx - REFACTORED: Custom time input with full control
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -11,13 +13,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Calendar as CalendarIcon,
   Clock,
@@ -45,6 +40,18 @@ interface DateTimeSectionProps {
   errors: FormValidationState;
 }
 
+// --- Pricing Preview Interface ---
+interface PricingPreview {
+  durationMinutes: number;
+  durationHours: string;
+  fullDays: number;
+  latenessMinutes: number;
+  chargedDays: number;
+  latenessFeeApplied: boolean;
+  dailyRate: number;
+  totalAmount: number;
+}
+
 const DateTimeSection: React.FC<DateTimeSectionProps> = ({
   pickupDate,
   returnDate,
@@ -59,8 +66,9 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
 }) => {
   const t = useTranslations("dashboard");
 
-  // State for vehicle calendar
+  // --- State ---
   const [isLoadingCalendar, setIsLoadingCalendar] = useState(false);
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
   const [blockedDates, setBlockedDates] = useState<string[]>([]);
   const [vehicleAvailability, setVehicleAvailability] = useState<{
     available: boolean;
@@ -69,22 +77,11 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
     nextAvailableDate?: string;
     nextAvailableTime?: string;
   }>({ available: true });
+  const [pricingPreview, setPricingPreview] = useState<PricingPreview | null>(
+    null
+  );
 
-  // Generate time slots
-  const timeSlots = React.useMemo(() => {
-    const slots = [];
-    for (let hour = 8; hour <= 20; hour++) {
-      for (let minute = 0; minute < 60; minute += 30) {
-        const timeString = `${hour.toString().padStart(2, "0")}:${minute
-          .toString()
-          .padStart(2, "0")}`;
-        slots.push(timeString);
-      }
-    }
-    return slots;
-  }, []);
-
-  // Load vehicle calendar when vehicle is selected
+  // --- Load Vehicle Calendar ---
   useEffect(() => {
     if (selectedCarId) {
       loadVehicleCalendar(selectedCarId);
@@ -94,7 +91,16 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
     }
   }, [selectedCarId]);
 
-  // Load vehicle calendar and blocked dates from backend
+  // --- Load Pricing Preview When Times Change ---
+  useEffect(() => {
+    if (pickupDate && returnDate && pickupTime && returnTime && selectedCarId) {
+      loadPricingPreview();
+    } else {
+      setPricingPreview(null);
+    }
+  }, [pickupDate, returnDate, pickupTime, returnTime, selectedCarId]);
+
+  // --- Load Vehicle Calendar ---
   const loadVehicleCalendar = async (vehicleId: string) => {
     try {
       setIsLoadingCalendar(true);
@@ -109,21 +115,12 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
         format(endDate, "yyyy-MM-dd")
       );
 
-      console.log("📅 Calendar API Response:", response); // ADD THIS
-
       if (response.success && response.data) {
-        console.log("📅 Calendar Data:", {
-          available: response.data.available,
-          nextAvailableDate: response.data.nextAvailableDate,
-          nextAvailableTime: response.data.nextAvailableTime, // ADD THIS
-          currentBooking: response.data.currentBooking,
-        });
-
         setBlockedDates(response.data.blockedDates || []);
         setVehicleAvailability({
           available: response.data.available,
           nextAvailableDate: response.data.nextAvailableDate,
-          nextAvailableTime: response.data.nextAvailableTime, // MAKE SURE THIS IS HERE
+          nextAvailableTime: response.data.nextAvailableTime,
           currentBooking: response.data.currentBooking,
           upcomingBooking: response.data.upcomingBooking,
         });
@@ -135,14 +132,7 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
           );
           const timeStr = response.data.nextAvailableTime || "any time";
 
-          console.log(
-            "🚗 Vehicle not available until:",
-            dateStr,
-            "at",
-            timeStr
-          ); // ADD THIS
-
-          toast.info(t("bookings.form.dateTime.vehicleAvailabilityUpdated"), {
+          toast.info("Vehicle availability updated", {
             description: `Next available: ${dateStr} at ${timeStr}`,
             duration: 5000,
           });
@@ -150,74 +140,155 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
       }
     } catch (error) {
       console.error("Error loading vehicle calendar:", error);
-      toast.error(t("bookings.form.dateTime.errorLoadingAvailability"), {
-        description: t("bookings.form.dateTime.datesNotAccurate"),
+      toast.error("Error loading availability", {
+        description:
+          "Could not load vehicle availability. Dates may not be accurate.",
       });
     } finally {
       setIsLoadingCalendar(false);
     }
   };
 
-  // Check if a date is blocked
+  // --- Load Pricing Preview ---
+  const loadPricingPreview = async () => {
+    if (
+      !pickupDate ||
+      !returnDate ||
+      !pickupTime ||
+      !returnTime ||
+      !selectedCarId
+    ) {
+      return;
+    }
+
+    try {
+      setIsLoadingPreview(true);
+
+      const pickupDateStr = format(pickupDate, "yyyy-MM-dd");
+      const returnDateStr = format(returnDate, "yyyy-MM-dd");
+
+      const response = await fetch(
+        `${
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"
+        }/bookings/preview-availability/${selectedCarId}?pickupDate=${pickupDateStr}&returnDate=${returnDateStr}&pickupTime=${pickupTime}&returnTime=${returnTime}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.success && data.data.pricing) {
+        setPricingPreview(data.data.pricing);
+      }
+    } catch (error) {
+      console.error("Error loading pricing preview:", error);
+    } finally {
+      setIsLoadingPreview(false);
+    }
+  };
+
+  // --- Validate Time Format (HH:MM) ---
+  const validateTimeFormat = (time: string): boolean => {
+    const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+    return timeRegex.test(time);
+  };
+
+  // --- Format Time Input (auto-format as user types) ---
+  const formatTimeInput = (value: string): string => {
+    // Remove all non-digits
+    const digits = value.replace(/\D/g, "");
+
+    // Format based on length
+    if (digits.length === 0) return "";
+    if (digits.length <= 2) return digits;
+    if (digits.length <= 4) return `${digits.slice(0, 2)}:${digits.slice(2)}`;
+
+    // Limit to 4 digits (HH:MM)
+    return `${digits.slice(0, 2)}:${digits.slice(2, 4)}`;
+  };
+
+  // --- Handle Time Input Change ---
+  const handleTimeInputChange = (
+    value: string,
+    setter: (time: string) => void
+  ) => {
+    const formatted = formatTimeInput(value);
+    setter(formatted);
+  };
+
+  // --- Handle Time Input Blur (validation) ---
+  const handleTimeInputBlur = (
+    value: string,
+    setter: (time: string) => void,
+    fieldName: string
+  ) => {
+    if (!value) return;
+
+    if (!validateTimeFormat(value)) {
+      toast.error(`Invalid ${fieldName}`, {
+        description: "Please enter time in HH:MM format (e.g., 08:00, 14:30)",
+      });
+      return;
+    }
+
+    // Validate hour and minute ranges
+    const [hour, minute] = value.split(":").map(Number);
+
+    if (hour > 23) {
+      toast.error(`Invalid ${fieldName}`, {
+        description: "Hour must be between 00 and 23",
+      });
+      setter("23:59");
+      return;
+    }
+
+    if (minute > 59) {
+      toast.error(`Invalid ${fieldName}`, {
+        description: "Minute must be between 00 and 59",
+      });
+      const correctedTime = `${String(hour).padStart(2, "0")}:59`;
+      setter(correctedTime);
+      return;
+    }
+
+    // Format to ensure leading zeros
+    const formattedTime = `${String(hour).padStart(2, "0")}:${String(
+      minute
+    ).padStart(2, "0")}`;
+    setter(formattedTime);
+  };
+
+  // --- Quick Time Presets ---
+  const quickTimePresets = [
+    { label: "00:00", value: "00:00" },
+    { label: "06:00", value: "06:00" },
+    { label: "08:00", value: "08:00" },
+    { label: "09:00", value: "09:00" },
+    { label: "10:00", value: "10:00" },
+    { label: "12:00", value: "12:00" },
+    { label: "14:00", value: "14:00" },
+    { label: "16:00", value: "16:00" },
+    { label: "18:00", value: "18:00" },
+    { label: "20:00", value: "20:00" },
+    { label: "23:59", value: "23:59" },
+  ];
+
+  // --- Check if Date is Blocked ---
   const isDateBlocked = (date: Date): boolean => {
     const dateStr = format(date, "yyyy-MM-dd");
     return blockedDates.includes(dateStr);
   };
 
-  // FIXED: Simple date change handlers
+  // --- Date Change Handlers ---
   const handlePickupDateChange = (date: Date | undefined) => {
     onPickupDateChange(date);
-
-    // If we have both dates, validate minimum 2 days
-    if (date && returnDate) {
-      const pickupUTC = new Date(
-        Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
-      );
-      const returnUTC = new Date(
-        Date.UTC(
-          returnDate.getFullYear(),
-          returnDate.getMonth(),
-          returnDate.getDate()
-        )
-      );
-      const diffDays = Math.ceil(
-        (returnUTC.getTime() - pickupUTC.getTime()) / (1000 * 60 * 60 * 24)
-      );
-
-      if (diffDays < 1) {
-        toast.error(t("bookings.form.dateTime.minimumRentalError"), {
-          description: t("bookings.form.dateTime.minimumRentalDesc"),
-          duration: 4000,
-        });
-      }
-    }
   };
 
   const handleReturnDateChange = (date: Date | undefined) => {
     if (date && pickupDate) {
-      // Check minimum 2 days
-      const pickupUTC = new Date(
-        Date.UTC(
-          pickupDate.getFullYear(),
-          pickupDate.getMonth(),
-          pickupDate.getDate()
-        )
-      );
-      const returnUTC = new Date(
-        Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
-      );
-      const diffDays = Math.ceil(
-        (returnUTC.getTime() - pickupUTC.getTime()) / (1000 * 60 * 60 * 24)
-      );
-
-      if (diffDays < 1) {
-        toast.error(t("bookings.form.dateTime.minimumRentalError"), {
-          description: t("bookings.form.dateTime.minimumRentalDesc"),
-          duration: 4000,
-        });
-        return;
-      }
-
       // Check for blocked dates in range
       const currentDate = new Date(pickupDate);
       let hasBlockedDate = false;
@@ -233,134 +304,42 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
       }
 
       if (hasBlockedDate) {
-        toast.error(
-          t("bookings.form.dateTime.dateNotAvailable", { date: blockedDate }),
-          {
-            description: t("bookings.form.dateTime.selectAvailableDates"),
-          }
-        );
+        toast.error(`Date not available: ${blockedDate}`, {
+          description: "Please select different dates.",
+        });
         return;
       }
-
-      // Success message
-      toast.success(
-        t("bookings.form.dateTime.daysSelectedSuccess", { days: diffDays }),
-        {
-          description: `${t("bookings.form.dateTime.fromTo", {
-            from: format(pickupDate, "MMM dd"),
-            to: format(date, "MMM dd"),
-          })}`,
-          duration: 2000,
-        }
-      );
     }
 
     onReturnDateChange(date);
   };
 
-  // FIXED: Proper rental duration calculation
-  const calculateDuration = (): number => {
+  // --- Calculate Duration ---
+  const getDurationInfo = () => {
     if (!pickupDate || !returnDate || !pickupTime || !returnTime) {
-      return 0;
-    }
-
-    try {
-      const pickup = new Date(pickupDate);
-      const returnD = new Date(returnDate);
-
-      // Basic day calculation
-      const diffTime = Math.abs(returnD.getTime() - pickup.getTime());
-      let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-      // If same day, calculate based on hours
-      if (diffDays === 0 && pickupTime && returnTime) {
-        const [pickupHour, pickupMin] = pickupTime.split(":").map(Number);
-        const [returnHour, returnMin] = returnTime.split(":").map(Number);
-
-        if (!isNaN(pickupHour) && !isNaN(returnHour)) {
-          const pickupMinutes = pickupHour * 60 + pickupMin;
-          const returnMinutes = returnHour * 60 + returnMin;
-          const hoursDiff = (returnMinutes - pickupMinutes) / 60;
-
-          return 1; // Same day rental = 1 day
-        }
-      }
-
-      // For multi-day rentals, apply time logic
-      if (pickupTime && returnTime && diffDays > 0) {
-        const [pickupHour, pickupMin] = pickupTime.split(":").map(Number);
-        const [returnHour, returnMin] = returnTime.split(":").map(Number);
-
-        if (!isNaN(pickupHour) && !isNaN(returnHour)) {
-          const timeDifference =
-            returnHour * 60 + returnMin - (pickupHour * 60 + pickupMin);
-
-          if (timeDifference > 60) {
-            // More than 1 hour later
-            diffDays += 1;
-          }
-        }
-      }
-
-      return Math.max(1, diffDays); // Minimum 1 day
-    } catch (error) {
-      console.error("Error calculating duration:", error);
-      return 1;
-    }
-  };
-
-  const duration = calculateDuration();
-  const meetsMinimumDays = duration >= 1;
-
-  // Check if same day booking
-  const isSameDay =
-    pickupDate &&
-    returnDate &&
-    pickupDate.toDateString() === returnDate.toDateString();
-
-  // Get time excess info
-  const getTimeExcessInfo = () => {
-    if (!pickupTime || !returnTime) return null;
-
-    try {
-      const [pickupHour, pickupMin] = pickupTime.split(":").map(Number);
-      const [returnHour, returnMin] = returnTime.split(":").map(Number);
-
-      if (
-        isNaN(pickupHour) ||
-        isNaN(pickupMin) ||
-        isNaN(returnHour) ||
-        isNaN(returnMin)
-      ) {
-        return null;
-      }
-
-      const pickupMinutes = pickupHour * 60 + pickupMin;
-      const returnMinutes = returnHour * 60 + returnMin;
-      const timeDifference = returnMinutes - pickupMinutes;
-      const oneHourInMinutes = 60;
-
-      if (timeDifference > oneHourInMinutes) {
-        const excessMinutes = timeDifference - oneHourInMinutes;
-        const excessHours = Math.floor(excessMinutes / 60);
-        const remainingMinutes = excessMinutes % 60;
-
-        return {
-          hasExcess: true,
-          excessHours,
-          excessMinutes: remainingMinutes,
-          message: t("bookings.form.dateTime.timeExcessMessage", {
-            hours: excessHours,
-            minutes: remainingMinutes,
-          }),
-        };
-      }
-
-      return { hasExcess: false };
-    } catch (error) {
       return null;
     }
+
+    if (!pricingPreview) {
+      return null;
+    }
+
+    const hours = parseFloat(pricingPreview.durationHours);
+    const isSameDay = pickupDate.toDateString() === returnDate.toDateString();
+
+    return {
+      minutes: pricingPreview.durationMinutes,
+      hours: hours,
+      days: pricingPreview.fullDays,
+      chargedDays: pricingPreview.chargedDays,
+      isSameDay,
+      isSubDay: hours < 24,
+      latenessMinutes: pricingPreview.latenessMinutes,
+      latenessFeeApplied: pricingPreview.latenessFeeApplied,
+    };
   };
+
+  const durationInfo = getDurationInfo();
 
   return (
     <Card>
@@ -368,20 +347,20 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
         <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
           <CalendarIcon className="h-5 w-5" />
           {t("bookings.form.dateTime.title")}
-          <span className="text-sm font-normal text-blue-600 bg-blue-50 px-2 py-1 rounded">
-            {t("bookings.form.dateTime.minimumDays")}
+          <span className="text-sm font-normal text-green-600 bg-green-50 px-2 py-1 rounded">
+            ✓ Any duration allowed
           </span>
         </h3>
 
         <div className="space-y-4">
-          {/* Vehicle Availability Status */}
+          {/* --- Vehicle Availability Status --- */}
           {selectedCarId && (
             <div className="mb-4">
               {isLoadingCalendar ? (
                 <div className="flex items-center justify-center gap-2 text-blue-600 bg-blue-50 rounded-lg px-3 py-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
                   <span className="text-sm font-medium">
-                    {t("bookings.form.dateTime.loadingAvailability")}
+                    Loading availability...
                   </span>
                 </div>
               ) : vehicleAvailability.available ? (
@@ -389,15 +368,13 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
                   <CheckCircle className="h-4 w-4" />
                   <span className="text-sm font-medium">
                     {vehicleAvailability.upcomingBooking
-                      ? t("bookings.form.dateTime.availableUntil", {
-                          date: format(
-                            new Date(
-                              vehicleAvailability.upcomingBooking.pickupDate
-                            ),
-                            "MMM dd"
+                      ? `Available until ${format(
+                          new Date(
+                            vehicleAvailability.upcomingBooking.pickupDate
                           ),
-                        })
-                      : t("bookings.form.dateTime.availableNow")}
+                          "MMM dd"
+                        )}`
+                      : "Vehicle available now"}
                   </span>
                 </div>
               ) : (
@@ -405,7 +382,7 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
                   <div className="flex items-center gap-2">
                     <AlertCircle className="h-4 w-4" />
                     <span className="text-sm font-medium">
-                      {t("bookings.form.dateTime.vehicleNotAvailable")}
+                      Vehicle not available
                     </span>
                   </div>
                   {vehicleAvailability.nextAvailableDate && (
@@ -413,7 +390,7 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
                       <div className="flex items-center gap-2 text-xs">
                         <CalendarIcon className="h-3 w-3" />
                         <span className="font-medium">
-                          Disponible à partir du :{" "}
+                          Available from:{" "}
                           {format(
                             new Date(vehicleAvailability.nextAvailableDate),
                             "dd MMM yyyy"
@@ -424,19 +401,10 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
                         <div className="flex items-center gap-2 text-xs">
                           <Clock className="h-3 w-3" />
                           <span className="font-medium">
-                            Dès : {vehicleAvailability.nextAvailableTime}
+                            From: {vehicleAvailability.nextAvailableTime}
                           </span>
                         </div>
                       )}
-                      <div className="mt-1 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800">
-                        💡 Le véhicule sera disponible le{" "}
-                        {format(
-                          new Date(vehicleAvailability.nextAvailableDate),
-                          "EEEE dd MMM"
-                        )}{" "}
-                        à{" "}
-                        {vehicleAvailability.nextAvailableTime || "toute heure"}
-                      </div>
                     </div>
                   )}
                 </div>
@@ -444,11 +412,11 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
             </div>
           )}
 
-          {/* Date Selection */}
+          {/* --- Date Selection --- */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Pickup Date */}
             <div>
-              <Label>{t("bookings.form.dateTime.pickupDate")} *</Label>
+              <Label>Pickup Date *</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -463,7 +431,7 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {pickupDate
                       ? format(pickupDate, "PPP")
-                      : t("bookings.form.dateTime.selectPickupDate")}
+                      : "Select pickup date"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -502,7 +470,7 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
 
             {/* Return Date */}
             <div>
-              <Label>{t("bookings.form.dateTime.returnDate")} *</Label>
+              <Label>Return Date *</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -519,7 +487,7 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {returnDate
                       ? format(returnDate, "PPP")
-                      : t("bookings.form.dateTime.selectReturnDate")}
+                      : "Select return date"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -530,7 +498,6 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
                     disabled={(date) => {
                       if (!pickupDate) return true;
 
-                      // Must be at least 2 days after pickup
                       const pickupUTC = new Date(
                         Date.UTC(
                           pickupDate.getFullYear(),
@@ -545,12 +512,9 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
                           date.getDate()
                         )
                       );
-                      const diffDays = Math.ceil(
-                        (dateUTC.getTime() - pickupUTC.getTime()) /
-                          (1000 * 60 * 60 * 24)
-                      );
 
-                      if (diffDays < 1) return true;
+                      // Allow same day
+                      if (dateUTC < pickupUTC) return true;
                       return isDateBlocked(date);
                     }}
                     modifiers={{
@@ -572,19 +536,11 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
                     <div className="flex items-center justify-between text-xs mb-2">
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 bg-green-100 border border-green-300 rounded"></div>
-                        <span>{t("bookings.form.dateTime.available")}</span>
+                        <span>Available</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 bg-red-100 border border-red-300 rounded opacity-40"></div>
-                        <span>{t("bookings.form.dateTime.booked")}</span>
-                      </div>
-                    </div>
-                    <div className="bg-blue-50 border border-blue-200 rounded p-2">
-                      <div className="flex items-center gap-1 text-blue-800">
-                        <CalendarIcon className="h-3 w-3" />
-                        <span className="text-xs font-medium">
-                          {t("bookings.form.dateTime.minimumDaysRequired")}
-                        </span>
+                        <span>Booked</span>
                       </div>
                     </div>
                   </div>
@@ -599,127 +555,117 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
             </div>
           </div>
 
-          {/* Time Selection */}
+          {/* --- Custom Time Input (Full Control) --- */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Pickup Time */}
             <div>
-              <Label htmlFor="pickupTime">
-                {t("bookings.form.dateTime.pickupTime")} *
-              </Label>
-              <Select value={pickupTime} onValueChange={onPickupTimeChange}>
-                <SelectTrigger
-                  className={errors.pickupTime ? "border-red-500" : ""}
-                >
-                  <Clock className="mr-2 h-4 w-4" />
-                  <SelectValue
-                    placeholder={t("bookings.form.dateTime.selectPickupTime")}
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  {timeSlots.map((time) => (
-                    <SelectItem key={time} value={time}>
-                      {time}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="pickupTime">Pickup Time (HH:MM) *</Label>
+              <div className="relative mt-1">
+                <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  id="pickupTime"
+                  type="text"
+                  value={pickupTime}
+                  onChange={(e) =>
+                    handleTimeInputChange(e.target.value, onPickupTimeChange)
+                  }
+                  onBlur={(e) =>
+                    handleTimeInputBlur(
+                      e.target.value,
+                      onPickupTimeChange,
+                      "pickup time"
+                    )
+                  }
+                  placeholder="08:00"
+                  className={cn("pl-10", errors.pickupTime && "border-red-500")}
+                  maxLength={5}
+                />
+              </div>
               {errors.pickupTime && (
                 <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
                   <AlertCircle className="h-3 w-3" />
                   {errors.pickupTime}
                 </p>
               )}
+
+              {/* Quick Presets */}
+              <div className="mt-2">
+                <p className="text-xs text-gray-600 mb-1">Quick select:</p>
+                <div className="flex flex-wrap gap-1">
+                  {quickTimePresets.slice(0, 6).map((preset) => (
+                    <Button
+                      key={preset.value}
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-6 text-xs px-2"
+                      onClick={() => onPickupTimeChange(preset.value)}
+                    >
+                      {preset.label}
+                    </Button>
+                  ))}
+                </div>
+              </div>
             </div>
 
+            {/* Return Time */}
             <div>
-              <Label htmlFor="returnTime">
-                {t("bookings.form.dateTime.returnTime")} *
-              </Label>
-              <Select value={returnTime} onValueChange={onReturnTimeChange}>
-                <SelectTrigger
-                  className={errors.returnTime ? "border-red-500" : ""}
-                >
-                  <Clock className="mr-2 h-4 w-4" />
-                  <SelectValue
-                    placeholder={t("bookings.form.dateTime.selectReturnTime")}
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  {timeSlots.map((time) => (
-                    <SelectItem key={time} value={time}>
-                      {time}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="returnTime">Return Time (HH:MM) *</Label>
+              <div className="relative mt-1">
+                <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  id="returnTime"
+                  type="text"
+                  value={returnTime}
+                  onChange={(e) =>
+                    handleTimeInputChange(e.target.value, onReturnTimeChange)
+                  }
+                  onBlur={(e) =>
+                    handleTimeInputBlur(
+                      e.target.value,
+                      onReturnTimeChange,
+                      "return time"
+                    )
+                  }
+                  placeholder="18:00"
+                  className={cn("pl-10", errors.returnTime && "border-red-500")}
+                  maxLength={5}
+                />
+              </div>
               {errors.returnTime && (
                 <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
                   <AlertCircle className="h-3 w-3" />
                   {errors.returnTime}
                 </p>
               )}
-            </div>
-          </div>
 
-          {/* Duration Summary */}
-          {duration > 0 && (
-            <div
-              className={cn(
-                "mt-4 p-3 border rounded-lg",
-                meetsMinimumDays
-                  ? "bg-green-50 border-green-200"
-                  : "bg-red-50 border-red-200"
-              )}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <CalendarIcon
-                    className={cn(
-                      "h-4 w-4",
-                      meetsMinimumDays ? "text-green-600" : "text-red-600"
-                    )}
-                  />
-                  <span
-                    className={cn(
-                      "text-sm font-medium",
-                      meetsMinimumDays ? "text-green-800" : "text-red-800"
-                    )}
-                  >
-                    {t("bookings.form.dateTime.rentalDuration")}
-                  </span>
-                </div>
-                <div className="text-right">
-                  <p
-                    className={cn(
-                      "font-bold",
-                      meetsMinimumDays ? "text-green-900" : "text-red-900"
-                    )}
-                  >
-                    {duration}{" "}
-                    {duration === 1
-                      ? t("bookings.form.dateTime.day")
-                      : t("bookings.form.dateTime.days")}
-                  </p>
-                  {!meetsMinimumDays && (
-                    <p className="text-xs text-red-700">
-                      {t("bookings.form.dateTime.needAtLeastDays")}
-                    </p>
-                  )}
-                  {isSameDay && meetsMinimumDays && (
-                    <p className="text-xs text-green-700">
-                      {t("bookings.form.dateTime.extendedByTimeLogic")}
-                    </p>
-                  )}
+              {/* Quick Presets */}
+              <div className="mt-2">
+                <p className="text-xs text-gray-600 mb-1">Quick select:</p>
+                <div className="flex flex-wrap gap-1">
+                  {quickTimePresets.slice(6).map((preset) => (
+                    <Button
+                      key={preset.value}
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-6 text-xs px-2"
+                      onClick={() => onReturnTimeChange(preset.value)}
+                    >
+                      {preset.label}
+                    </Button>
+                  ))}
                 </div>
               </div>
             </div>
-          )}
+          </div>
 
           {!selectedCarId && (
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
               <div className="flex items-center gap-2 text-gray-600">
                 <Info className="h-4 w-4" />
                 <span className="text-sm">
-                  {t("bookings.form.dateTime.selectVehicleFirst")}
+                  Select a vehicle first to see availability and pricing
                 </span>
               </div>
             </div>

@@ -1,3 +1,4 @@
+// src/components/dashboard/bookings/forms/AddBookingForm.tsx - REFACTORED: Updated calculation logic
 "use client";
 
 import React, { useState } from "react";
@@ -31,7 +32,7 @@ const AddBookingForm: React.FC<AddBookingFormProps> = ({
   const t = useTranslations("dashboard");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Form state - using AdminBookingFormData structure
+  // --- Form State ---
   const [formData, setFormData] = useState<AdminBookingFormData>({
     customerId: "",
     vehicleId: "",
@@ -47,65 +48,65 @@ const AddBookingForm: React.FC<AddBookingFormProps> = ({
   const [pickupDate, setPickupDate] = useState<Date | undefined>();
   const [returnDate, setReturnDate] = useState<Date | undefined>();
 
-  // Use validation hook (without existingBookings for now)
+  // Use validation hook
   const { errors, validateForm, clearError } = useBookingValidation(
     cars,
     users,
     [] // We'll handle availability check in the backend
   );
 
-  // FIXED: Get selected entities properly
+  // --- Get Selected Entities ---
   const selectedCustomer = users.find(
-    (user) => user.id === formData.customerId // Fixed: was using vehicleId
+    (user) => user.id === formData.customerId
   );
   const selectedCar = cars.find((car) => car.id === formData.vehicleId);
 
-  // Calculate booking details
-  const calculateDays = (): number => {
+  // --- Calculate Charged Days (Frontend Preview - matches backend logic) ---
+  const calculateChargedDays = (): number => {
     if (
-      pickupDate &&
-      returnDate &&
-      formData.pickupTime &&
-      formData.returnTime
+      !pickupDate ||
+      !returnDate ||
+      !formData.pickupTime ||
+      !formData.returnTime
     ) {
-      // Calculate basic day difference
-      const pickupDateObj = new Date(pickupDate.toDateString());
-      const returnDateObj = new Date(returnDate.toDateString());
-      const basicDays = Math.ceil(
-        (returnDateObj.getTime() - pickupDateObj.getTime()) /
-          (1000 * 60 * 60 * 24)
+      return 0;
+    }
+
+    try {
+      const pickupDateTime = new Date(
+        `${formData.pickupDate}T${formData.pickupTime}:00`
+      );
+      const returnDateTime = new Date(
+        `${formData.returnDate}T${formData.returnTime}:00`
       );
 
-      // Apply your specific time logic
-      const pickupTime = formData.pickupTime;
-      const returnTime = formData.returnTime;
+      // Total duration in minutes
+      const totalMinutes = Math.floor(
+        (returnDateTime.getTime() - pickupDateTime.getTime()) / (1000 * 60)
+      );
 
-      // Convert times to minutes for easier comparison
-      const [pickupHour, pickupMin] = pickupTime.split(":").map(Number);
-      const [returnHour, returnMin] = returnTime.split(":").map(Number);
+      if (totalMinutes < 0) return 0;
 
-      const pickupMinutes = pickupHour * 60 + pickupMin;
-      const returnMinutes = returnHour * 60 + returnMin;
+      // Calculate full 24-hour blocks
+      const fullDays = Math.floor(totalMinutes / 1440); // 1440 = 24 * 60
 
-      // Your logic: if return time is more than 1 hour after pickup time, add 1 day
-      const timeDifference = returnMinutes - pickupMinutes;
-      const oneHourInMinutes = 60;
+      // Calculate lateness (remainder beyond full days)
+      const latenessMinutes = totalMinutes - fullDays * 1440;
 
-      let rentalDays = basicDays;
+      // Apply lateness rule: >= 90 minutes adds +1 day
+      const chargedDays = fullDays + (latenessMinutes >= 90 ? 1 : 0);
 
-      // If return time exceeds pickup time by more than 1 hour, add extra day
-      if (timeDifference > oneHourInMinutes) {
-        rentalDays += 1;
-      }
-
-      return Math.max(1, rentalDays);
+      return Math.max(1, chargedDays); // Minimum 1 day charged
+    } catch (error) {
+      console.error("Error calculating charged days:", error);
+      return 1;
     }
-    return 0;
   };
-  const days = calculateDays();
-  const totalAmount = selectedCar ? selectedCar.price * days : 0;
 
-  // Handle input changes
+  const chargedDays = calculateChargedDays();
+  const totalAmount = selectedCar ? selectedCar.price * chargedDays : 0;
+
+  // --- Handle Input Changes ---
   const handleInputChange = (
     field: keyof AdminBookingFormData,
     value: string
@@ -114,7 +115,7 @@ const AddBookingForm: React.FC<AddBookingFormProps> = ({
     clearError(field);
   };
 
-  // Handle date changes
+  // --- Handle Date Changes ---
   const handleDateChange = (
     date: Date | undefined,
     field: "pickup" | "return"
@@ -131,17 +132,21 @@ const AddBookingForm: React.FC<AddBookingFormProps> = ({
     }
   };
 
-  // Handle form submission
+  // --- Handle Form Submission ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    console.log("Submitting booking form:", formData);
+
     if (!validateForm(formData)) {
+      console.log("Validation failed:", errors);
       return;
     }
 
     setIsSubmitting(true);
     try {
       await onSubmit(formData);
+
       // Reset form on success
       setFormData({
         customerId: "",
@@ -166,7 +171,7 @@ const AddBookingForm: React.FC<AddBookingFormProps> = ({
     <div className="space-y-6">
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Left Column */}
+          {/* --- Left Column --- */}
           <div className="space-y-6">
             {/* Customer Selection */}
             <CustomerSelectionSection
@@ -190,7 +195,7 @@ const AddBookingForm: React.FC<AddBookingFormProps> = ({
               error={errors.vehicleId}
             />
 
-            {/* Date and Time Selection - UPDATED: Pass selectedCarId */}
+            {/* Date and Time Selection */}
             <DateTimeSection
               pickupDate={pickupDate}
               returnDate={returnDate}
@@ -209,7 +214,7 @@ const AddBookingForm: React.FC<AddBookingFormProps> = ({
             />
           </div>
 
-          {/* Right Column */}
+          {/* --- Right Column --- */}
           <div className="space-y-6">
             {/* Locations */}
             <LocationsSection
@@ -225,11 +230,11 @@ const AddBookingForm: React.FC<AddBookingFormProps> = ({
             />
 
             {/* Booking Summary */}
-            {selectedCustomer && selectedCar && days > 0 && (
+            {selectedCustomer && selectedCar && chargedDays > 0 && (
               <BookingSummary
                 customer={selectedCustomer}
                 car={selectedCar}
-                days={days}
+                days={chargedDays}
                 totalAmount={totalAmount}
                 pickupTime={formData.pickupTime}
                 returnTime={formData.returnTime}
@@ -316,7 +321,7 @@ const AddBookingForm: React.FC<AddBookingFormProps> = ({
           </div>
         </div>
 
-        {/* Form Actions */}
+        {/* --- Form Actions --- */}
         <div className="flex flex-col sm:flex-row justify-end gap-3 pt-6 border-t">
           <Button
             type="button"
@@ -331,7 +336,10 @@ const AddBookingForm: React.FC<AddBookingFormProps> = ({
             type="submit"
             className="bg-carbookers-red-600 hover:bg-carbookers-red-700 w-full sm:w-auto order-1 sm:order-2"
             disabled={
-              isSubmitting || !selectedCar || !selectedCustomer || days < 1
+              isSubmitting ||
+              !selectedCar ||
+              !selectedCustomer ||
+              chargedDays < 1
             }
           >
             {isSubmitting

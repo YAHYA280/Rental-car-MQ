@@ -1,3 +1,4 @@
+// src/components/dashboard/bookings/forms/sections/BookingSummary.tsx - REFACTORED: Show lateness rule breakdown
 "use client";
 
 import React from "react";
@@ -13,11 +14,11 @@ import {
   MapPin,
   CreditCard,
   Calculator,
-  Star,
   Shield,
   CheckCircle,
   AlertCircle,
   Info,
+  Zap,
 } from "lucide-react";
 import { UserData, CarData } from "@/components/types";
 
@@ -45,46 +46,49 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
   const t = useTranslations("dashboard");
 
   const dailyRate = car.price;
-  const subtotal = dailyRate * days;
-  const discount = 0;
-  const finalTotal = subtotal - discount;
   const cautionAmount = Number(car.caution) || 0;
 
-  const getTimeExcessInfo = () => {
-    if (!pickupTime || !returnTime) return null;
-
-    const [pickupHour, pickupMin] = pickupTime.split(":").map(Number);
-    const [returnHour, returnMin] = returnTime.split(":").map(Number);
-
-    const pickupMinutes = pickupHour * 60 + pickupMin;
-    const returnMinutes = returnHour * 60 + returnMin;
-
-    const timeDifference = returnMinutes - pickupMinutes;
-    const oneHourInMinutes = 60;
-
-    if (timeDifference > oneHourInMinutes) {
-      const excessMinutes = timeDifference - oneHourInMinutes;
-      const excessHours = Math.floor(excessMinutes / 60);
-      const remainingMinutes = excessMinutes % 60;
-
-      return {
-        hasExcess: true,
-        excessHours,
-        excessMinutes: remainingMinutes,
-        message: t("bookings.summary.timeExcessMessage", {
-          hours: excessHours,
-          minutes: remainingMinutes,
-        }),
-      };
+  // --- Calculate Lateness Info ---
+  const getLatenessInfo = () => {
+    if (!pickupTime || !returnTime || !pickupDate || !returnDate) {
+      return null;
     }
 
-    return { hasExcess: false };
+    try {
+      const pickupDateTime = new Date(`${pickupDate}T${pickupTime}:00`);
+      const returnDateTime = new Date(`${returnDate}T${returnTime}:00`);
+
+      const totalMinutes = Math.floor(
+        (returnDateTime.getTime() - pickupDateTime.getTime()) / (1000 * 60)
+      );
+
+      if (totalMinutes < 0) return null;
+
+      const fullDays = Math.floor(totalMinutes / 1440);
+      const latenessMinutes = totalMinutes - fullDays * 1440;
+      const latenessFeeApplied = latenessMinutes >= 90;
+
+      const latenessHours = Math.floor(latenessMinutes / 60);
+      const latenessRemainingMinutes = latenessMinutes % 60;
+
+      return {
+        totalMinutes,
+        durationHours: (totalMinutes / 60).toFixed(1),
+        fullDays,
+        latenessMinutes,
+        latenessHours,
+        latenessRemainingMinutes,
+        latenessFeeApplied,
+        chargedDays: days,
+        isSubDay: totalMinutes < 1440,
+      };
+    } catch (error) {
+      console.error("Error calculating lateness:", error);
+      return null;
+    }
   };
 
-  const timeExcessInfo = getTimeExcessInfo();
-
-  const isLongTerm = days >= 7;
-  const isVeryLongTerm = days >= 30;
+  const latenessInfo = getLatenessInfo();
 
   return (
     <Card className="border-2 border-blue-200">
@@ -95,7 +99,7 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
         </h3>
 
         <div className="space-y-4">
-          {/* Customer Summary */}
+          {/* --- Customer Summary --- */}
           <div className="bg-white border rounded-lg p-3">
             <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2 text-sm">
               <User className="h-4 w-4 text-blue-600" />
@@ -116,7 +120,7 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
             </div>
           </div>
 
-          {/* Vehicle Summary */}
+          {/* --- Vehicle Summary --- */}
           <div className="bg-white border rounded-lg p-3">
             <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2 text-sm">
               <Car className="h-4 w-4 text-blue-600" />
@@ -145,81 +149,58 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
             </div>
           </div>
 
-          {/* Rental Duration with Time Details */}
-          <div className="bg-white border rounded-lg p-3">
-            <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2 text-sm">
-              <Calendar className="h-4 w-4 text-blue-600" />
-              {t("bookings.summary.rentalDuration")}
-            </h4>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-gray-400" />
-                  <span className="text-sm text-gray-600">
-                    {t("bookings.summary.duration")}:
+          {/* --- Duration with Lateness Breakdown --- */}
+          {latenessInfo && (
+            <div className="bg-white border rounded-lg p-3">
+              <div className="space-y-2">
+                {/* Full Days */}
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-600 flex items-center gap-1">
+                    <Calendar className="h-3 w-3" />
+                    Full 24h Blocks:
+                  </span>
+                  <span className="font-medium text-gray-900">
+                    {latenessInfo.fullDays} day
+                    {latenessInfo.fullDays !== 1 ? "s" : ""}
                   </span>
                 </div>
-                <div className="text-right">
-                  <p className="font-bold text-gray-900">
-                    {days}{" "}
-                    {days === 1
-                      ? t("bookings.summary.day")
-                      : t("bookings.summary.days")}
-                  </p>
-                  {isLongTerm && (
-                    <p className="text-xs text-green-600">
-                      {isVeryLongTerm
-                        ? t("bookings.summary.monthlyRateEligible")
-                        : t("bookings.summary.weeklyRateEligible")}
-                    </p>
-                  )}
+
+                {/* Divider */}
+                <div className="border-t border-gray-200 my-2"></div>
+
+                {/* Charged Days */}
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold text-gray-900">
+                    Charged Days:
+                  </span>
+                  <span className="font-bold text-xl text-blue-600">
+                    {latenessInfo.chargedDays} day
+                    {latenessInfo.chargedDays !== 1 ? "s" : ""}
+                  </span>
                 </div>
               </div>
 
               {/* Time Details */}
               {pickupTime && returnTime && (
-                <div className="text-xs text-gray-600 space-y-1 pt-2 border-t border-gray-200">
+                <div className="text-xs text-gray-600 space-y-1 pt-2 mt-2 border-t border-gray-200">
                   <div className="flex justify-between">
-                    <span>{t("bookings.summary.pickupTime")}:</span>
-                    <span className="font-medium">{pickupTime}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>{t("bookings.summary.returnTime")}:</span>
-                    <span className="font-medium">{returnTime}</span>
-                  </div>
-                  {pickupDate && returnDate && (
-                    <>
-                      <div className="flex justify-between">
-                        <span>{t("bookings.summary.from")}:</span>
-                        <span className="font-medium">{pickupDate}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>{t("bookings.summary.to")}:</span>
-                        <span className="font-medium">{returnDate}</span>
-                      </div>
-                    </>
-                  )}
-                </div>
-              )}
-
-              {/* Time Policy Warning */}
-              {timeExcessInfo?.hasExcess && (
-                <div className="bg-amber-50 border border-amber-200 rounded p-2 mt-2">
-                  <div className="flex items-center gap-2 text-amber-800">
-                    <AlertCircle className="h-4 w-4" />
-                    <span className="text-xs font-medium">
-                      {t("bookings.summary.timePolicyApplied")}
+                    <span>Pickup:</span>
+                    <span className="font-medium">
+                      {pickupDate} at {pickupTime}
                     </span>
                   </div>
-                  <p className="text-xs text-amber-700 mt-1">
-                    {timeExcessInfo.message}
-                  </p>
+                  <div className="flex justify-between">
+                    <span>Return:</span>
+                    <span className="font-medium">
+                      {returnDate} at {returnTime}
+                    </span>
+                  </div>
                 </div>
               )}
             </div>
-          </div>
+          )}
 
-          {/* Price Breakdown */}
+          {/* --- Price Breakdown --- */}
           <div className="bg-gray-50 border rounded-lg p-3">
             <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2 text-sm">
               <Calculator className="h-4 w-4 text-blue-600" />
@@ -227,47 +208,22 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
             </h4>
 
             <div className="space-y-2">
-              {/* Daily Rate */}
+              {/* Daily Rate Calculation */}
               <div className="flex justify-between items-center text-sm">
                 <span className="text-gray-600">
-                  {t("bookings.summary.dailyRateCalculation", {
-                    days: days,
-                    dayText:
-                      days === 1
-                        ? t("bookings.summary.day")
-                        : t("bookings.summary.days"),
-                  })}
+                  Rental ({days} day{days !== 1 ? "s" : ""} × €{dailyRate}):
                 </span>
-                <span className="font-medium">
-                  €{dailyRate} × {days} = €{subtotal}
-                </span>
+                <span className="font-medium">€{totalAmount.toFixed(2)}</span>
               </div>
 
-              {/* Time excess fee */}
-              {timeExcessInfo?.hasExcess && (
+              {/* Show lateness fee if applied */}
+              {latenessInfo?.latenessFeeApplied && (
                 <div className="flex justify-between items-center text-sm text-amber-600">
                   <span className="flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    {t("bookings.summary.timeExcess")}
+                    <AlertCircle className="h-3 w-3" />
+                    Lateness fee (+1 day):
                   </span>
-                  <span>€{dailyRate}</span>
-                </div>
-              )}
-
-              {/* Discount (if applicable) */}
-              {isLongTerm && (
-                <div className="flex justify-between items-center text-sm text-green-600">
-                  <span>
-                    {isVeryLongTerm
-                      ? t("bookings.summary.monthlyDiscount")
-                      : t("bookings.summary.weeklyDiscount")}
-                  </span>
-                  <span>
-                    -€
-                    {isVeryLongTerm
-                      ? Math.round(subtotal * 0.15)
-                      : Math.round(subtotal * 0.1)}
-                  </span>
+                  <span className="font-medium">€{dailyRate}</span>
                 </div>
               )}
 
@@ -280,21 +236,8 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
                   {t("bookings.summary.rentalTotal")}:
                 </span>
                 <span className="font-bold text-xl text-carbookers-red-600">
-                  €{totalAmount}
+                  €{totalAmount.toFixed(2)}
                 </span>
-              </div>
-
-              {/* Security Deposit/Caution - Separate section */}
-              <div className="bg-amber-50 border border-amber-200 rounded p-3 mt-3">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="font-semibold text-amber-900 flex items-center gap-2">
-                    <Shield className="h-4 w-4" />
-                    {t("bookings.summary.securityDeposit")}:
-                  </span>
-                  <span className="font-bold text-xl text-amber-900">
-                    €{cautionAmount}
-                  </span>
-                </div>
               </div>
             </div>
           </div>
@@ -303,5 +246,10 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
     </Card>
   );
 };
+
+// Helper for conditional class names
+function cn(...classes: (string | boolean | undefined)[]) {
+  return classes.filter(Boolean).join(" ");
+}
 
 export default BookingSummary;
