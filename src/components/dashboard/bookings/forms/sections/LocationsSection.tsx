@@ -21,7 +21,6 @@ import {
   Hotel,
   MapIcon,
   AlertCircle,
-  ArrowRight,
 } from "lucide-react";
 import { FormValidationState } from "@/components/types";
 
@@ -92,13 +91,6 @@ const LocationsSection: React.FC<LocationsSectionProps> = ({
   const getLocationDetails = (locationValue: string) => {
     return locations.find((loc) => loc.value === locationValue);
   };
-
-  const pickupDetails = getLocationDetails(pickupLocation);
-  const returnDetails = getLocationDetails(returnLocation);
-
-  // Check if different locations
-  const isDifferentLocation =
-    pickupLocation && returnLocation && pickupLocation !== returnLocation;
 
   return (
     <Card>
@@ -225,51 +217,6 @@ const LocationsSection: React.FC<LocationsSectionProps> = ({
               </p>
             )}
           </div>
-          {/* Location Summary */}
-          {pickupLocation && returnLocation && (
-            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <h4 className="font-medium text-blue-900 mb-2 flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
-                {t("bookings.form.locations.locationSummary")}
-              </h4>
-              <div className="flex items-center gap-2 text-sm">
-                <div className="flex items-center gap-1">
-                  {pickupDetails?.icon && (
-                    <pickupDetails.icon className="h-3 w-3 text-green-600" />
-                  )}
-                  <span className="text-green-700 font-medium">
-                    {pickupDetails?.label || pickupLocation}
-                  </span>
-                </div>
-                <ArrowRight className="h-3 w-3 text-gray-400" />
-                <div className="flex items-center gap-1">
-                  {returnDetails?.icon && (
-                    <returnDetails.icon className="h-3 w-3 text-red-600" />
-                  )}
-                  <span className="text-red-700 font-medium">
-                    {returnDetails?.label || returnLocation}
-                  </span>
-                </div>
-              </div>
-
-              {isDifferentLocation && (
-                <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded">
-                  <p className="text-xs text-amber-800 font-medium flex items-center gap-1">
-                    <AlertCircle className="h-3 w-3" />
-                    {t("bookings.form.locations.differentLocationWarning")}
-                  </p>
-                </div>
-              )}
-
-              {!isDifferentLocation && (
-                <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded">
-                  <p className="text-xs text-green-800 font-medium">
-                    ✓ {t("bookings.form.locations.sameLocationBenefit")}
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
         </div>
       </CardContent>
     </Card>

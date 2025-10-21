@@ -1,4 +1,4 @@
-// src/hooks/useBookings.ts - FIXED: Removed .overview references
+// src/hooks/useBookings.ts - FIXED: Better error handling and debugging
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import {
@@ -85,21 +85,83 @@ export const useBookings = (
 
   const createAdminBooking = useCallback(
     async (bookingData: AdminBookingFormData): Promise<boolean> => {
+      console.log(
+        "🔵 useBookings - Creating admin booking with data:",
+        bookingData
+      );
+
       try {
+        // Validate required fields before sending
+        if (!bookingData.customerId) {
+          toast.error("Customer is required");
+          return false;
+        }
+        if (!bookingData.vehicleId) {
+          toast.error("Vehicle is required");
+          return false;
+        }
+        if (!bookingData.pickupDate || !bookingData.returnDate) {
+          toast.error("Pickup and return dates are required");
+          return false;
+        }
+        if (!bookingData.pickupTime || !bookingData.returnTime) {
+          toast.error("Pickup and return times are required");
+          return false;
+        }
+        if (!bookingData.pickupLocation || !bookingData.returnLocation) {
+          toast.error("Pickup and return locations are required");
+          return false;
+        }
+
         const response = await bookingService.createAdminBooking(bookingData);
+        console.log("🔵 useBookings - API response:", response);
 
         if (response.success) {
-          toast.success(response.message || "Booking created successfully");
+          toast.success(
+            response.message || "Booking created successfully! 🎉",
+            {
+              description: response.data?.bookingNumber
+                ? `Booking ${response.data.bookingNumber} has been created`
+                : undefined,
+            }
+          );
           await getBookings(); // Refresh the list
           return true;
         } else {
-          toast.error(response.message || "Failed to create booking");
+          // Show detailed error message
+          const errorMsg = response.message || "Failed to create booking";
+          const errorDetails = response.errors
+            ? response.errors.map((e: any) => e.msg || e.message).join(", ")
+            : null;
+
+          toast.error(errorMsg, {
+            description: errorDetails || undefined,
+          });
+          console.error("❌ Booking creation failed:", response);
           return false;
         }
       } catch (err: any) {
-        const errorMessage = err.message || "Failed to create booking";
-        toast.error(errorMessage);
-        console.error("Error creating admin booking:", err);
+        console.error("❌ Error creating admin booking:", err);
+
+        // Parse error message
+        let errorMessage = "Failed to create booking";
+        let errorDescription = undefined;
+
+        if (err.response?.data) {
+          errorMessage = err.response.data.message || errorMessage;
+          if (err.response.data.errors) {
+            errorDescription = err.response.data.errors
+              .map((e: any) => e.msg || e.message)
+              .join(", ");
+          }
+        } else if (err.message) {
+          errorMessage = err.message;
+        }
+
+        toast.error(errorMessage, {
+          description: errorDescription,
+        });
+
         return false;
       }
     },
@@ -297,15 +359,13 @@ export const useBookings = (
     []
   );
 
-  // FIXED: Removed .overview and access properties directly
   const getBookingStats = useCallback(async () => {
     try {
-      console.log("Fetching booking stats..."); // Debug log
+      console.log("Fetching booking stats...");
       const response = await bookingService.getBookingStats();
-      console.log("Stats API response:", response); // Debug log
+      console.log("Stats API response:", response);
 
       if (response.success && response.data) {
-        // FIXED: Access properties directly from response.data (no .overview)
         const transformedStats: BookingStats = {
           totalBookings: response.data.totalBookings || 0,
           pendingBookings: response.data.pendingBookings || 0,
@@ -318,14 +378,13 @@ export const useBookings = (
           monthlyRevenue: response.data.monthlyRevenue || 0,
         };
 
-        console.log("Transformed stats:", transformedStats); // Debug log
+        console.log("Transformed stats:", transformedStats);
         setStats(transformedStats);
       } else {
         throw new Error(response.message || "Failed to fetch booking stats");
       }
     } catch (err: any) {
       console.error("Error fetching booking stats:", err);
-      // Set default stats if error
       setStats({
         totalBookings: 0,
         pendingBookings: 0,

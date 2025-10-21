@@ -1,4 +1,4 @@
-// src/components/dashboard/bookings/hooks/useBookingValidation.ts - FIXED
+// src/components/dashboard/bookings/hooks/useBookingValidation.ts - REFACTORED: Remove 1-day minimum for admin
 "use client";
 
 import { useState, useCallback } from "react";
@@ -24,7 +24,7 @@ export const useBookingValidation = (
 ): UseBookingValidationReturn => {
   const [errors, setErrors] = useState<FormValidationState>({});
 
-  // Clear specific error
+  // --- Clear Specific Error ---
   const clearError = useCallback((field: string) => {
     setErrors((prev) => {
       const newErrors = { ...prev };
@@ -33,60 +33,53 @@ export const useBookingValidation = (
     });
   }, []);
 
-  // Clear all errors
+  // --- Clear All Errors ---
   const clearAllErrors = useCallback(() => {
     setErrors({});
   }, []);
 
-  // Check if vehicle is available for the given period
-  const isVehicleAvailable = useCallback(
-    (vehicleId: string, pickupDate: string, returnDate: string): boolean => {
-      const conflictingBookings = existingBookings.filter(
-        (booking) =>
-          booking.vehicleId === vehicleId &&
-          (booking.status === "confirmed" || booking.status === "active") &&
-          !(
-            new Date(returnDate) <= new Date(booking.pickupDate) ||
-            new Date(pickupDate) >= new Date(booking.returnDate)
-          )
-      );
-      return conflictingBookings.length === 0;
-    },
-    [existingBookings]
-  );
-
-  // Validate time format (HH:MM)
+  // --- Validate Time Format (HH:MM) ---
   const isValidTimeFormat = useCallback((time: string): boolean => {
     const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
     return timeRegex.test(time);
   }, []);
 
-  // Calculate days between dates
-  const calculateDays = useCallback(
-    (pickupDate: string, returnDate: string): number => {
-      const pickup = new Date(pickupDate);
-      const returnD = new Date(returnDate);
-      const diffTime = Math.abs(returnD.getTime() - pickup.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      return Math.max(1, diffDays);
-    },
-    []
-  );
-
-  // Convert time string to minutes for comparison
+  // --- Convert Time to Minutes ---
   const timeToMinutes = useCallback((time: string): number => {
     const [hours, minutes] = time.split(":").map(Number);
     return hours * 60 + minutes;
   }, []);
 
-  // FIXED: Main validation function
+  // --- Calculate Duration in Minutes ---
+  const calculateDurationMinutes = useCallback(
+    (
+      pickupDate: string,
+      returnDate: string,
+      pickupTime: string,
+      returnTime: string
+    ): number => {
+      try {
+        const pickupDateTime = new Date(`${pickupDate}T${pickupTime}:00`);
+        const returnDateTime = new Date(`${returnDate}T${returnTime}:00`);
+
+        const durationMs = returnDateTime.getTime() - pickupDateTime.getTime();
+        return Math.floor(durationMs / (1000 * 60));
+      } catch (error) {
+        console.error("Error calculating duration:", error);
+        return 0;
+      }
+    },
+    []
+  );
+
+  // --- Main Validation Function ---
   const validateForm = useCallback(
     (formData: AdminBookingFormData): boolean => {
       const newErrors: FormValidationState = {};
 
-      console.log("Validating form data:", formData);
+      console.log("Validating admin booking form:", formData);
 
-      // FIXED: Required field validation with proper checks
+      // --- Required Field Validation ---
       if (!formData.customerId || formData.customerId.trim() === "") {
         newErrors.customerId = "Customer selection is required";
       }
@@ -119,7 +112,7 @@ export const useBookingValidation = (
         newErrors.returnLocation = "Return location is required";
       }
 
-      // Customer validation
+      // --- Customer Validation ---
       if (formData.customerId) {
         const customer = users.find((user) => user.id === formData.customerId);
         if (!customer) {
@@ -129,7 +122,7 @@ export const useBookingValidation = (
         }
       }
 
-      // Vehicle validation
+      // --- Vehicle Validation ---
       if (formData.vehicleId) {
         const vehicle = cars.find((car) => car.id === formData.vehicleId);
         if (!vehicle) {
@@ -139,30 +132,51 @@ export const useBookingValidation = (
         }
       }
 
-      // Date validation
+      // --- Date Validation ---
       if (formData.pickupDate && formData.returnDate) {
         const pickupDate = new Date(formData.pickupDate);
         const returnDate = new Date(formData.returnDate);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
 
-        // Check if return date is after pickup date
-        if (returnDate <= pickupDate) {
-          newErrors.returnDate = "Return date must be after pickup date";
+        // Return date must be same day or after pickup date
+        if (returnDate < pickupDate) {
+          newErrors.returnDate = "Return date cannot be before pickup date";
         }
+      }
 
-        // Check minimum rental period
-        const days = calculateDays(formData.pickupDate, formData.returnDate);
-        if (days < 1) {
-          newErrors.returnDate = "Minimum 1 day rental period required";
-        }
+      // --- Time Format Validation ---
+      if (formData.pickupTime && !isValidTimeFormat(formData.pickupTime)) {
+        newErrors.pickupTime = "Invalid time format (use HH:MM, e.g., 08:00)";
+      }
 
-        // Check same-day booking time logic
-        if (
-          pickupDate.toDateString() === returnDate.toDateString() &&
-          formData.pickupTime &&
+      if (formData.returnTime && !isValidTimeFormat(formData.returnTime)) {
+        newErrors.returnTime = "Invalid time format (use HH:MM, e.g., 18:00)";
+      }
+
+      // --- Duration Validation (Admin: minimum 15 minutes) ---
+      if (
+        formData.pickupDate &&
+        formData.returnDate &&
+        formData.pickupTime &&
+        formData.returnTime &&
+        isValidTimeFormat(formData.pickupTime) &&
+        isValidTimeFormat(formData.returnTime)
+      ) {
+        const durationMinutes = calculateDurationMinutes(
+          formData.pickupDate,
+          formData.returnDate,
+          formData.pickupTime,
           formData.returnTime
-        ) {
+        );
+
+        console.log("Calculated duration:", durationMinutes, "minutes");
+
+        // Check minimum duration (15 minutes)
+        if (durationMinutes < 15) {
+          newErrors.returnTime = "Minimum rental duration is 15 minutes";
+        }
+
+        // For same-day bookings, ensure return time is after pickup time
+        if (formData.pickupDate === formData.returnDate) {
           const pickupMinutes = timeToMinutes(formData.pickupTime);
           const returnMinutes = timeToMinutes(formData.returnTime);
 
@@ -173,16 +187,7 @@ export const useBookingValidation = (
         }
       }
 
-      // Time format validation
-      if (formData.pickupTime && !isValidTimeFormat(formData.pickupTime)) {
-        newErrors.pickupTime = "Invalid time format (use HH:MM)";
-      }
-
-      if (formData.returnTime && !isValidTimeFormat(formData.returnTime)) {
-        newErrors.returnTime = "Invalid time format (use HH:MM)";
-      }
-
-      // Location validation
+      // --- Location Validation ---
       const validLocations = [
         "Tangier Airport",
         "Tangier City Center",
@@ -205,44 +210,9 @@ export const useBookingValidation = (
         newErrors.returnLocation = "Invalid return location selected";
       }
 
-      // Availability validation - only if we have existing bookings data
-      if (
-        existingBookings.length > 0 &&
-        formData.vehicleId &&
-        formData.pickupDate &&
-        formData.returnDate
-      ) {
-        if (
-          !isVehicleAvailable(
-            formData.vehicleId,
-            formData.pickupDate,
-            formData.returnDate
-          )
-        ) {
-          const conflictingBookings = existingBookings.filter(
-            (booking) =>
-              booking.vehicleId === formData.vehicleId &&
-              (booking.status === "confirmed" || booking.status === "active") &&
-              !(
-                new Date(formData.returnDate) <= new Date(booking.pickupDate) ||
-                new Date(formData.pickupDate) >= new Date(booking.returnDate)
-              )
-          );
-
-          const conflictDetails = conflictingBookings
-            .map(
-              (booking) =>
-                `${booking.bookingNumber} (${new Date(
-                  booking.pickupDate
-                ).toLocaleDateString()} - ${new Date(
-                  booking.returnDate
-                ).toLocaleDateString()})`
-            )
-            .join(", ");
-
-          newErrors.vehicleId = `Vehicle not available for selected dates. Conflicting bookings: ${conflictDetails}`;
-        }
-      }
+      // --- Availability Validation (optional - backend will do final check) ---
+      // Note: We skip this for now since the backend has the authoritative availability check
+      // The frontend preview will show availability status in real-time
 
       console.log("Validation errors:", newErrors);
       console.log("Form is valid:", Object.keys(newErrors).length === 0);
@@ -254,10 +224,9 @@ export const useBookingValidation = (
       cars,
       users,
       existingBookings,
-      isVehicleAvailable,
       isValidTimeFormat,
-      calculateDays,
       timeToMinutes,
+      calculateDurationMinutes,
     ]
   );
 

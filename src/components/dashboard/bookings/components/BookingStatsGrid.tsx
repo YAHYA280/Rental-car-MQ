@@ -18,7 +18,6 @@ const BookingStatsGrid: React.FC<BookingStatsGridProps> = ({
 }) => {
   const t = useTranslations("dashboard");
 
-  // Default stats when loading or no data
   const defaultStats: BookingStats = {
     totalBookings: 0,
     pendingBookings: 0,
@@ -151,58 +150,6 @@ const BookingStatsGrid: React.FC<BookingStatsGridProps> = ({
           );
         })}
       </div>
-
-      {/* OPTIONAL: Simple Summary Card */}
-      {currentStats.totalBookings > 0 && (
-        <Card className="border-0 shadow-md bg-gradient-to-r from-blue-50 to-indigo-50">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  {t("bookings.stats.quickSummary")}
-                </h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-                  <div>
-                    <span className="text-gray-600">
-                      {t("bookings.stats.pendingLabel")}:
-                    </span>
-                    <span className="ml-1 font-semibold text-yellow-600">
-                      {currentStats.pendingBookings}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-gray-600">
-                      {t("bookings.stats.activeLabel")}:
-                    </span>
-                    <span className="ml-1 font-semibold text-green-600">
-                      {currentStats.activeBookings}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-gray-600">
-                      {t("bookings.stats.revenueLabel")}:
-                    </span>
-                    <span className="ml-1 font-semibold text-purple-600">
-                      €{currentStats.totalRevenue.toLocaleString()}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="text-sm text-gray-600">
-                  {t("bookings.stats.totalBookingsLabel")}
-                </div>
-                <div className="text-2xl font-bold text-indigo-600">
-                  {currentStats.totalBookings}
-                </div>
-                <div className="text-xs text-gray-500">
-                  {t("bookings.stats.allTime")}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 };
